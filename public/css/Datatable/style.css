@@ -1,0 +1,27 @@
+div.dt-container .dt-paging .dt-paging-button.current, div.dt-container .dt-paging .dt-paging-button.current:hover
+{
+    border-radius: 50px;
+    background-color: #635bff !important;
+    color: #fff !important;
+}
+div.dt-container .dt-paging .dt-paging-button
+{
+    color: #635bff !important;
+    border-radius: 50px;
+    background: lightgrey;
+}
+
+div.dt-container .dt-paging .dt-paging-button:hover
+{
+    background: linear-gradient(to bottom, #635bff59 0%, #839bffde 100%) !important; /* W3C */
+}
+div.dt-container .dt-paging .dt-paging-button.disabled, div.dt-container .dt-paging .dt-paging-button.disabled:hover, div.dt-container .dt-paging .dt-paging-button.disabled:active
+{
+    /*  background: #cacacafc; */
+    background-color: #9691fd !important;
+    color: #fff !important;
+}
+.paging_full_numbers
+{
+    display: flex !important;
+}
