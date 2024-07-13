@@ -85,7 +85,7 @@
             </div>
         </div>
         <div class="accordion-item">
-            <div class="accordion-header  ">Crédit</div>
+            <div class="accordion-header ">Crédit</div>
             <div class="accordion-content ">
                 <table class="table bg-info table-striped ">
                     <tr>
@@ -108,6 +108,18 @@
                         <th>Total Reglement</th>
                         <td class="d-flex justify-content-end">{{number_format($totalReglementCheque->totalReglement,2,',',' ') }} DH</td>
                     </tr>
+                </table>
+            </div>
+        </div>
+        <div class="accordion-item">
+            <div class="accordion-header ">Virement</div>
+            <div class="accordion-content ">
+                <table class="table bg-info table-striped ">
+                    <tr>
+                        <th>Total </th>
+                        <td class="d-flex justify-content-end">{{number_format($virement->totalPaye,2,',',' ') }} DH</td>
+                    </tr>
+
                 </table>
             </div>
         </div>

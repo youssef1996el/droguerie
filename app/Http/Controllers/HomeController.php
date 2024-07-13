@@ -55,6 +55,7 @@ class HomeController extends Controller
         // extract count client
         $CountClient = DB::table('clients as c')
                     ->join('company as co','co.id','=','c.idcompany')
+                    ->where('co.status','=','Active')
                     ->count();
 
         $currentMonth   = Carbon::now()->startOfMonth();
@@ -111,54 +112,69 @@ class HomeController extends Controller
         $threeYearsAgo = $currentYear - 2; // Calculate three years ago
 
         // Determine the minimum and maximum years with data in paiements, charge, or reglementspersonnels
-        $minYear = DB::table('paiements')->min(DB::raw('YEAR(created_at)'));
-        $maxYear = DB::table('paiements')->max(DB::raw('YEAR(created_at)'));
+        $minYear = DB::table('paiements')
+        ->join('company', 'paiements.idcompany', '=', 'company.id')
+        ->where('company.status', 'Active')
+        ->min(DB::raw('YEAR(paiements.created_at)'));
+
+        $maxYear = DB::table('paiements')
+        ->join('company', 'paiements.idcompany', '=', 'company.id')
+        ->where('company.status', 'Active')
+        ->max(DB::raw('YEAR(paiements.created_at)'));
         $startYear = max($currentYear - 2, $minYear); // Start from three years ago or the minimum year with data
 
         // Initialize an array to store the result data
         $dataTotalChart = [];
 
         // Loop through each year from $startYear to $currentYear
-        for ($year = $startYear; $year <= $currentYear; $year++)
-        {
+
+        for ($year = $startYear; $year <= $currentYear; $year++) {
             // Query for paiements, charge, and reglementspersonnels for each year
             $monthlyData = DB::table(DB::raw('(SELECT MAKEDATE(' . $year . ', 1) + INTERVAL (m.month - 1) MONTH AS m
                                     FROM (SELECT 1 AS month UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4
                                         UNION ALL SELECT 5 UNION ALL SELECT 6 UNION ALL SELECT 7 UNION ALL SELECT 8
                                         UNION ALL SELECT 9 UNION ALL SELECT 10 UNION ALL SELECT 11 UNION ALL SELECT 12) AS m) AS months'))
                 ->leftJoin(DB::raw('(SELECT
-                                        YEAR(created_at) AS year,
-                                        MONTH(created_at) AS month,
-                                        SUM(total) AS total_sum
+                                        YEAR(paiements.created_at) AS year,
+                                        MONTH(paiements.created_at) AS month,
+                                        SUM(paiements.total) AS total_sum
                                     FROM
                                         paiements
-                                    WHERE YEAR(created_at) = ' . $year . '
+                                    JOIN
+                                        company ON paiements.idcompany = company.id
+                                    WHERE YEAR(paiements.created_at) = ' . $year . ' AND company.status = "Active"
                                     GROUP BY
-                                        YEAR(created_at), MONTH(created_at)) AS paiements'), function($join) {
+                                        YEAR(paiements.created_at), MONTH(paiements.created_at)) AS paiements'), function($join) {
                     $join->on(DB::raw('YEAR(months.m)'), '=', 'paiements.year')
                         ->on(DB::raw('MONTH(months.m)'), '=', 'paiements.month');
                 })
                 ->leftJoin(DB::raw('(SELECT
-                                        YEAR(created_at) AS year,
-                                        MONTH(created_at) AS month,
-                                        SUM(total) AS total_sum
+                                        YEAR(charge.created_at) AS year,
+                                        MONTH(charge.created_at) AS month,
+                                        SUM(charge.total) AS total_sum
                                     FROM
                                         charge
-                                    WHERE YEAR(created_at) = ' . $year . '
+                                    JOIN
+                                        company ON charge.idcompany = company.id
+                                    WHERE YEAR(charge.created_at) = ' . $year . ' AND company.status = "Active"
                                     GROUP BY
-                                        YEAR(created_at), MONTH(created_at)) AS charges'), function($join) {
+                                        YEAR(charge.created_at), MONTH(charge.created_at)) AS charges'), function($join) {
                     $join->on(DB::raw('YEAR(months.m)'), '=', 'charges.year')
                         ->on(DB::raw('MONTH(months.m)'), '=', 'charges.month');
                 })
                 ->leftJoin(DB::raw('(SELECT
-                                        YEAR(created_at) AS year,
-                                        MONTH(created_at) AS month,
-                                        SUM(total) AS total_sum
+                                        YEAR(rp.created_at) AS year,
+                                        MONTH(rp.created_at) AS month,
+                                        SUM(rp.total) AS total_sum
                                     FROM
-                                        reglementspersonnels
-                                    WHERE YEAR(created_at) = ' . $year . '
+                                        reglementspersonnels rp
+                                    JOIN
+                                        personnels p ON rp.idpersonnel = p.id
+                                    JOIN
+                                        company c ON p.idcompany = c.id
+                                    WHERE YEAR(rp.created_at) = ' . $year . ' AND c.status = "Active"
                                     GROUP BY
-                                        YEAR(created_at), MONTH(created_at)) AS reglementspersonnels'), function($join) {
+                                        YEAR(rp.created_at), MONTH(rp.created_at)) AS reglementspersonnels'), function($join) {
                     $join->on(DB::raw('YEAR(months.m)'), '=', 'reglementspersonnels.year')
                         ->on(DB::raw('MONTH(months.m)'), '=', 'reglementspersonnels.month');
                 })
@@ -172,11 +188,8 @@ class HomeController extends Controller
                 ->orderBy(DB::raw("MONTH(months.m)"))
                 ->get();
 
-
-            foreach ($monthlyData as $monthData)
-            {
-                $dataTotalChart[] =
-                [
+            foreach ($monthlyData as $monthData) {
+                $dataTotalChart[] = [
                     'month_name' => $monthData->month_name,
                     'year' => $monthData->year,
                     'net_total' => $monthData->net_total,

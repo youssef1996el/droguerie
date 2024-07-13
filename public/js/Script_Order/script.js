@@ -22,6 +22,7 @@ $(document).ready(function ()
         {
             var tableVente = $(selector).DataTable({
                 processing: true,
+
                 serverSide: true,
                 ajax: {
                     url: url,
@@ -604,19 +605,41 @@ $(document).ready(function ()
             async: false,
             success: function (response)
             {
-                if (response.status === 200) {
+                if (response.status === 200)
+                {
 
 
+                    var newIdClient = $('#IdClient').val();
+                    var newIdCompany = IdCompanyActive.id;
+                    var typeVente = null;
+                    if($('#DivTypeVente').is(':visible'))
+                    {
+                        typeVente =  $('#DropDownTypeVente').val();
+                    }
                     // Destroy the existing DataTable
                     reloadTable(newIdClient, newIdCompany,typeVente);
                     updateTotals();
+                    if($('#DivTypeVente').is(':hidden'))
+                    {
+                        var uniteVente = null;
+                        initializeDataTable(nameProduct,uniteVente);
+                    }
+                    else
+                    {
+                        initializeDataTable(nameProduct,$('#DropDownTypeVente').val());
+                    }
+
                     toastr.success("La quantité a été modifiée avec succès", 'Success');
-                } else if (response.status === 422) {
-                    console.log('Inside 422 block'); // Debug statement to check if this block is entered
+                }
+                else if (response.status === 422)
+                {
+
                     toastr.error(response.message, "Attention");
                     // Optionally adjust newValue or take other actions
-                } else {
-                    console.log('Other status:', response.status); // Debug statement for other statuses
+                }
+                else
+                {
+
                     toastr.error("Une erreur s'est produite", "Erreur");
                 }
             }
@@ -641,24 +664,45 @@ $(document).ready(function ()
             async: false,
             success: function (response)
             {
-                if (response.status === 200) {
+                if (response.status === 200)
+                {
 
 
+                    var newIdClient = $('#IdClient').val();
+                    var newIdCompany = IdCompanyActive.id;
+                    var typeVente = null;
+                    if($('#DivTypeVente').is(':visible'))
+                    {
+                        typeVente =  $('#DropDownTypeVente').val();
+                    }
                     // Destroy the existing DataTable
                     reloadTable(newIdClient, newIdCompany,typeVente);
                     updateTotals();
+                    if($('#DivTypeVente').is(':hidden'))
+                    {
+                        var uniteVente = null;
+                        initializeDataTable(nameProduct,uniteVente);
+                    }
+                    else
+                    {
+                        initializeDataTable(nameProduct,$('#DropDownTypeVente').val());
+                    }
                     toastr.success("La quantité a été modifiée avec succès", 'Success');
 
-                } else if (response.status === 422) {
+                }
+                else if (response.status === 422)
+                {
                     newValue -= 1;
                     toastr.error(response.message, "Attention");
 
-                } else if(response.status === 500)
+                }
+                else if(response.status === 500)
                 {
                     newValue -= 1;
                     toastr.error(response.message, "Attention");
                 }
-                else {
+                else
+                {
                     console.log('Other status:', response.status); // Debug statement for other statuses
                     toastr.error("Une erreur s'est produite", "Erreur");
                 }
@@ -681,7 +725,8 @@ $('.TableTmpVente').on('input', 'input.input-box', function () {
     // Ensure value is within bounds
     if (isNaN(newValue) || newValue < minValue) {
         newValue = minValue;
-    } else if (newValue > maxValue) {
+    } else if (newValue > maxValue)
+    {
         newValue = maxValue;
     }
 
@@ -1213,18 +1258,15 @@ $('.TableTmpVente').on('input', 'input.input-box', function () {
         let modeArray = [];
 
         $('.TableModePaiement thead tr').each(function() {
-            let mode = $(this).find('select[name="mode_paiement"]').val();
+            let mode = $(this).find('select[name="mode_paiement"] option:selected').text();
             if (mode) {
                 modeArray.push(mode);
             }
         });
         console.log(modeArray);
-        if (modeArray.includes('3'))
-        {
+        if (modeArray.includes('chèque')) {
             $('.DivCheque').css('display', 'block');
-        }
-        else
-        {
+        } else {
             $('.DivCheque').css('display', 'none');
         }
     });

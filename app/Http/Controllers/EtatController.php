@@ -80,6 +80,15 @@ class EtatController extends Controller
                             ->whereDate('reglements.created_at', $today)
                             ->where('modepaiement.name', 'chèque')
                             ->first();
+        $virement  = Order::select( DB::raw('SUM(paiements.total) as totalPaye'))
+                            ->join('reglements', 'orders.id', '=', 'reglements.idorder')
+                            ->join('paiements', 'reglements.id', '=', 'paiements.idreglement')
+                            ->join('modepaiement', 'reglements.idmode', '=', 'modepaiement.id')
+                            ->join('company' ,'company.id', '=','reglements.idcompany')
+                            ->where('modepaiement.name', '=', 'virement')
+                            ->where('company.status','=','Active')
+                            ->whereDate('paiements.created_at', $today)
+                            ->first();
 
         return view('Etat.index')
         ->with('CompanyIsActive'         ,$CompanyIsActive)
@@ -88,7 +97,9 @@ class EtatController extends Controller
         ->with('totalRest'               ,$totalRest)
         ->with('cheque'                  ,$cheque)
         ->with('totalReglement'          ,$totalReglement)
-        ->with('totalReglementCheque'    ,$totalReglementCheque);
+        ->with('totalReglementCheque'    ,$totalReglementCheque)
+        ->with('virement'                ,$virement)
+        ;
     }
 
     public function SearchEtat(Request $request)
@@ -153,6 +164,16 @@ class EtatController extends Controller
                     ->whereBetween(DB::raw('DATE(reglements.created_at)'), [$dateDebut, $datefin])
                     ->where('modepaiement.name', 'chèque')
                     ->first();
+
+        $virement  = Order::select( DB::raw('SUM(paiements.total) as totalPaye'))
+                    ->join('reglements', 'orders.id', '=', 'reglements.idorder')
+                    ->join('paiements', 'reglements.id', '=', 'paiements.idreglement')
+                    ->join('modepaiement', 'reglements.idmode', '=', 'modepaiement.id')
+                    ->join('company' ,'company.id', '=','reglements.idcompany')
+                    ->where('modepaiement.name', '=', 'virement')
+                    ->where('company.status','=','Active')
+                    ->whereBetween(DB::raw('DATE(paiements.created_at)'), [$dateDebut, $datefin])
+                    ->first();
         $CompanyIsActive       = Company::where('status','Active')->select('title','id')->first();
         return view('Etat.index')
         ->with('CompanyIsActive'         ,$CompanyIsActive)
@@ -161,6 +182,8 @@ class EtatController extends Controller
         ->with('totalRest'               ,$totalRest)
         ->with('cheque'                  ,$cheque)
         ->with('totalReglement'          ,$totalReglement)
-        ->with('totalReglementCheque'    ,$totalReglementCheque);
+        ->with('totalReglementCheque'    ,$totalReglementCheque)
+        ->with('virement'                ,$virement)
+        ;
     }
 }

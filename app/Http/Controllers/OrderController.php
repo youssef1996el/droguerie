@@ -46,14 +46,22 @@ class OrderController extends Controller
             ->with('title','Il n\'est pas possible d\'accéder à la page stock')
             ->with('body',"Parce qu'il n'y a pas de information");
         }
-        $CountTva = Tva::count();
+
+        $CountTva = DB::table('tva as t')
+        ->join('company as c','c.id','=','t.idcompany')
+        ->where('c.status','Active')
+        ->count();
         if($CountTva == 0)
         {
             return view('Errors.index')
             ->with('title','Il n\'est pas possible d\'accéder à la page vente')
             ->with('body',"Parce qu'il n'y a pas tva");
         }
-        $ModePaiement = ModePaiement::count();
+
+        $ModePaiement = DB::table('modepaiement as m')
+        ->join('company as c','c.id','=','m.idcompany')
+        ->where('c.status','Active')
+        ->count();
         if($ModePaiement == 0)
         {
             return view('Errors.index')
@@ -77,8 +85,16 @@ class OrderController extends Controller
         ->select('p.name')
         ->get();
 
-        $Tva                    = Tva::first();
-        $ModePaiement           = ModePaiement::all();
+        $Tva                    = DB::table('tva as t')
+        ->join('company as c','c.id','=','t.idcompany')
+        ->where('c.status','Active')
+        ->first();
+
+        $ModePaiement           = DB::table('modepaiement as m')
+        ->join('company as c','c.id','=','m.idcompany')
+        ->where('c.status','Active')
+        ->select('m.id','m.name')
+        ->get();
 
 
 
@@ -563,63 +579,83 @@ class OrderController extends Controller
     }
 
 
-
     public function ChangeQteTmpPlus(Request $request)
     {
+        $Client = Client::where('id', $request->idclient)
+            ->select('nom', 'prenom', 'plafonnier')
+            ->first();
 
-        //extract id product from tmp with idRow
-        $Product   = TmpLineOrder::where('id',$request->id)->select('idproduct')->first();
-        $IdProduct = $Product->idproduct;
-
-        // extract Quantite product Stock
-        $Qte_Stock = Stock::where('idproduct',$IdProduct)->select('qte')->first();
-
-        //extract Quantite product TmpOrder
-        $Qte_TmpVente = TmpLineOrder::where('idproduct',$IdProduct)->select('qte')->first();
-        if(!is_null($Qte_TmpVente))
-        {
-            if(intval($Qte_TmpVente->qte) == intval($Qte_Stock->qte))
-            {
-                return response()->json([
-                    'status' => 422,
-                    'message' => 'maximent quantite produit est :' . $Qte_Stock->qte
-                ]);
-            }
+        if (!$Client) {
+            return response()->json(['status' => 404, 'message' => 'Client not found']);
         }
-        $ModePaiement = ModePaiement::where('name','crédit')->select('id')->first();
-        // extract plafonnier client
-        $Client       = Client::where('id',$request->idclient)->select('nom','prenom','plafonnier')->first();
-        // extract total credit by client
-        $creditClient = Reglements::where('idclient',$request->idclient)->where('idmode',$ModePaiement->id)->sum('total');
-        // extract total client in table tmp
-        $totalTmpByClient = TmpLineOrder::where('idclient',$request->idclient)->sum('total');
 
-        $totalCreditByClient = $totalTmpByClient + $creditClient;
-        if($Client->plafonnier > 0)
+        $creditClient           = $this->getClientCredit($request->idclient);
+        $totalTmpByClient       = TmpLineOrder::where('idclient', $request->idclient)->sum('total');
+        $Price                  = TmpLineOrder::where('id',$request->id)->value('price');
+        $totalCreditByClient    = $totalTmpByClient + $Price + $creditClient;
+
+        if ($Client->plafonnier > 0 && $totalCreditByClient >= $Client->plafonnier)
         {
-            if($totalCreditByClient >= $Client->plafonnier)
-            {
-                return response()->json([
-                    'status' => 500,
-                    'message'=> 'Le client '.$Client->nom." ".$Client->prenom.' a atteint le montant maximum de '.$Client->plafonnier.' dirhams'
-                ]);
-            }
-        }
-        else
-        {
-            // extract price product from stock
-            $DataProduct = Stock::where('idproduct',$IdProduct)->select('price')->first();
-            $UpDateRow = TmpLineOrder::where('id',$request->id)
-            ->update([
-                'qte'    => $request->qte,
-                'total'  => $DataProduct->price * $request->qte,
-            ]);
 
             return response()->json([
-                'status'      => 200,
+                'status' => 500,
+                'message' => 'Le client ' . $Client->nom . " " . $Client->prenom . ' a atteint le montant maximum de ' . $Client->plafonnier . ' dirhams'
             ]);
         }
+
+        $tmpLineOrder = TmpLineOrder::find($request->id);
+        if (!$tmpLineOrder) {
+            return response()->json(['status' => 404, 'message' => 'TmpLineOrder not found']);
+        }
+
+        $Qte_Stock = Stock::where('idproduct', $tmpLineOrder->idproduct)
+            ->where('id', $tmpLineOrder->idstock)
+            ->value('qte');
+
+        $Qte_New_Tmp = $this->calculateNewQuantity($request->qte, $tmpLineOrder->idsetting);
+
+        if ($Qte_New_Tmp > $Qte_Stock) {
+            return response()->json([
+                'status' => 422,
+                'message' => 'Maximum quantity available is: ' . $Qte_Stock
+            ]);
+        }
+
+        $price_product = $tmpLineOrder->price;
+        $tmpLineOrder->update([
+            'qte' => $request->qte,
+            'total' => $price_product * $request->qte,
+        ]);
+
+        return response()->json(['status' => 200]);
     }
+
+    private function getClientCredit($clientId)
+    {
+        $Mode_Paiement = DB::table('modepaiement as m')
+            ->join('company as c', 'c.id', '=', 'm.idcompany')
+            ->where('m.name', 'crédit')
+            ->select('m.id')
+            ->first();
+
+        if (!$Mode_Paiement) {
+            return 0;
+        }
+
+        return Reglements::where('idclient', $clientId)
+            ->where('idmode', $Mode_Paiement->id)
+            ->sum('total');
+    }
+
+    private function calculateNewQuantity($quantity, $idsetting)
+    {
+        if ($idsetting) {
+            $number_kg = Setting::where('id', $idsetting)->value('convert');
+            return ($quantity * $number_kg) / $number_kg;
+        }
+        return $quantity;
+    }
+
     public function ChangeQteTmpMinus(Request $request)
     {
         //extract id product from tmp with idRow
@@ -629,22 +665,22 @@ class OrderController extends Controller
 
         if(intval($request->qte) == 1)
         {
-            $DataProduct = Stock::where('idproduct',$IdProduct)->select('price')->first();
-            $UpDateRow = TmpLineOrder::where('id',$request->id)
+            $price      = TmpLineOrder::where('id',$request->id)->value('price');
+            $UpDateRow  = TmpLineOrder::where('id',$request->id)
             ->update([
                 'qte'    => 1,
-                'total'  => $DataProduct->price * 1,
+                'total'  => $price * 1,
             ]);
 
             return response()->json([
                 'status'      => 200,
             ]);
         }
-        $DataProduct = Stock::where('idproduct',$IdProduct)->select('price')->first();
-        $UpDateRow = TmpLineOrder::where('id',$request->id)
+        $price      = TmpLineOrder::where('id',$request->id)->value('price');
+        $UpDateRow  = TmpLineOrder::where('id',$request->id)
         ->update([
             'qte'    => $request->qte,
-            'total'  => $DataProduct->price * $request->qte,
+            'total'  => $price * $request->qte,
         ]);
 
         return response()->json([
