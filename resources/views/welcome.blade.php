@@ -182,7 +182,8 @@
                     <div class="fxt-column-wrap justify-content-between">
                         <div class="fxt-animated-img">
                             <div class="fxt-transformX-L-50 fxt-transition-delay-10">
-                                <img src="{{asset('images_login/bg34-1.png')}}" alt="Animated Image">
+                               {{--  <img src="{{asset('images_login/bg34-1.png')}}" alt="Animated Image"> --}}
+                                <img src="https://media.istockphoto.com/id/1226643716/vector/city-construction-work-process-with-machines.jpg?s=612x612&w=0&k=20&c=xyzez-XRmc9ee2pxrL3SKbAE5mUIa4t4UlMHEuMttjQ=" alt="Animated Image" style="border-radius: 60px">
                             </div>
                         </div>
                         <div class="fxt-transformX-L-50 fxt-transition-delay-3">
@@ -209,6 +210,7 @@
                             <form method="POST" action="{{ route('login') }}">
                                 @csrf
                                 <div class="form-group">
+                                    <label for="">Email :</label>
                                     <input id="email" type="email" class="form-control @error('email') is-invalid @enderror" name="email" value="{{ old('email') }}" required autocomplete="email" autofocus>
                                     @error('email')
                                     <span class="invalid-feedback" role="alert">
@@ -217,6 +219,7 @@
                                 @enderror
                                 </div>
                                 <div class="form-group">
+                                    <label for="">Mot de passe</label>
                                     <input id="password" type="password" class="form-control @error('password') is-invalid @enderror" name="password" required autocomplete="current-password">
                                     <i toggle="#password" class="fa fa-fw fa-eye toggle-password field-icon"></i>
                                     @error('password')
