@@ -187,7 +187,8 @@
                             </div>
                         </div>
                         <div class="fxt-transformX-L-50 fxt-transition-delay-3">
-                            <a href="login-34.html" class="fxt-logo"><img src="{{asset('images_login/Add_a_heading-removebg-preview.png')}}" alt="Logo"></a>
+                            <a href="#" class="fxt-logo" style="margin-left: 7rem">
+                                <img src="{{asset('images_login/Add_a_heading-removebg-preview.png')}}" alt="Logo"></a>
                         </div>
                         <div class="fxt-transformX-L-50 fxt-transition-delay-5">
                             <div class="fxt-middle-content">
