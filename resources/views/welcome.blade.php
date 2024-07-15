@@ -186,21 +186,21 @@
                             </div>
                         </div>
                         <div class="fxt-transformX-L-50 fxt-transition-delay-3">
-                            <a href="login-34.html" class="fxt-logo"><img src="{{asset('images_login/logo-34.png')}}" alt="Logo"></a>
+                            <a href="login-34.html" class="fxt-logo"><img src="{{asset('images_login/Add_a_heading-removebg-preview.png')}}" alt="Logo"></a>
                         </div>
                         <div class="fxt-transformX-L-50 fxt-transition-delay-5">
                             <div class="fxt-middle-content">
-                                <h1 class="fxt-main-title">Sign In to Rechage Direct</h1>
-                                <div class="fxt-switcher-description1">If you don’t have an account You can
-                                    <a href="register-34.html" class="fxt-switcher-text ms-2">Sign Up</a>
+                                <h1 class="fxt-main-title">{{-- Sign In to Rechage Direct --}}</h1>
+                                <div class="fxt-switcher-description1">{{-- If you don’t have an account You can --}}
+                                    <a href="register-34.html" class="fxt-switcher-text ms-2">{{-- Sign Up --}}</a>
                                 </div>
                             </div>
                         </div>
-                        <div class="fxt-transformX-L-50 fxt-transition-delay-7">
+                        {{-- <div class="fxt-transformX-L-50 fxt-transition-delay-7">
                             <div class="fxt-qr-code">
                                 <img src="{{asset('images_login/qr-login-34.png')}}" alt="QR">
                             </div>
-                        </div>
+                        </div> --}}
                     </div>
                 </div>
                 <div class="col-lg-4">
@@ -227,18 +227,18 @@
                                 </div>
                                 <div class="form-group">
                                     <div class="fxt-switcher-description2 text-right">
-                                        <a href="forgot-password-34.html" class="fxt-switcher-text">Recovery Password</a>
+                                        {{-- <a href="forgot-password-34.html" class="fxt-switcher-text">Recovery Password</a> --}}
                                     </div>
                                 </div>
                                 <div class="form-group">
-                                    <button type="submit" class="fxt-btn-fill">Sign In</button>
+                                    <button type="submit" class="fxt-btn-fill">se connecter</button>
                                 </div>
                             </form>
                         </div>
-                        <div class="fxt-style-line">
+                        {{-- <div class="fxt-style-line">
                             <span>Or Continus with</span>
-                        </div>
-                        <ul class="fxt-socials">
+                        </div> --}}
+                        {{-- <ul class="fxt-socials">
                             <li class="fxt-google">
                                 <a href="#" title="google"><i class="fab fa-google-plus-g"></i></a>
                             </li>
@@ -248,7 +248,7 @@
                             <li class="fxt-facebook">
                                 <a href="#" title="Facebook"><i class="fab fa-facebook-f"></i></a>
                             </li>
-                        </ul>
+                        </ul> --}}
                     </div>
                 </div>
             </div>

@@ -14,16 +14,18 @@ class StockNotification extends Notification
     private $numero_bon;
     private $product;
     private $iduser;
+    private $idcompany;
 
 
     /**
      * Create a new notification instance.
      */
-    public function __construct($numero_bon,$product,$iduser)
+    public function __construct($numero_bon,$product,$iduser,$idcompany)
     {
-        $this->numero_bon= $numero_bon;
-        $this->product= $product;
-        $this->iduser= $iduser;
+        $this->numero_bon   = $numero_bon;
+        $this->product      = $product;
+        $this->iduser       = $iduser;
+        $this->idcompany    = $idcompany;
 
 
     }
@@ -52,9 +54,9 @@ class StockNotification extends Notification
     {
         return
         [
-            'id'    => $this->iduser,
-            'text' => 'Le produit ' . $this->product . ' est presque en rupture de stock (Numero Bon ' . $this->numero_bon . ')',
-
+            'id'        => $this->iduser,
+            'text'      => 'Le produit ' . $this->product . ' est presque en rupture de stock (Numero Bon ' . $this->numero_bon . ')',
+            'idcompany' => $this->idcompany,
         ];
     }
 }

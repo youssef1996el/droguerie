@@ -27,7 +27,9 @@ use Auth;
 use PDF;
 use Dompdf\Dompdf;
 use App\Notifications\StockNotification;
+use App\Notifications\ChequeNotification;
 use Illuminate\Support\Facades\Notification;
+use Carbon\Carbon;
 class OrderController extends Controller
 {
     public function index()
@@ -96,6 +98,32 @@ class OrderController extends Controller
         ->select('m.id','m.name')
         ->get();
 
+
+        $Cheques = DB::table('cheques as c')
+        ->join('orders as o','o.id','=','c.idorder')
+        ->join('company as co','co.id','=','o.idcompany')
+        ->where('co.status','Active')
+        ->select('c.*')
+        ->get();
+        $users = User::all();
+        $idCompany  = Company::where('status','Active')->value('id');
+        foreach ($Cheques as $item)
+        {
+            $date_promise = Carbon::parse($item->datepromise);
+            $date_Today   = Carbon::Today();
+            if($date_Today >= $date_promise)
+            {
+                $existingNotification = DB::table('notifications')
+                ->whereJsonContains('data->id', $item->numero)
+                ->exists();
+                if (!$existingNotification)
+                {
+                    Notification::send($users, new ChequeNotification($item->numero, $item->datecheque,$item->datepromise,
+                    $item->montant, $item->name , $item->bank,$idCompany));
+                }
+
+            }
+        }
 
 
         return view('Order.index')
@@ -691,17 +719,17 @@ class OrderController extends Controller
     public function StoreOrder(Request $request)
     {
 
-        $hasCheque = true;
+        $hasCheque = false;
         foreach($request->ModePaiement as $item)
         {
             $ModePaiement = ModePaiement::where('id',$item['mode'])->select('name')->get();
             foreach($ModePaiement as $item1)
             {
-                if($item1->name == "chèque")
+                if($item1->name === "chèque")
                 {
+                    $hasCheque = true;
                     if($item['totalPrix'] != $request->montant)
                     {
-                        $hasCheque = false;
                         return response()->json([
                             'status' => 442,
                         ]);
@@ -846,7 +874,8 @@ class OrderController extends Controller
 
             if ($result && $result->qte <= $result->qte_notification)
             {
-                Notification::send($users, new StockNotification($result->numero_bon, $result->name, $iduser));
+                $idCompany  = Company::where('status','Active')->value('id');
+                Notification::send($users, new StockNotification($result->numero_bon, $result->name, $iduser,$idCompany));
             }
         }
         $TmpLineOrder = TmpLineOrder::where('idclient',$request->idclient)->where('iduser',Auth::user()->id)->delete();
@@ -941,39 +970,29 @@ class OrderController extends Controller
         $order    = Order::findOrFail($id);
         // check is facture or bon
         $typeOrder = false;
+        $id = null;
         if(!is_null($order->idfacture))
         {
             $typeOrder = true;
+            $id = $order->idfacture;
         }
+        $id = $order->id;
+        $formattedId = str_pad($id, 4, '0', STR_PAD_LEFT);
         $Tva                  = DB::table('tva as t')
         ->join('company as c','c.id','=','t.idcompany')
         ->where('c.status','=','Active')
         ->select('t.name')
         ->first();
-       /*  $numberLines = count($DataLine);
-        $TotalPlus = Order::where('id', $id)->value('accessoire');
 
-        if ($numberLines > 0) {
-            $TotalPlus = $TotalPlus / $numberLines;
-
-        } else {
-            $TotalPlus = 0;
-        } */
         $Info = DB::table('infos as f')->join('company as c','c.id','=','f.idcompany')->where('c.status','=','Active')->select('f.*')->first();
         // Load view file into DOMPDF
-        $pdf            = PDF::loadView('Order.FactureOrBon',compact('Client','DataLine','order','typeOrder','Info','Tva'))
+        $pdf            = PDF::loadView('Order.FactureOrBon',compact('Client','DataLine','order','typeOrder','Info','Tva','formattedId'))
         ->setOptions(['defaultFnt' => 'san-serif'])->setPaper('a4');
         return $pdf->download('bon de retour caisses vides.pdf');
 
 
 
-        /* return view('Order.FactureOrBon')
-        ->with('Client',$Client)
-        ->with('DataLine',$DataLine)
-        ->with('Order',$order)
-        ->with('typeOrder',$typeOrder)
-        ->with('Info',$Info)
-        ->with('Tva',$Tva); */
+
 
     }
 

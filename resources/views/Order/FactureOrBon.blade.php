@@ -14,18 +14,16 @@
         <table style="width: 100%">
             <tr>
                 <th>
-                    <div class="left">
-                    <h3 style="text-transform: uppercase;">{{$Info->title}}</h3>
-                    <h5>TEL: {{$formattedPhone}} / {{$formattedFix}}</h5>
+                    <div class="left titleLeft">
+                        <h3 style="text-transform: uppercase;">{{$Info->title}}</h3>
+                        <h5>TEL: {{$formattedPhone}} / {{$formattedFix}}</h5>
                     </div>
                 </th>
                 <th>
-                    <div class="right">
+                    <div class="right titleRight">
                         <p>@if ($typeOrder) Facture @else Bon @endif</p>
-                        <p>@if ($typeOrder) N° facture @else N° Bon @endif </p>
-                        {{-- <div style="border: 1px solid rgb(157, 194, 241);padding:20px;width: 100%;border-radius: 10px">
+                        <p>@if ($typeOrder) N° {{$formattedId}} @else N° {{$formattedId}} @endif </p>
 
-                        </div> --}}
 
                     </div>
                 </th>
@@ -36,7 +34,7 @@
     </div>
 
     <div>
-        <div class="container" >
+        <div class="container DivContentInformationClient" >
 
             <table style="width: 100%">
                 <tr>
@@ -162,7 +160,7 @@
     }
 
     .invoice-container {
-        height: 960px;
+        height: 1060px;
         position: relative;
         border: 1px solid;
         padding: 20px;
@@ -276,6 +274,25 @@
             text-align: center;
             padding: 10px;
             box-sizing: border-box;
+        }
+
+        .titleLeft
+        {
+            border: 1px solid rgb(150, 196, 255);
+            border-radius: 10px
+        }
+        .titleRight
+        {
+            border: 1px solid rgb(150, 196, 255);
+            border-radius: 10px;
+            width: 80%;
+
+        }
+        .DivContentInformationClient
+        {
+            border: 1px solid rgb(150, 196, 255);
+            border-radius: 10px;
+            width: 95%;
         }
 </style>
 

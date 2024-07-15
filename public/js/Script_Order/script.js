@@ -15,6 +15,22 @@ $(document).ready(function ()
         placeholder: "veuillez sélectionner le client",
         allowClear: true
     });
+    $('.datecheque, .datepromise').change(function() {
+        var date1Val = $('.datecheque').val();
+        var date2Val = $('.datepromise').val();
+
+        if (date1Val !== '' && date2Val !== '')
+        {
+            var date1 = new Date(date1Val);
+            var date2 = new Date(date2Val);
+
+            if (date2 <= date1)
+            {
+                toastr.error('La date promise doit être supérieure à la date chèque.','Erreur');
+                $('.datepromise').val('');
+            }
+        }
+    });
     $(function ()
     {
         initializeDataTable('.TableVente', GetMyVente);
@@ -889,7 +905,8 @@ $('.TableTmpVente').on('input', 'input.input-box', function () {
                     'totalPrixPaiement' : totalPrixPaiement
                 };
 
-                if (contentCheque) {
+                if (contentCheque)
+                {
                     Object.assign(data, {
                         'numero'        : $('.numero').val(),
                         'datecheque'    : $('.datecheque').val(),
@@ -899,6 +916,21 @@ $('.TableTmpVente').on('input', 'input.input-box', function () {
                         'bank'          : $('.bank').val(),
                         'name'          : $('.name').val(),
                     });
+                }
+                var date1Val = $('.datecheque').val();
+                var date2Val = $('.datepromise').val();
+
+                if (date1Val !== '' && date2Val !== '')
+                {
+                    var date1 = new Date(date1Val);
+                    var date2 = new Date(date2Val);
+
+                    if (date2 <= date1)
+                    {
+                        toastr.error('La date promise doit être supérieure à la date chèque.','Erreur');
+                        $('.datepromise').val('');
+                        return false;
+                    }
                 }
 
                 $('.preloader').show();
@@ -1043,6 +1075,21 @@ $('.TableTmpVente').on('input', 'input.input-box', function () {
                         'bank'          : $('.bank').val(),
                         'name'          : $('.name').val(),
                     });
+                }
+                var date1Val = $('.datecheque').val();
+                var date2Val = $('.datepromise').val();
+
+                if (date1Val !== '' && date2Val !== '')
+                {
+                    var date1 = new Date(date1Val);
+                    var date2 = new Date(date2Val);
+
+                    if (date2 <= date1)
+                    {
+                        toastr.error('La date promise doit être supérieure à la date chèque.','Erreur');
+                        $('.datepromise').val('');
+                        return false;
+                    }
                 }
 
                 $('.preloader').show();
