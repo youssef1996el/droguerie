@@ -988,7 +988,15 @@ class OrderController extends Controller
         // Load view file into DOMPDF
         $pdf            = PDF::loadView('Order.FactureOrBon',compact('Client','DataLine','order','typeOrder','Info','Tva','formattedId'))
         ->setOptions(['defaultFnt' => 'san-serif'])->setPaper('a4');
-        return $pdf->download('bon de retour caisses vides.pdf');
+        if(!is_null($order->idfacture))
+        {
+            return $pdf->download('Facture.pdf');
+        }
+        else
+        {
+            return $pdf->download('Bon.pdf');
+        }
+
 
 
 
