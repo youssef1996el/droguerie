@@ -49,7 +49,7 @@
                 <!-- -------------------------------------------- -->
                 <!-- Customers -->
                 <!-- -------------------------------------------- -->
-                <div class="col-md-6">
+                <div class="col-md-12">
                     <div class="card bg-secondary-subtle overflow-hidden shadow-none">
                         <div class="card-body p-4">
                             <span class="text-dark">Clientes</span>
@@ -64,7 +64,7 @@
               <!-- -------------------------------------------- -->
               <!-- Projects -->
               <!-- -------------------------------------------- -->
-              <div class="col-md-6">
+              {{-- <div class="col-md-6">
                 <div class="card bg-danger-subtle overflow-hidden shadow-none">
                   <div class="card-body p-4">
                     <span class="text-dark">Projects</span>
@@ -78,7 +78,7 @@
                   </div>
 
                 </div>
-              </div>
+              </div> --}}
             </div>
           </div>
           <div class="col-lg-7">
@@ -115,7 +115,7 @@
               </div>
             </div>
           </div>
-          <div class="col-lg-5">
+          <div class="col-lg-12">{{-- col-lg-5 --}}
             <!-- -------------------------------------------- -->
             <!-- Your Performance -->
             <!-- -------------------------------------------- -->
@@ -125,7 +125,7 @@
                {{--  <p class="card-subtitle mb-0">Last check on 25 february</p> --}}
 
                 <div class="row mt-4">
-                    <div class="col-md-6">
+                    <div class="col-md-6">{{-- col-md-6 --}}
                         <div class="vstack gap-9 mt-2">
                             <div class="hstack align-items-center gap-3">
                                 <div class="d-flex align-items-center justify-content-center round-48 rounded bg-primary-subtle flex-shrink-0">
@@ -168,7 +168,7 @@
               </div>
             </div>
           </div>
-          <div class="col-lg-7">
+          {{-- <div class="col-lg-7">
             <div class="row">
               <div class="col-md-6">
                 <!-- -------------------------------------------- -->
@@ -222,7 +222,7 @@
               </div>
             </div>
 
-          </div>
+          </div> --}}
 
           <div class="col-lg-12">
             <!-- -------------------------------------------- -->
@@ -232,11 +232,11 @@
                 <div class="card-body">
                     <div class="d-flex flex-wrap gap-3 mb-2 justify-content-between align-items-center">
                         <h5 class="card-title fw-semibold mb-0">Revenus par commande</h5>
-                        <select class="form-select w-auto fw-semibold">
+                        {{-- <select class="form-select w-auto fw-semibold">
                             <option value="1">Sep 2024</option>
                             <option value="2">Oct 2024</option>
                             <option value="3">Nov 2024</option>
-                        </select>
+                        </select> --}}
                     </div>
 
                     <div class="table-responsive">

@@ -15,7 +15,7 @@
    <!-- Core Css -->
    <link rel="stylesheet" href="{{asset('css/dashboard/styles.css')}}" />
 
-  <title>MatDash Bootstrap Admin</title>
+   <title>STE RIFI</title>
 
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons@latest/iconfont/tabler-icons.min.css">
 
@@ -49,8 +49,8 @@
      <div class="toast-body hstack align-items-start gap-6">
        <i class="ti ti-alert-circle fs-6"></i>
        <div>
-         <h5 class="text-white fs-3 mb-1">Welcome to MatDash</h5>
-         <h6 class="text-white fs-2 mb-0">Easy to costomize the Template!!!</h6>
+         <h5 class="text-white fs-3 mb-1">Bienvenue à RIFI</h5>
+
        </div>
        <button type="button" class="btn-close btn-close-white fs-2 m-0 ms-auto shadow-none" data-bs-dismiss="toast" aria-label="Close"></button>
      </div>
@@ -650,13 +650,13 @@
                            <div>
                              <h5 class="mb-0 fs-12">{{Auth::user()->name}}
                                 <span class="text-success fs-11">
-                                    @if(!empty($user->getRoleNames()))
+                                    {{-- @if(!empty($user->getRoleNames()))
 
                                         @foreach($user->getRoleNames() as $role)
                                             <label class="badge badge-success text-success">{{ $role }}</label>
                                         @endforeach
 
-                                    @endif
+                                    @endif --}}
                                 </span>
                              </h5>
                              <p class="mb-0 text-dark">
