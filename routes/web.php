@@ -54,6 +54,7 @@ Route::group(['middleware' => ['web','auth']], function ()
     Route::post('UpdateClient'       ,[ClientController::class,'UpdateClient'                 ]);
     Route::post('TrashClient'        ,[ClientController::class,'TrashClient'                 ]);
     Route::get('StoreRemark'         ,[ClientController::class,'StoreRemark'                 ]);
+
     /******************************** End Client ***********************************************/
 
 

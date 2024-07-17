@@ -3,7 +3,7 @@
 <script src="{{asset('js/Script_index/script.js')}}"></script>
 <script>
     var groupedByYear = @Json($groupedByYear);
-
+    var weeklyCounts  = @Json($weeklyCounts);
 
 </script>
     <div class="container-fluid">

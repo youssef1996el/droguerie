@@ -221,6 +221,49 @@ class HomeController extends Controller
         ->groupBy('orders.id')
         ->orderBy('orders.id', 'desc')
         ->get();
+
+
+       // Get today's date
+    // Get today's date
+    $today = Carbon::today();
+
+    // Fetch the creation dates of clients from the clients table
+    $clientCounts = DB::table('clients')
+        ->join('company as c', 'c.id', '=', 'clients.idcompany')
+        ->where('c.status', 'Active')
+        ->select(
+            DB::raw('WEEK(clients.created_at) as week_number'),
+            DB::raw('YEAR(clients.created_at) as year'),
+            DB::raw('COUNT(*) as count')
+        )
+        ->groupBy('week_number', 'year')
+        ->get();
+
+    // Initialize an empty array to hold the weekly counts
+    $weeklyCounts = [];
+
+    // Loop through each client count
+    foreach ($clientCounts as $clientCount) {
+        // Calculate the start date of the week based on year and week number
+        $startDate = Carbon::now()->setISODate($clientCount->year, $clientCount->week_number)->startOfWeek();
+
+        // Calculate the end date of the week
+        $endDate = Carbon::now()->setISODate($clientCount->year, $clientCount->week_number)->endOfWeek();
+
+        // Format the dates as strings
+        $startDateString = $startDate->toDateString();
+        $endDateString = $endDate->toDateString();
+
+        // Push the weekly count to the array
+
+
+        $weeklyCounts[] = $clientCount->count ;
+
+    }
+
+
+        // Return the weekly counts as a JSON response
+
         return view('Dashboard.index')
             ->with('NameUser'                           ,$NameUser)
             ->with('CompanyIsActive'                    ,$CompanyIsActive)
@@ -234,7 +277,7 @@ class HomeController extends Controller
             ->with('CalcuLNumberFacture'                ,$CalcuLNumberFacture)
             ->with('TotalOrderStartApp'                 ,$TotalOrderStartApp)
             ->with('orders'                             ,$orders)
-
+            ->with('weeklyCounts'                       ,$weeklyCounts)
             ->with('groupedByYear'                      ,$groupedByYear);
     }
 

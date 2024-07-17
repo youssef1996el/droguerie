@@ -14,6 +14,10 @@ document.addEventListener("DOMContentLoaded", function () {
   // -----------------------------------------------------------------------
   // Customers
   // -----------------------------------------------------------------------
+  var data = [];
+  weeklyCounts.forEach((element) => data.push(element));
+
+
 
   var options = {
     chart: {
@@ -31,7 +35,8 @@ document.addEventListener("DOMContentLoaded", function () {
       {
         name: "customers",
         color: "var(--bs-secondary)",
-        data: [36, 45, 31, 47, 38, 43],
+        /* data: [36, 45, 31, 47, 38, 43], */
+        data: data,
       },
     ],
     stroke: {
@@ -66,6 +71,8 @@ document.addEventListener("DOMContentLoaded", function () {
     },
   };
   new ApexCharts(document.querySelector("#customers"), options).render();
+
+
 
   // -----------------------------------------------------------------------
   // Projects
