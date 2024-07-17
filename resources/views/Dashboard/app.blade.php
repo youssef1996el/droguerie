@@ -70,7 +70,7 @@
 
          <div class="brand-logo d-flex align-items-center">
            <a href="#" class="text-nowrap logo-img">
-             <img src="" alt="Logo" />
+             <img src="{{asset('images_login/Add_a_heading-removebg-preview.png')}}" alt="Logo" width="120px"  height="100px" style="margin-left : 15px "/>
            </a>
 
          </div>
