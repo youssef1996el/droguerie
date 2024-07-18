@@ -43,13 +43,13 @@ class ChequeController extends Controller
                 ->addColumn('action', function ($row) {
                     $btn = '<div class="action-btn d-flex">';
 
-                    if (auth()->user()->can('clients-voir')) {
+                    if (auth()->user()->can('Cheque-voir')) {
                         $btn .= '<a href="' . url("ShowOrder/{$row->encryptedId}") . '" class="text-light view" value="' . $row->id . '">
                                     <i class="ti ti-eye fs-5 border rounded-2 bg-info p-1" title="Voir le client"></i>
                                 </a>';
                     }
 
-                    if (auth()->user()->can('clients-modifier')) {
+                    if (auth()->user()->can('Cheque-modifier')) {
                         $btn .= '<a href="#" class="text-light edit ms-2" value="' . $row->id . '">
                                     <i class="ti ti-edit fs-5 border rounded-2 bg-success p-1" title="Modifier le client"></i>
                                 </a>';

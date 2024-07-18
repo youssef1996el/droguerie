@@ -116,6 +116,10 @@ class PermissionTableSeeder extends Seeder
             'etat',
             'etat-recherche',
 
+            'Cheque',
+            'Cheque-voir',
+            'Cheque-modifier',
+
 
 
         ];
