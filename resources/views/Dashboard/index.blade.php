@@ -61,24 +61,7 @@
                         <div id="customers"></div>
                     </div>
                 </div>
-              <!-- -------------------------------------------- -->
-              <!-- Projects -->
-              <!-- -------------------------------------------- -->
-              {{-- <div class="col-md-6">
-                <div class="card bg-danger-subtle overflow-hidden shadow-none">
-                  <div class="card-body p-4">
-                    <span class="text-dark">Projects</span>
-                    <div class="hstack gap-6 align-items-end mt-1 mb-4">
-                      <h5 class="card-title fw-semibold mb-0 fs-7 mt-1">78,298</h5>
-                      <span class="fs-11 text-dark fw-semibold">+31.8%</span>
-                    </div>
-                    <div class="me-n3">
-                      <div id="projects"></div>
-                    </div>
-                  </div>
 
-                </div>
-              </div> --}}
             </div>
           </div>
           <div class="col-lg-7">

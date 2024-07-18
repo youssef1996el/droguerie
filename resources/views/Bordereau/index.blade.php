@@ -55,7 +55,7 @@
                         </div>
 
                         <div class="col-md-4 mt-4">
-                            <button type="button" class="btn btn-primary btn-block" id="BtnSearchOrder">Search</button>
+                            <button type="button" class="btn btn-primary btn-block" id="BtnSearchOrder">Recherche</button>
                         </div>
                     </div>
                 @endcan

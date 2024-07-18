@@ -20,6 +20,7 @@ use App\Http\Controllers\PersonnelController;
 use App\Http\Controllers\InfoController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\RoleController;
+use App\Http\Controllers\ChequeController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -181,5 +182,10 @@ Route::group(['middleware' => ['web','auth']], function ()
     Route::post('UpdateInformation'  ,[InfoController::class,'UpdateInformation'                         ]);
 
     /******************************** End  Info  *********************************************************/
+
+    /********************************** Cheque  **********************************************************/
+    Route::get('Cheque'              ,[ChequeController::class,'index'                                  ]);
+    Route::get('ChangeStatus'        ,[ChequeController::class,'ChangeStatus'                           ]);
+    /********************************** End cheque *******************************************************/
 
 });

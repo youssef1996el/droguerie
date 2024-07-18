@@ -12,6 +12,6 @@ class Cheques extends Model
     protected $table = 'cheques';
 
     protected $fillable = [
-        'numero', 'datecheque','datepromise','montant','type','name','bank','idorder'
+        'numero', 'datecheque','datepromise','montant','type','name','bank','idorder','status'
     ];
 }

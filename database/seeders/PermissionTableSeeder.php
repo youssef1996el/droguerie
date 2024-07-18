@@ -61,8 +61,8 @@ class PermissionTableSeeder extends Seeder
 
             'mode paiement',
             'mode paiement-ajoute',
-            'mode_paiement-modifier',
-            'mode_paiement-supprimer',
+            'mode paiement-modifier',
+            'mode paiement-supprimer',
 
             'information',
             'information-ajoute',

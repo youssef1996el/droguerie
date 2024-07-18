@@ -86,13 +86,13 @@ class ModePaiementController extends Controller
         {
             $btn = '<div class="action-btn d-flex">';
             // Edit button with permission check
-            if (auth()->user()->can('mode_paiement-modifier')) {
+            if (auth()->user()->can('mode paiement-modifier')) {
                 $btn .= '<a href="#" class="text-light edit ms-2" value="' . $row->id . '">
                             <i class="ti ti-edit fs-5 border rounded-2 bg-success p-1" title="Modifier le mode de paiement"></i>
                         </a>';
             }
             // Delete button with permission check
-            if (auth()->user()->can('mode_paiement-supprimer')) {
+            if (auth()->user()->can('mode paiement-supprimer')) {
                 $btn .= '<a href="#" class="text-light trash" value="' . $row->id . '">
                             <i class="ti ti-trash fs-5 border rounded-2 bg-danger p-1" title="Supprimer le mode de paiement"></i>
                         </a>';
