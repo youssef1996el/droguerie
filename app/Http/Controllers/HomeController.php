@@ -301,7 +301,7 @@ class HomeController extends Controller
         DB::table('categorys')->truncate();
         DB::table('setting')->truncate();
         DB::table('company')->truncate();
-        DB::table('infos')->truncate();
+        /* DB::table('infos')->truncate(); */
         DB::table('charge')->truncate();
         DB::table('products')->truncate();
 
