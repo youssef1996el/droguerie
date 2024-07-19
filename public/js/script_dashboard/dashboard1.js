@@ -33,7 +33,7 @@ document.addEventListener("DOMContentLoaded", function () {
     },
     series: [
       {
-        name: "customers",
+        name: "clients",
         color: "var(--bs-secondary)",
         /* data: [36, 45, 31, 47, 38, 43], */
         data: data,

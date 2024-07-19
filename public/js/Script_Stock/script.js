@@ -296,8 +296,7 @@ $(document).ready(function ()
                             $('#chauffeurEdit').val(response.data[0].chauffeur);
                             $('#cinEdit').val(response.data[0].cin);
                             $('.TableStockEdit').find('tbody').html("");
-                            $.each(response.data, function (index, value)
-                            {
+                            $.each(response.data, function (index, value) {
                                 var options = '';
                                 $.each(CategoryCompanyActive, function (catIndex, category) {
                                     // If the category id is equal to value.idcategory, mark it as selected
@@ -307,32 +306,33 @@ $(document).ready(function ()
                                         options += `<option value="${category.id}">${category.name}</option>`;
                                     }
                                 });
+                                console.log(value.product);
                                 $('.TableStockEdit').find('tbody').append(`
-                                                                        <tr>
-                                                                            <td>
-                                                                                <input type="text" id="name" name="name[]" class="form-control name" placeholder="(obligatoire)" autocomplete="on" value=${value.product} required>
-                                                                            </td>
-                                                                            <td>
-                                                                                <select name="DropDownCategory[]" id="DropDownCategory" class="form-select DropDownCategory">
-                                                                                    ${options}
-                                                                                </select>
-                                                                            </td>
-                                                                            <td>
-                                                                                <input type="number" id="price" name="price[]" class="form-control price" value=${value.price} placeholder="(obligatoire)" required>
-                                                                            </td>
-                                                                            <td>
-                                                                                <input type="number" min="1" id="qte" name="qte[]" class="form-control qte" value=${value.qte_stock} placeholder="(obligatoire)" required>
-                                                                            </td>
-                                                                            <td>
-                                                                                <input type="number" min="1" id="qte_company" name="qte_company[]" value=${value.qte_company} class="form-control qte_company" placeholder="(obligatoire)" required>
-                                                                            </td>
-                                                                             <td>
-                                                                                <input type="number" min="0" id="qte_notification" name="qte_notification[]" value=${value.qte_notification} class="form-control qte_notification" placeholder="(obligatoire)" required>
-                                                                            </td>
-                                                                            <td>
+                                    <tr>
+                                        <td>
+                                            <input type="text" id="name" name="name[]" class="form-control name" placeholder="(obligatoire)" value="${value.product}" required>
+                                        </td>
+                                        <td>
+                                            <select name="DropDownCategory[]" id="DropDownCategory" class="form-select DropDownCategory">
+                                                ${options}
+                                            </select>
+                                        </td>
+                                        <td>
+                                            <input type="number" id="price" name="price[]" class="form-control price" value="${value.price}" placeholder="(obligatoire)" required>
+                                        </td>
+                                        <td>
+                                            <input type="number" min="1" id="qte" name="qte[]" class="form-control qte" value="${value.qte_stock}" placeholder="(obligatoire)" required>
+                                        </td>
+                                        <td>
+                                            <input type="number" min="1" id="qte_company" name="qte_company[]" value="${value.qte_company}" class="form-control qte_company" placeholder="(obligatoire)" required>
+                                        </td>
+                                        <td>
+                                            <input type="number" min="0" id="qte_notification" name="qte_notification[]" value="${value.qte_notification}" class="form-control qte_notification" placeholder="(obligatoire)" required>
+                                        </td>
+                                        <td>
 
-                                                                            </td>
-                                                                        </tr>`);
+                                        </td>
+                                    </tr>`);
                             });
 
 
