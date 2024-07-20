@@ -42,6 +42,7 @@ class RecouverementController extends Controller
                                 ->join('reglements as r','r.idmode','=','m.id')
                                 ->join('company as ca','ca.id','=','m.idcompany')
                                 ->select('m.id','m.name')
+                                ->where('ca.status','Active')
                                 ->groupBy('m.id')
                                 ->get();
         return view('Recouverement.index')

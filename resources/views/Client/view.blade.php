@@ -1,26 +1,6 @@
 @extends('Dashboard.app')
 @section('content')
-{{-- <style>
-    @keyframes slideDown {
-        from {
-            transform: translateY(-100%);
-            opacity: 0;
-        }
-        to {
-            transform: translateY(0);
-            opacity: 1;
-        }
-    }
 
-    .slide-down {
-        animation: slideDown 2s ease-out forwards;
-    }
-</style>
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        document.querySelector('.cardRemark').classList.add('slide-down');
-    });
-    </script> --}}
 <div class="container-fluid">
     <div class="card card-body py-3">
         <div class="row align-items-center">
@@ -35,6 +15,7 @@
                                 </a>
                             </li>
                             <li class="breadcrumb-item" aria-current="page">
+                                <a href="#" class="badge fw-medium fs-2 bg-success text-white text-uppercase">solde de départ</a>
                                 <span class="badge fw-medium fs-2 bg-primary-subtle text-primary">
                                     Voir client
                                 </span>
