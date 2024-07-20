@@ -98,6 +98,7 @@ Route::group(['middleware' => ['web','auth']], function ()
     Route::get('getUniteVenteByProduct',[OrderController::class,'getUniteVenteByProduct'       ]);
     Route::get('checkTableTmpHasDataNotThisClient',[OrderController::class,'checkTableTmpHasDataNotThisClient']);
     Route::get('changeAccessoireTmp',[OrderController::class,'changeAccessoireTmp'              ]);
+    Route::get('ChangeQteByPress'   ,[OrderController::class,'changeQteByPress' ]);
     /******************************** End Order ************************************************/
 
 

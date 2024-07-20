@@ -1131,6 +1131,7 @@ class OrderController extends Controller
             ->where('p.name','like',"%{$request->name}%")
             ->where('co.status','=','Active')
             ->select('s.type','s.id')
+            ->groupBy('s.type')
             ->get();
 
         if($products->isNotEmpty())
@@ -1211,6 +1212,55 @@ class OrderController extends Controller
         return response()->json([
             'status' => 200,
         ]);
+    }
+    public function changeQteByPress(Request $request)
+    {
+        $Client = Client::where('id', $request->idclient)
+            ->select('nom', 'prenom', 'plafonnier')
+            ->first();
 
+        if (!$Client) {
+            return response()->json(['status' => 404, 'message' => 'Client not found']);
+        }
+
+        $creditClient           = $this->getClientCredit($request->idclient);
+        $totalTmpByClient       = TmpLineOrder::where('idclient', $request->idclient)->sum('total');
+        $Price                  = TmpLineOrder::where('id',$request->id)->value('price');
+        $totalCreditByClient    = $totalTmpByClient + $Price + $creditClient;
+
+        if ($Client->plafonnier > 0 && $totalCreditByClient >= $Client->plafonnier)
+        {
+
+            return response()->json([
+                'status' => 500,
+                'message' => 'Le client ' . $Client->nom . " " . $Client->prenom . ' a atteint le montant maximum de ' . $Client->plafonnier . ' dirhams'
+            ]);
+        }
+
+        $tmpLineOrder = TmpLineOrder::find($request->id);
+        if (!$tmpLineOrder) {
+            return response()->json(['status' => 404, 'message' => 'TABLEAU PANIER PAR CLIENT pas trouvé']);
+        }
+
+        $Qte_Stock = Stock::where('idproduct', $tmpLineOrder->idproduct)
+            ->where('id', $tmpLineOrder->idstock)
+            ->value('qte');
+
+        $Qte_New_Tmp = $this->calculateNewQuantity($request->qte, $tmpLineOrder->idsetting);
+
+        if ($Qte_New_Tmp > $Qte_Stock) {
+            return response()->json([
+                'status' => 422,
+                'message' => 'Maximum quantity available is: ' . $Qte_Stock
+            ]);
+        }
+
+        $price_product = $tmpLineOrder->price;
+        $tmpLineOrder->update([
+            'qte' => $request->qte,
+            'total' => $price_product * $request->qte,
+        ]);
+
+        return response()->json(['status' => 200]);
     }
 }

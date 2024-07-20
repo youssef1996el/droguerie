@@ -24,6 +24,7 @@
     var checkTableTmpHasDataNotThisClient = "{{url('checkTableTmpHasDataNotThisClient')}}";
     var StoreRemark                     = "{{url('StoreRemark')}}";
     var changeAccessoireTmp             = "{{url('changeAccessoireTmp')}}";
+    var ChangeQteByPress                = "{{url('ChangeQteByPress')}}";
 </script>
 <style>
     @keyframes slideDown

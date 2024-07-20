@@ -191,7 +191,7 @@ $(document).ready(function ()
                     name: 'accessoire',
                     render: function (data, type, row) {
                         /* return data + ' DH'; */
-                        return '<input type="number" class="inputAccessoire"  value="'+data+'" min="0" max="10000" style="border: 1px solid skyblue;border-radius: 10px;text-align: center;padding: 5px">';
+                        return '<input type="number" class="inputAccessoire"  value="'+data+'"  max="10000" style="border: 1px solid skyblue;border-radius: 10px;text-align: center;padding: 5px">';
                     },
                     className: "dt-right"
                 },
@@ -1325,12 +1325,13 @@ $('.TableTmpVente').on('input', 'input.input-box', function () {
         };
     }
 
-    $(document).on('input change keydown', '.TableTmpVente tbody .inputAccessoire', debounce(function(e) {
+    /* $(document).on('input change keydown', '.TableTmpVente tbody .inputAccessoire', debounce(function(e) {
         var $input = $(this);
 
         // Check if the key pressed is backspace (8) or delete (46)
         if ((e.type === 'keydown' && (e.keyCode === 8 || e.keyCode === 46)) || e.type === 'input' || e.type === 'change') {
-            setTimeout(function() {
+            setTimeout(function()
+            {
                 var id = $('.TableTmpVente').DataTable().row($input.closest('tr')).data().id;
                 var accessoire = $input.val().trim() === '' ? 0 : $input.val().trim();
 
@@ -1361,7 +1362,105 @@ $('.TableTmpVente').on('input', 'input.input-box', function () {
                 });
             }, 0);
         }
+    }, 300)); */
+    $(document).on('keypress', '.TableTmpVente tbody .inputAccessoire', debounce(function(e) {
+        var $input = $(this);
+        var newValue = $input.val().trim();
+
+        var key = e.which;
+
+        // Check if the key pressed is Enter (13)
+        if(key == 13){
+            setTimeout(function()
+            {
+
+                var id = $('.TableTmpVente').DataTable().row($input.closest('tr')).data().id;
+                var accessoire = $input.val().trim() === '' ? 0 : $input.val().trim();
+                $.ajax({
+                    type: "GET",
+                    url: changeAccessoireTmp,
+                    data: {
+                        id: id,
+                        accessoire: accessoire
+                    },
+                    dataType: "json",
+                    success: function(response) {
+                        if (response.status == 200) {
+                            var newIdClient = $('#IdClient').val();
+                            var newIdCompany = IdCompanyActive.id; // Assuming company ID does not change
+                            var typeVente = null;
+                            // Destroy the existing DataTable
+                            reloadTable(newIdClient, newIdCompany, typeVente);
+                            updateTotals();
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        // Handle error
+                    }
+                });
+
+            }, 0);
+        }
+
+        // Update the last value for the input
+        $input.data('lastValue', newValue);
     }, 300));
+
+
+    $(document).on('keypress','.TableTmpVente tbody .input-box',debounce(function(e)
+    {
+        var $input = $(this);
+        var newValue = $input.val().trim();
+        var key = e.which;
+        if(key == 13)
+        {
+            e.preventDefault();
+            setTimeout(function()
+            {
+                var id = $('.TableTmpVente').DataTable().row($input.closest('tr')).data().id;
+                var Qte = $input.val().trim() === '' ? 1 : $input.val().trim();
+                $.ajax({
+                    type: "GET",
+                    url: ChangeQteByPress,
+                    data:
+                    {
+                        id: id,
+                        qte: Qte,
+                        idclient :$('#IdClient').val()
+                    },
+                    dataType: "json",
+                    success: function (response)
+                    {
+                        if (response.status == 200)
+                        {
+                            var newIdClient = $('#IdClient').val();
+                            var newIdCompany = IdCompanyActive.id; // Assuming company ID does not change
+                            var typeVente = null;
+                            // Destroy the existing DataTable
+                            reloadTable(newIdClient, newIdCompany, typeVente);
+                            updateTotals();
+                        }
+                        else if(response.status == 500)
+                        {
+                            toastr.error(response.message,'Erreur');
+                            $input.data('lastValue', newValue);
+                        }
+                        else if(response.status == 404)
+                        {
+                            toastr.error(response.message,'Erreur');
+                            $input.data('lastValue', newValue);
+                        }
+                        else if(response.status == 422)
+                        {
+                            toastr.error(response.message,'Erreur');
+                            $input.data('lastValue', newValue);
+                        }
+                    }
+                });
+            });
+        }
+    },300));
+
 
 
 
