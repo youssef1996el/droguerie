@@ -58,6 +58,7 @@ class SettingController extends Controller
         ->join('stock as s','s.idbonentre','=','b.id')
         ->join('company as c','c.id','b.idcompany')
         ->where('c.status','=','Active')
+        ->where('b.numero_bon','!=','Bon-Solde-Depart')
         ->select('numero_bon','b.id')
         ->groupBy('b.id')
         ->orderBy('b.id','desc')

@@ -33,6 +33,7 @@ class CategoryController extends Controller
         $Categorys = DB::table('categorys as ca')
         ->join('company as c','c.id','=','ca.idcompany')
         ->where('c.status','=','Active')
+        ->where('ca.name','!=','Solde de départ')
         ->select('ca.name','c.title','ca.id')
         ->get();
         return DataTables::of($Categorys)->addIndexColumn()->addColumn('action', function ($row)
