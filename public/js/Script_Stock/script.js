@@ -306,11 +306,11 @@ $(document).ready(function ()
                                         options += `<option value="${category.id}">${category.name}</option>`;
                                     }
                                 });
-                                console.log(value.product);
+                                console.log(value);
                                 $('.TableStockEdit').find('tbody').append(`
                                     <tr>
                                         <td>
-                                            <input type="text" id="name" name="name[]" class="form-control name" placeholder="(obligatoire)" value="${value.product}" required>
+                                            <input type="text" id="name" name="name[]" class="form-control name" placeholder="(obligatoire)" value="${value.product}" data-value="${value.idstock}" required>
                                         </td>
                                         <td>
                                             <select name="DropDownCategory[]" id="DropDownCategory" class="form-select DropDownCategory">
@@ -318,7 +318,7 @@ $(document).ready(function ()
                                             </select>
                                         </td>
                                         <td>
-                                            <input type="number" id="price" name="price[]" class="form-control price" value="${value.price}" placeholder="(obligatoire)" required>
+                                            <input type="number" id="price" name="price[]" class="form-control price" value="${value.price}" placeholder="(obligatoire)"  required>
                                         </td>
                                         <td>
                                             <input type="number" min="1" id="qte" name="qte[]" class="form-control qte" value="${value.qte_stock}" placeholder="(obligatoire)" required>
@@ -423,6 +423,7 @@ $(document).ready(function ()
         var qte_companies = [];
         var categories = [];
         var qte_notifications = [];
+        var idstocks = [];
         $('#productTableBodyEdit tr').each(function() {
             var name = $(this).find('.name').val();
             var price = $(this).find('.price').val();
@@ -430,22 +431,25 @@ $(document).ready(function ()
             var qte_company = $(this).find('.qte_company').val();
             var category = $(this).find('.DropDownCategory').val();
             var qte_notification = $(this).find('.qte_notification').val();
+            var idstock = $(this).find('.name').attr('data-value');
 
-            if(name && price && qte && qte_company && category && qte_notification) {
+            if(name && price && qte && qte_company && category && qte_notification && idstock) {
                 names.push(name);
                 prices.push(price);
                 qtes.push(qte);
                 qte_companies.push(qte_company);
                 categories.push(category);
                 qte_notifications.push(qte_notification);
+                idstocks.push(idstock);
             }
         });
-        data['name'] = names;
-        data['price'] = prices;
-        data['qte'] = qtes;
-        data['qte_company'] = qte_companies;
-        data['DropDownCategory'] = categories;
-        data['qte_notification'] = qte_notifications;
+        data['name']                = names;
+        data['price']               = prices;
+        data['qte']                 = qtes;
+        data['qte_company']         = qte_companies;
+        data['DropDownCategory']    = categories;
+        data['qte_notification']    = qte_notifications;
+        data['idstock']             = idstocks;
         $.ajax({
             type: "post",
             url: UpdateStock,

@@ -235,6 +235,7 @@ class StockController extends Controller
             }
 
             // Merge fields for items with the same idbon
+
             $merged->idbon = $item->idbon;
             $merged->name = $item->name;
             $merged->numero_bon = $item->numero_bon;
@@ -252,6 +253,7 @@ class StockController extends Controller
             $merged->price[] = $item->price;
             $merged->product[] = $item->product;
             $merged->qte_notification[] = $item->qte_notification;
+
             return $merged;
         }, new \stdClass()); // Start with an empty stdClass object
 
@@ -297,7 +299,7 @@ class StockController extends Controller
         ->where('c.status', 'Active')
         ->where('b.id','=',$request->idBon)
         ->select(
-            'b.id as idbon', 'b.numero_bon', 'b.date', 'b.numero', 'b.commercial',
+            'b.id as idbon', 'b.numero_bon', 'b.date', 'b.numero', 'b.commercial','s.id as idstock',
             'b.mode_paiement', 'b.matricule', 'b.chauffeur', 'b.cin', 'b.created_at',
             'c.title as title_company', 's.qte as qte_stock', 's.qte_company', 's.price',
             'u.name', 'p.name as product','b.mode_paiement','ca.id as idcategory','ca.name as titleCategory','s.qte_notification'
@@ -314,6 +316,7 @@ class StockController extends Controller
 
     public function UpdateStock(Request $request)
     {
+
         $rules =
         [
             'numero_bon'        => 'required',
@@ -378,8 +381,8 @@ class StockController extends Controller
                 'idcompany'                 => $request['idcompany'],
                 'iduser'                    => $request['iduser'],
             ]);
-            // delete stock by bon entree
-            $DeleteStockByBon = Stock::where('idbonentre',$request->idbon)->delete();
+
+
             foreach ($request['name'] as $index => $name)
             {
                 $check = Product::where(['name' => $name, 'idcompany' => $request['idcompany']])->count();
@@ -399,7 +402,22 @@ class StockController extends Controller
                 }
                 if ($Product)
                 {
-                    $dataStock = [
+                    $stock = Stock::where('id', $request['idstock'][$index])->first();
+                    if($stock)
+                    {
+                        $stock->update([
+                            'idbonentre'        => $request->idbon,
+                            'idproduct'         => $Product->id,
+                            'qte'               => $request['qte'][$index],
+                            'price'             => $request['price'][$index],
+                            'qte_company'       => $request['qte_company'][$index],
+                            'idcategory'        => $request['DropDownCategory'][$index],
+                            'idcompany'         => $request['idcompany'],
+                            'iduser'            => $request['iduser'],
+                            'qte_notification'  => $request['qte_notification'][$index],
+                        ]);
+                    }
+                   /*  $dataStock = [
                         'idbonentre'            => $request->idbon,
                         'idproduct'             => $Product->id,
                         'qte'                   => $request['qte'][$index],
@@ -409,9 +427,10 @@ class StockController extends Controller
                         'idcompany'             => $request['idcompany'],
                         'iduser'                => $request['iduser'],
                         'qte_notification'      => $request['qte_notification'][$index],
+
                     ];
 
-                    Stock::create($dataStock);
+                    Stock::create($dataStock); */
                 }
                 else
                 {
