@@ -53,8 +53,9 @@ Route::group(['middleware' => ['web','auth']], function ()
     Route::get('ShowClient/{id}'     ,[ClientController::class,'ShowClient'                   ]);
     Route::post('StoreClient'        ,[ClientController::class,'StoreClient'                  ]);
     Route::post('UpdateClient'       ,[ClientController::class,'UpdateClient'                 ]);
-    Route::post('TrashClient'        ,[ClientController::class,'TrashClient'                 ]);
-    Route::get('StoreRemark'         ,[ClientController::class,'StoreRemark'                 ]);
+    Route::post('TrashClient'        ,[ClientController::class,'TrashClient'                  ]);
+    Route::get('StoreRemark'         ,[ClientController::class,'StoreRemark'                  ]);
+    Route::post('StoreSolde'         ,[ClientController::class,'StoreSolde'                   ]);
 
     /******************************** End Client ***********************************************/
 

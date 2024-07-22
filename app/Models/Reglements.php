@@ -12,6 +12,6 @@ class Reglements extends Model
 
     protected $fillable =
     [
-        'total','datepaiement','idclient','idorder','idcompany','iduser','idmode'
+        'total','datepaiement','idclient','idorder','idcompany','iduser','idmode','status'
     ];
 }

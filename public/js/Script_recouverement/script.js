@@ -327,6 +327,7 @@ $(document).ready(function () {
                 $('.TableRecouverementSelected tbody tr').each(function() {
                     var data = $('.TableRecouverementSelected').DataTable().row(this).data();
                     let id = data.id;
+
                     let mode = $(this).find('select[name="mode_paiement"]').val();
                     let prix = parseFloat($(this).find('input.MontantSaisir').val());
                     let reste = $(this).find('td:eq(3)').text();
@@ -354,6 +355,7 @@ $(document).ready(function () {
                         }
                     }
                 });
+
                 if(modePaiementTable.length > 0)
                 {
                     let DataPaiement = Object.values(modePaiementTable);

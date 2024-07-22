@@ -58,8 +58,13 @@ class RecouverementController extends Controller
     {
         if($request->ajax())
         {
-
-            $Recouvement = Order::select(
+            $CompanyIsActive       = Company::where('status','Active')->select('id')->first();
+            $idModePaiement        = DB::table('modepaiement as m')
+            ->join('company as c','c.id','=','m.idcompany')
+            ->where('c.id',$CompanyIsActive->id)
+            ->where('m.name','=','crédit')
+            ->value('m.id');
+            /* $Recouvement = Order::select(
                 'orders.id',
                 'orders.total AS totalvente',
                 DB::raw('SUM(reglements.total) AS totalpaye'),
@@ -81,8 +86,42 @@ class RecouverementController extends Controller
             ->where('company.status','=','Active')
             ->havingRaw('reste > 0')
             ->groupBy('orders.id')
+            ->get(); */
+            $Recouvement = DB::table('reglements as r')
+            ->join('orders as o', 'r.idorder', '=', 'o.id')
+            ->join('clients as c', 'o.idclient', '=', 'c.id')
+            ->join('company as co', 'c.idcompany', '=', 'co.id')
+            ->join('users as u', 'r.iduser', '=', 'u.id')
+            ->select(
+                'o.id',
+                'o.total AS totalvente',
+                DB::raw("
+                    CASE
+                        WHEN
+                            CASE
+                                WHEN (o.total - SUM(r.total)) < 0 THEN (o.total + SUM(r.total))
+                                ELSE (o.total - SUM(r.total))
+                            END = r.total THEN 0
+                        ELSE
+                            CASE
+                                WHEN (o.total - SUM(r.total)) < 0 THEN (o.total + SUM(r.total))
+                                ELSE (o.total - SUM(r.total))
+                            END
+                    END AS totalpaye
+                "),
+                DB::raw('SUM(r.total) as reste'),
+                DB::raw("CONCAT(c.nom, ' ', c.prenom) as client"),
+                'o.idfacture',
+                'u.name as user',
+                'co.title as company',
+                DB::raw("DATE_FORMAT(o.created_at, '%Y-%m-%d') as created_at_formatted")
+            )
+            ->where('co.status', 'Active')
+            ->where('r.idclient', $request->idclient)
+            ->where('r.idmode', $idModePaiement)
+            ->groupBy('o.id', )
+            ->having('reste', '>', 0)
             ->get();
-
             return DataTables::of($Recouvement)->addIndexColumn()->make(true);
         }
     }
@@ -92,7 +131,7 @@ class RecouverementController extends Controller
         if($request->ajax())
         {
             $ids = $request->id;
-            $Recouvement = Order::select(
+            /* $Recouvement = Order::select(
                 'orders.id',
                 'orders.total AS totalvente',
                 DB::raw('SUM(reglements.total) AS totalpaye'),
@@ -110,10 +149,54 @@ class RecouverementController extends Controller
             ->join('company', 'company.id', '=', 'orders.idcompany')
             ->join('users', 'users.id', '=', 'orders.iduser')
             ->leftJoin('factures', 'factures.id', '=', 'orders.idfacture')
-            ->whereIn('orders.id', $ids) // Use whereIn to match multiple IDs
+            ->whereIn('orders.id', $ids)
             ->havingRaw('reste > 0')
             ->groupBy('orders.id')
+            ->get(); */
+
+            $IdCredit = DB::table('modepaiement as m')
+            ->join('company as c','c.id','=','m.idcompany')
+            ->where('c.status','Active')
+            ->where('m.name','crédit')
+            ->select('m.id')
+            ->first();
+
+            $Recouvement = DB::table('reglements as r')
+            ->join('orders as o', 'r.idorder', '=', 'o.id')
+            ->join('clients as c', 'o.idclient', '=', 'c.id')
+            ->join('company as co', 'c.idcompany', '=', 'co.id')
+            ->join('users as u', 'r.iduser', '=', 'u.id')
+            ->select(
+                'o.id',
+                'o.total AS totalvente',
+                DB::raw("
+                    CASE
+                        WHEN
+                            CASE
+                                WHEN (o.total - SUM(r.total)) < 0 THEN (o.total + SUM(r.total))
+                                ELSE (o.total - SUM(r.total))
+                            END = r.total THEN 0
+                        ELSE
+                            CASE
+                                WHEN (o.total - SUM(r.total)) < 0 THEN (o.total + SUM(r.total))
+                                ELSE (o.total - SUM(r.total))
+                            END
+                    END AS totalpaye
+                "),
+                DB::raw('SUM(r.total) as reste'),
+                DB::raw("CONCAT(c.nom, ' ', c.prenom) as client"),
+                'o.idfacture',
+                'u.name as user',
+                'co.title as company',
+                DB::raw("DATE_FORMAT(o.created_at, '%Y-%m-%d') as created_at_formatted")
+            )
+            ->whereIn('o.id', $ids)
+            ->where('r.idmode', $IdCredit->id)
+            ->havingRaw('reste > 0')
+            ->groupBy('o.id')
             ->get();
+
+
 
             return DataTables::of($Recouvement)->addIndexColumn()->make(true);
         }
@@ -127,7 +210,13 @@ class RecouverementController extends Controller
             foreach ($request['ModePaiement'] as $item)
             {
                 // extract id mode paiement credit
-                $IdCredit = ModePaiement::where('name','crédit')->select('id')->first();
+                //$IdCredit = ModePaiement::where('name','crédit')->select('id')->first();
+                $IdCredit = DB::table('modepaiement as m')
+                ->join('company as c','c.id','=','m.idcompany')
+                ->where('c.status','Active')
+                ->where('m.name','crédit')
+                ->select('m.id')
+                ->first();
                 // extract reglement
 
                 $Reglements = Reglements::where('idorder',$item['idorder'])

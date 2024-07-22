@@ -4,6 +4,12 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Client;
+use App\Models\Categorys;
+use App\Models\Product;
+use App\Models\BonEntre;
+use App\Models\Stock;
+use App\Models\Lineorder;
+use App\Models\Reglements;
 use DataTables;
 use App\Models\Company;
 use App\Models\Order;
@@ -178,7 +184,17 @@ class ClientController extends Controller
         ->join('company', 'company.id', '=', 'orders.idcompany')
         ->join('users', 'users.id', '=', 'orders.iduser')
         ->leftJoin('factures', 'factures.id', '=', 'orders.idfacture')
-        ->where('company.status','=','Active')->where('orders.idclient','=',$id)->groupBy('orders.id')->get();
+        ->where('company.status','=','Active')
+        ->where('orders.idclient','=',$id)
+        ->groupBy('orders.id')
+        ->get();
+
+        $has_Solde = false;
+        $Solde_Client = Reglements::where('idclient',$id)->count();
+        if($Solde_Client > 0)
+        {
+            $has_Solde = true;
+        }
         // remarque client
         $remarks = DB::select("select remark from remark where idclient = ?",[$id]);
 
@@ -198,7 +214,8 @@ class ClientController extends Controller
         ->with('Client', $Client)
         ->with('orders', $orders)
         ->with('remark', $remark)
-        ->with('CompanyIsActive'         ,$CompanyIsActive);
+        ->with('CompanyIsActive'         ,$CompanyIsActive)
+        ->with('has_Solde'               ,$has_Solde);
     }
     public function StoreRemark(Request $request)
     {
@@ -272,6 +289,139 @@ class ClientController extends Controller
                 'status'  => 200,
             ]);
         }
+    }
+
+    public function StoreSolde(Request $request)
+    {
+
+        $name_product = "Solde de départ";
+
+        $CompanyActive = Company::where('status','Active')->first();
+
+        // create category
+        $check_category = Categorys::where('name',$name_product)->count();
+        $Category = null;
+        if($check_category == 0)
+        {
+            $Category = Categorys::create([
+                'name'          => $name_product,
+                'idcompany'     => $CompanyActive->id,
+                'iduser'        => Auth::user()->id,
+            ]);
+        }
+        else
+        {
+            $Category = Categorys::where('name', $name_product)->where('idcompany' , $CompanyActive->id,)->first();
+        }
+
+        $product = null;
+        $check_product      = Product::where('name',$name_product)->count();
+        if($check_product == 0)
+        {
+            // create product
+            $product  = Product::create([
+                'name'          => $name_product,
+                'idcompany'     => $CompanyActive->id,
+                'idcategory'    => $Category->id,
+                'iduser'        => Auth::user()->id,
+            ]);
+        }
+        else
+        {
+            // create product
+            $product  = Product::where('name', $name_product)->where('idcompany' , $CompanyActive->id,)->first();
+        }
+        $BonEntre = null;
+        $check_BonEntre = BonEntre::where('numero_bon','Bon-Solde-Depart')->where('idcompany',$CompanyActive->id)->count();
+        if($check_BonEntre == 0)
+        {
+            // create bon entre
+            $BonEntre  = BonEntre::create([
+                'numero_bon'      => 'Bon-Solde-Depart',
+                'date'            => Carbon::now()->format('Y-m-d'),
+                'numero'          => 'Bon-Solde-Depart-01',
+                'commercial'      => null,
+                'matricule'       => null,
+                'chauffeur'       => null,
+                'cin'             => null,
+                'idcompany'       => $CompanyActive->id,
+                'iduser'          => Auth::user()->id,
+            ]);
+        }
+        else
+        {
+            $BonEntre  = BonEntre::where('numero_bon','Bon-Solde-Depart')->where('idcompany',$CompanyActive->id)->first();
+        }
+        $Stock = null;
+        $check_Stock = Stock::where('idbonentre',$BonEntre->id)->where('idcompany',$CompanyActive->id)->count();
+        if($check_Stock == 0)
+        {
+            // create stock
+            $Stock      = Stock::create([
+                'qte'               => 0,
+                'qte_comapny'       => 0,
+                'qte_notification'  => 0,
+                'price'             => 0,
+                'status'            => 'waiting',
+                'idproduct'         => $product->id,
+                'idcompany'         => $CompanyActive->id,
+                'iduser'            => Auth::user()->id,
+                'idbonentre'        => $BonEntre->id,
+            ]);
+        }
+        else
+        {
+            $Stock      = Stock::where('idbonentre',$BonEntre->id)->where('idcompany',$CompanyActive->id)->first();
+        }
+
+        // create order
+        $Order   = Order::create([
+            'total'     => $request->montant,
+            'idfacture' => null,
+            'idcompany' => $CompanyActive->id,
+            'idclient'  => $request->id,
+            'iduser'    => Auth::user()->id,
+        ]);
+
+        // create line order
+        $LineOrder = Lineorder::create([
+            'qte'       => 0,
+            'price'     => $request->montant,
+            'total'     => $request->montant,
+            'accessoire'=> 0.00,
+            'idsetting' => null,
+            'idstock'   => $Stock->id,
+            'idproduct' => $product->id,
+            'idorder'   => $Order->id,
+        ]);
+
+        // extract id mode paiement credit by company
+        $ModePaiementCredit = DB::table('modepaiement as m')
+        ->join('company as c', 'c.id','=','m.idcompany')
+        ->where('c.status','Active')
+        ->where('m.name','crédit')
+        ->select('m.id')
+        ->groupBy('m.name')
+        ->first();
+
+        // create reglement
+        $Reglement = Reglements::create([
+            'total'         => $request->montant,
+            'datepaiement'  => null,
+            'idclient'      => $request->id,
+            'idorder'       => $Order->id,
+            'idmode'        => $ModePaiementCredit->id,
+            'idcompany'     => $CompanyActive->id,
+            'iduser'        => Auth::user()->id,
+            'status'        => 'SD',
+        ]);
+
+        return response()->json([
+            'status'        => 200,
+        ]);
+
+
+
     }
 
 }

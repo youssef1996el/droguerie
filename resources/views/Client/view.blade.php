@@ -15,7 +15,10 @@
                                 </a>
                             </li>
                             <li class="breadcrumb-item" aria-current="page">
-                                <a href="#" class="badge fw-medium fs-2 bg-success text-white text-uppercase">solde de départ</a>
+                                @if(!$has_Solde)
+                                    <a href="#" class="badge fw-medium fs-2 bg-success text-white text-uppercase" data-bs-toggle="modal" data-bs-target="#Modam_Solde_Depart">solde de départ</a>
+                                @endif
+
                                 <span class="badge fw-medium fs-2 bg-primary-subtle text-primary">
                                     Voir client
                                 </span>
@@ -155,6 +158,38 @@
             <button class="btn btn-success mt-2 float-end" id="SaveRemark">Sauvegarder</button>
         </div>
     </div>
+
+    <div class="modal fade" id="Modam_Solde_Depart" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                <h5 class="modal-title text-uppercase text-center border rounded-2 bg-light w-100 p-2" id="exampleModalLabel">solde de départ</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="add-contact-box">
+                        <div class="add-contact-content">
+                            <ul class="ValidationSolde"></ul>
+                            <div class="row">
+                                <div class="col-12">
+                                    <div class="input-group mb-3">
+                                        <input type="number" id="Montant" name="Montant" class="form-control" placeholder="Montant (obligatoire)" min="1"  required>
+                                        <span class="input-group-text">DH</span>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-success" id="BtnSaveSolde">Sauvegarder</button>
+                    <button type="button" class="btn bg-danger-subtle text-danger" data-bs-dismiss="modal">Close</button>
+
+                </div>
+          </div>
+        </div>
+      </div>
 </div>
 <script>
     $(document).ready(function ()
@@ -195,6 +230,53 @@
                     }
                 }
             });
+        });
+
+        $('#BtnSaveSolde').on('click',function(e)
+        {
+            e.preventDefault();
+            var data =
+            {
+                'id'      : idClient,
+                'montant' : $('#Montant').val(),
+                '_token'     : "{{csrf_token()}}",
+            };
+
+            if($('#Montant').val() == '')
+            {
+                $('.ValidationSolde').html("");
+                $('.ValidationSolde').addClass('alert alert-danger');
+                $('.ValidationSolde').append('<li>Veuillez entrer le montant</li>');
+                setTimeout(function() {
+                    $('.ValidationSolde').fadeOut('slow', function() {
+                        $(this).removeClass('alert alert-danger');
+                        $(this).html("");
+                        $(this).show(); // Reset to show for the next error display
+                    });
+                }, 5000);
+
+            }
+            else
+            {
+                $('.ValidationSolde').html("");
+                $.ajax({
+                    type: "post",
+                    url: "{{url('StoreSolde')}}",
+                    data: data,
+                    dataType: "json",
+                    success: function (response)
+                    {
+                        if(response.status == 200)
+                        {
+                            toastr.success('Solde de départ créer success');
+                            $('#Modam_Solde_Depart').modal("hide");
+                            $('#Montant').val(1);
+                            location.reload();
+                        }
+                    }
+                });
+
+            }
         });
     });
 
