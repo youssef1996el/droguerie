@@ -171,7 +171,7 @@ class ClientController extends Controller
         $CompanyIsActive       = Company::where('status','Active')->select('title')->first();
         $Client                = Client::where('id',$id)->first();
         // order client
-        $orders = Order::select(
+        /* $orders = Order::select(
             'orders.id',DB::raw('orders.total AS totalvente'),
             DB::raw('SUM(reglements.total) AS totalpaye'),DB::raw('(orders.total - SUM(reglements.total)) AS reste'),
             DB::raw('CONCAT(clients.nom, " ", clients.prenom) AS client'),'company.title AS company','users.name AS user','orders.idfacture',
@@ -187,7 +187,35 @@ class ClientController extends Controller
         ->where('company.status','=','Active')
         ->where('orders.idclient','=',$id)
         ->groupBy('orders.id')
-        ->get();
+        ->get(); */
+        $IdCredit = DB::table('modepaiement as m')
+                ->join('company as c','c.id','=','m.idcompany')
+                ->where('c.status','Active')
+                ->where('m.name','crédit')
+                ->select('m.id')
+                ->first();
+        $orders = DB::select('select id, client,  IF(totalvente = 0, "Solde de départ", concat(totalvente," ","DH")) AS totalvente,
+                                IF(totalvente = 0 , (select sum(total) from reglements where idclient = ? and idmode !=?  ) , sum(totalpaye) ) as totalpaye ,
+                                IF(totalvente = 0 , (select sum(total) from reglements where idclient = ? and idmode = ?  ) , totalvente - sum(totalpaye) ) as reste ,
+                                IF(idfacture IS NULL, "Bon", "Facture") AS type ,title,name,created_at
+
+                                from (
+
+                                    select o.id,concat(c.nom ," ",c.prenom) as client,o.total as totalvente,0 as totalpaye, o.idfacture,co.title,u.name, DATE_FORMAT(o.created_at, "%Y-%m-%d") AS created_at
+                                    from clients c,orders o  ,company co ,users u
+
+                                    where c.id = o.idclient and c.idcompany = co.id and c.id = ? and c.iduser = u.id and co.status = "Active"
+                                    group by o.id
+
+                                union all
+
+                                    select r.idorder,concat(c.nom ," ",c.prenom) as client,0 as totalvente ,sum(r.total) as totalpaye , o.idfacture ,co.title,u.name,DATE_FORMAT(o.created_at, "%Y-%m-%d") AS created_at
+                                    from reglements r, orders o  , clients c , company co , users u
+                                    where r.idorder = o.id and c.id = r.idclient and c.idcompany = co.id and c.iduser = u.id and co.status = "Active" and r.idclient = ?
+                                    group by r.idorder) as t group by id;
+                            ',[$id,$IdCredit->id ,$id,$IdCredit->id   ,$id,$id]);
+
+
 
         $has_Solde = false;
         $Solde_Client = Reglements::where('idclient',$id)->count();

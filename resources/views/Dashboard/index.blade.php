@@ -240,7 +240,7 @@
                                 @foreach ($orders as $item)
                                     <tr>
                                         <td>{{$item->client}}</td>
-                                        <td class="text-end">{{$item->totalvente}} DH</td>
+                                        <td class="text-end">{{$item->totalvente == 0 ? "Solde de départ" : $item->totalvente ." DH"}} </td>
                                         <td class="text-end">{{$item->totalpaye}} DH</td>
                                         <td class="text-end">{{$item->reste}} DH</td>
                                         @if($item->idfacture)

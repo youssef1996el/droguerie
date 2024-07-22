@@ -113,7 +113,7 @@
                             <a href="{{ url('ShowOrder', $id) }}">{{$item->client}}</a>
                         </td>
                         <td>
-                            <a href="{{ url('ShowOrder', $id) }}">{{$item->totalvente}} DH</a>
+                            <a href="{{ url('ShowOrder', $id) }}">{{$item->totalvente}} </a>
                         </td>
                         <td>
                             <a href="{{ url('ShowOrder', $id) }}">{{$item->totalpaye}}  DH</a>
@@ -121,7 +121,7 @@
                         <td>
                             <a href="{{ url('ShowOrder', $id) }}">{{$item->reste}}      DH</a>
                         </td>
-                        @if ($item->idfacture)
+                        @if ($item->type == 'Facture')
                             <td>
                                 <a href="{{ url('ShowOrder', $id) }}">
                                     <span class="form-control border border-success bg-success text-white">Facture</span>
@@ -135,13 +135,13 @@
                             </td>
                         @endif
                         <td>
-                            <a href="{{ url('ShowOrder', $id) }}">{{$item->company}}</a>
+                            <a href="{{ url('ShowOrder', $id) }}">{{$item->title}}</a>
                         </td>
                         <td>
-                            <a href="{{ url('ShowOrder', $id) }}">{{$item->user}}</a>
+                            <a href="{{ url('ShowOrder', $id) }}">{{$item->name}}</a>
                         </td>
                         <td style="white-space: nowrap">
-                            <a href="{{ url('ShowOrder', $id) }}">{{$item->created_at_formatted}}</a>
+                            <a href="{{ url('ShowOrder', $id) }}">{{$item->created_at}}</a>
                         </td>
                     </tr>
                     @endforeach

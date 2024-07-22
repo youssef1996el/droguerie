@@ -218,6 +218,7 @@ class HomeController extends Controller
         ->join('users', 'users.id', '=', 'orders.iduser')
         ->leftJoin('factures', 'factures.id', '=', 'orders.idfacture')
         ->where('company.status','=','Active')
+        ->where('reglements.status','=',null)
         ->groupBy('orders.id')
         ->orderBy('orders.id', 'desc')
         ->get();

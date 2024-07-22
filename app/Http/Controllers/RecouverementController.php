@@ -249,7 +249,8 @@ class RecouverementController extends Controller
                         'idmode'          => $item['mode'],
                     ]);
 
-
+                    // extract status reglement if has solde de départ or not
+                    $Status                = Reglements::where('id',$Reglements->id)->value('status');
                     // create new reglement
                     $CreateReglementCredit = Reglements::create([
                         'total'            => $item['reste'] - $item['prix'],
@@ -258,6 +259,7 @@ class RecouverementController extends Controller
                         'idmode'           => $IdCredit->id,
                         'idcompany'        => $Reglements->idcompany,
                         'iduser'           => Auth::user()->id,
+                        'status'           => $Status,
                     ]);
 
                     // create Paiements
