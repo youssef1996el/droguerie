@@ -120,6 +120,11 @@ class PermissionTableSeeder extends Seeder
             'Cheque-voir',
             'Cheque-modifier',
 
+            'Solde',
+            'Solde-ajoute',
+            'Solde-modifier',
+            'Solde-supprimer',
+
 
 
         ];

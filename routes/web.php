@@ -21,6 +21,7 @@ use App\Http\Controllers\InfoController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\ChequeController;
+use App\Http\Controllers\SoldecaisseController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -189,5 +190,13 @@ Route::group(['middleware' => ['web','auth']], function ()
     Route::get('Cheque'              ,[ChequeController::class,'index'                                  ]);
     Route::get('ChangeStatus'        ,[ChequeController::class,'ChangeStatus'                           ]);
     /********************************** End cheque *******************************************************/
+
+    /********************************** Solde Caisse *****************************************************/
+    Route::get('SoldeCaisse'         ,[SoldecaisseController::class,'index'                             ]);
+    Route::get('getSoldeCaisse'      ,[SoldecaisseController::class,'getSoldeCaisse'                    ]);
+    Route::post('StoreSoldeCaisse'   ,[SoldecaisseController::class,'StoreSoldeCaisse'                  ]);
+    Route::post('UpdateSoldeCaisse'  ,[SoldecaisseController::class,'UpdateSoldeCaisse'                 ]);
+    Route::post('TrashSoldeCaisse'  ,[SoldecaisseController::class,'TrashSoldeCaisse'                 ]);
+    /******************************* End Solde Caisse *****************************************************/
 
 });
