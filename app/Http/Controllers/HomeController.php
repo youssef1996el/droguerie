@@ -32,6 +32,11 @@ class HomeController extends Controller
     {
         $NameUser              = Auth::user()->name;
         $CompanyIsActive       = Company::where('status','Active')->select('title')->first();
+        $SoldeCaisseToday      = DB::table('soldecaisse as s')
+        ->join('company as c','c.id','=','s.idcompany')
+        ->where('c.status','Active')
+        ->whereDate('s.created_at', Carbon::today())
+        ->value('s.total');
         // extract how much total today
 
         $totalToday = DB::table('paiements as p')
@@ -44,13 +49,19 @@ class HomeController extends Controller
                     ->where('co.status','=','Active')
                     ->whereDate('c.created_at', Carbon::today())
                     ->sum('total');
-        $totalToday = $totalToday - $Charge;
+        $totalToday = ($totalToday + $SoldeCaisseToday)  - ($Charge);
+
+        $SoldeCaisseAll      = DB::table('soldecaisse as s')
+        ->join('company as c','c.id','=','s.idcompany')
+        ->where('c.status','Active')
+        ->whereDate('s.created_at', Carbon::today())
+        ->value('s.total');
         // extract total start application
         $AllTotal   = DB::table('paiements as p')
                     ->join('company as c','c.id','=','p.idcompany')
                     ->where('c.status','=','Active')
                     ->sum('total');
-        $AllTotal   = $AllTotal - $Charge;
+        $AllTotal   = ($AllTotal + $SoldeCaisseAll )- ($Charge);
 
         // extract count client
         $CountClient = DB::table('clients as c')
