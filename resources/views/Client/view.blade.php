@@ -116,7 +116,7 @@
                             <a href="{{ url('ShowOrder', $id) }}">{{$item->totalvente}} </a>
                         </td>
                         <td>
-                            <a href="{{ url('ShowOrder', $id) }}">{{$item->totalpaye}}  DH</a>
+                            <a href="{{ url('ShowOrder', $id) }}">{{$item->totalpaye == null ? 0.00: $item->totalpaye." DH"}}  </a>
                         </td>
                         <td>
                             <a href="{{ url('ShowOrder', $id) }}">{{$item->reste}}      DH</a>
