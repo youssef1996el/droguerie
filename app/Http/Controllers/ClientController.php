@@ -84,7 +84,7 @@ class ClientController extends Controller
         $validator=validator::make($request->all(),[
             'nom'                     =>'required',
             'prenom'                  =>'required',
-            'phone'                   =>'required',
+            /* 'phone'                   =>'required', */
         ]);
          // Override default error messages
         $customMessages = [
