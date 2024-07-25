@@ -3,7 +3,7 @@ $(document).ready(function ()
     var IdCompanyActive = IdCompanyActiveExtren;
     let originalTotalHt = parseFloat($('#TotalHT').text().replace(' DH', ''));
     let tvaCalcul         = tvaFromDataBase;
-    let originalTotalTTC  = parseFloat($('#TotalTTC').text().replace(' DH', ''));;
+    let originalTotalTTC  = parseFloat($('#TotalTTC').text().replace(' DH', ''));
     $('.select2').select2({
             dropdownParent: $('#AddOrder'), // Ensure it attaches to the modal
             placeholder: "veuillez sélectionner le produit",

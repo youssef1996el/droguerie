@@ -22,6 +22,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\ChequeController;
 use App\Http\Controllers\SoldecaisseController;
+use App\Http\Controllers\AvoirController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -198,5 +199,13 @@ Route::group(['middleware' => ['web','auth']], function ()
     Route::post('UpdateSoldeCaisse'  ,[SoldecaisseController::class,'UpdateSoldeCaisse'                 ]);
     Route::post('TrashSoldeCaisse'  ,[SoldecaisseController::class,'TrashSoldeCaisse'                 ]);
     /******************************* End Solde Caisse *****************************************************/
+
+    /*********************************** Avoir ************************************************************/
+    Route::get('Avoir'                       ,[AvoirController::class,'index'                           ]);
+    Route::get('GetDataTmpAvoirByClient'     ,[AvoirController::class,'GetDataTmpAvoirByClient'         ]);
+    Route::get('GetTotalByClientCompanyaVoir',[AvoirController::class,'GetTotalByClientCompanyaVoir'    ]);
+    Route::get('GetOrderClient'              ,[AvoirController::class,'GetOrderClient'                  ]);
+    Route::get('checkClientHasOrder'         ,[AvoirController::class,'checkClientHasOrder'             ]);
+    /*********************************** End Avoir ********************************************************/
 
 });

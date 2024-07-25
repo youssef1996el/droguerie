@@ -83,6 +83,7 @@ class OrderController extends Controller
         ->join('stock as s', 'p.id', '=', 's.idproduct')
         ->join('company as c', 'p.idcompany', '=', 'c.id')
         ->where('c.status', 'Active')
+        ->where('p.name','!=','Solde de départ')
         ->groupBy('p.id')
         ->select('p.name')
         ->get();
