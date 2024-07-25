@@ -231,6 +231,7 @@ class AvoirController extends Controller
                 ->groupBy('id')
                 ->orderBy('id','desc')
                 ->get();
+
                 return DataTables::of($result)
                 ->addIndexColumn() // This adds the index column to DataTables
                 ->rawColumns([]) // No raw columns to set
@@ -260,5 +261,21 @@ class AvoirController extends Controller
                 'message'  => 'Ce client n\'a pas de vente'
             ]);
         }
+    }
+
+    public function GetProductByOrderClient(Request $request)
+    {
+        $Products = DB::table('lineorder as l')
+            ->leftJoin('setting as s', 'l.idsetting', '=', 's.id')
+            ->join('stock as st', 'l.idstock', '=', 'st.id')
+            ->join('bonentres as b', 'st.idbonentre', '=', 'b.id')
+            ->join('products as p', 'l.idproduct', '=', 'p.id')
+            ->select('l.id', 'b.numero_bon', 'p.name', 'l.qte as qte', 'l.price', 'l.total', 'l.accessoire', 's.convert', DB::raw('(l.qte / s.convert) as qte_convert'), 's.type')
+            ->where('l.idorder', '=', $request->idorder)
+            ->get();
+        return DataTables::of($Products)
+            ->addIndexColumn() // This adds the index column to DataTables
+            ->rawColumns([]) // No raw columns to set
+            ->make(true);
     }
 }

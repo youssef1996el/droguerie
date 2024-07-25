@@ -7,6 +7,7 @@
     var GetDataTmpAvoirByClient             = "{{url('GetDataTmpAvoirByClient')}}";
     var GetTotalByClientCompanyaVoir        = "{{url('GetTotalByClientCompanyaVoir')}}";
     var GetOrderClient                      = "{{url('GetOrderClient')}}";
+    var GetProductByOrderClient             = "{{url('GetProductByOrderClient')}}";
     var IdCompanyActiveExtren               = @Json($CompanyIsActive);
     var ModePaiement                        = @Json($ModePaiement);
     var tvaFromDataBase                     = @Json($tva);
@@ -319,7 +320,7 @@
                             <div class="row">
                                 <div class="col-12 col-xl-5 mb-3">
                                     <div class="card card-body border rounded-2 p-2">
-                                        <h5 class="card-title border p-2 bg-light rounded-2 text-center text-uppercase fst-italic">Tableau du stock</h5>
+                                        <h5 class="card-title border p-2 bg-light rounded-2 text-center text-uppercase fst-italic">Tableau du produit par client</h5>
                                         <div class="table-responsive">
                                             <table class="table table-bordered table-striped TableProductsByOrder">
                                                 <thead>
@@ -328,8 +329,8 @@
                                                         <th>Produit</th>
                                                         <th>Quantité</th>
                                                         <th>Prix</th>
-                                                       {{--  <th>Compagnie</th> --}}
-
+                                                        <th>Accessoire</th>
+                                                        <th>Total</th>
 
                                                     </tr>
                                                 </thead>

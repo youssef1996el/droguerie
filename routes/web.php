@@ -206,6 +206,7 @@ Route::group(['middleware' => ['web','auth']], function ()
     Route::get('GetTotalByClientCompanyaVoir',[AvoirController::class,'GetTotalByClientCompanyaVoir'    ]);
     Route::get('GetOrderClient'              ,[AvoirController::class,'GetOrderClient'                  ]);
     Route::get('checkClientHasOrder'         ,[AvoirController::class,'checkClientHasOrder'             ]);
+    Route::get('GetProductByOrderClient'     ,[AvoirController::class,'GetProductByOrderClient'         ]);
     /*********************************** End Avoir ********************************************************/
 
 });

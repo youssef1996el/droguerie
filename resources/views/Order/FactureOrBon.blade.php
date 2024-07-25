@@ -39,12 +39,12 @@
             <table style="width: 100%">
                 <tr>
                     <th>
-                        <div class="left">
+                        <div class="left;" style="white-space: nowrap;">
                             CLIENT : {{$Client->nom}} {{$Client->prenom}}
                         </div>
                     </th>
                     <th>
-                        <div  class="right" style="float: right">
+                        <div  class="right" style="float: right;">
                             Date : @php echo date('d/m/Y') @endphp
                         </div>
 
@@ -281,13 +281,13 @@
             border: 1px solid rgb(150, 196, 255);
             border-radius: 10px
         }
-        .titleRight
+       /*  .titleRight
         {
             border: 1px solid rgb(150, 196, 255);
             border-radius: 10px;
             width: 80%;
 
-        }
+        } */
         .DivContentInformationClient
         {
             border: 1px solid rgb(150, 196, 255);

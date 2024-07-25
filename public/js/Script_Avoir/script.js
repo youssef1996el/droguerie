@@ -153,8 +153,13 @@ $(document).ready(function () {
                 { data: 'title', name: 'title' },
                 { data: 'user', name: 'user' },
                 { data: 'creer_le', name: 'creer_le' },
+                { data: 'id', name: 'id' },
             ],
             columnDefs: [
+                {
+                    targets: [8], // Targeting the idfacture column
+                    visible: false,
+                },
                 {
                     targets: 2,
                     width: '150px'
@@ -190,14 +195,17 @@ $(document).ready(function () {
                 }
             }
         });
-        $('.TableVenteByClient tbody').on('click', 'tr', function (e)
-        {
-            e.preventDefault();
-            var data = TableVenteByClient.row(this).data();
-            GetProductByOrderByClient(data.id);
-        });
+
         return TableVenteByClient;
     }
+    $('.TableVenteByClient tbody').on('click', 'tr', function (e)
+    {
+        e.preventDefault();
+        var data = $('.TableVenteByClient').DataTable().row(this).data();
+        console.log(data.id);
+        GetProductByOrderByClient(data.id);
+        $('#ModelOrderByClient').modal('hide');
+    });
 
     function GetProductByOrderByClient(idorder)
     {
@@ -208,56 +216,43 @@ $(document).ready(function () {
             autoWidth: false,
             ordering: false,
             ajax: {
-                url: GetOrderClient,
+                url: GetProductByOrderClient,
                 data: function (d) {
-                    d.idclient = idclient;
-                    d.idcompany = idcompany;
+                    d.idorder = idorder;
                 },
             },
             columns: [
-                { data: 'client', name: 'client' },
+                { data: 'numero_bon' , name: 'numero_bon' },
+                { data: 'name'       , name: 'name'       },
+                { data: 'qte_convert', name: 'qte_convert'},
                 {
-                    data: 'montantOrder',
-                    name: 'montantOrder',
+                    data: 'price',
+                    name: 'price',
                     render: function (data, type, row) {
                         return data + ' DH';
                     },
                     className: "dt-right"
                 },
                 {
-                    data: 'totalpaye',
-                    name: 'totalpaye',
+                    data: 'accessoire',
+                    name: 'accessoire',
                     render: function (data, type, row) {
                         return data + ' DH';
                     },
                     className: "dt-right"
                 },
                 {
-                    data: 'reste',
-                    name: 'reste',
+                    data: 'total',
+                    name: 'total',
                     render: function (data, type, row) {
                         return data + ' DH';
                     },
                     className: "dt-right"
                 },
-                {
-                    data: 'idfacture',
-                    name: 'idfacture',
-                    render: function (data, type, row) {
-                        var html = row.idfacture ? '<span class="btn btn-sm btn-success">Facture</span>' : '<span class="btn btn-sm btn-info">Bon</span>';
-                        return html;
-                    },
-                },
-                { data: 'title', name: 'title' },
-                { data: 'user', name: 'user' },
-                { data: 'creer_le', name: 'creer_le' },
+
+
             ],
-            columnDefs: [
-                {
-                    targets: 2,
-                    width: '150px'
-                },
-            ],
+
             language: {
                 "sInfo": "Affichage de l'élément _START_ à _END_ sur _TOTAL_ éléments",
                 "sInfoEmpty": "Affichage de l'élément 0 à 0 sur 0 élément",
@@ -288,5 +283,6 @@ $(document).ready(function () {
                 }
             }
         });
+        return TableProductsByOrder;
     }
 });
