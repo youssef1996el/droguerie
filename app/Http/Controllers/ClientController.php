@@ -404,7 +404,7 @@ class ClientController extends Controller
 
         // create order
         $Order   = Order::create([
-            'total'     => $request->montant,
+            'total'     => /* $request->montant */ 0.00,
             'idfacture' => null,
             'idcompany' => $CompanyActive->id,
             'idclient'  => $request->id,
