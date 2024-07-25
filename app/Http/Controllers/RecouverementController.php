@@ -38,6 +38,7 @@ class RecouverementController extends Controller
                                 ->where('ca.status','=','Active')
                                 ->select(DB::raw('concat(c.nom," ",c.prenom) as client'),'c.id')
                                 ->get();
+
         $ModePaiement          = DB::table("modepaiement as m")
                                /*  ->join('reglements as r','r.idmode','=','m.id') */
                                 ->join('company as ca','ca.id','=','m.idcompany')

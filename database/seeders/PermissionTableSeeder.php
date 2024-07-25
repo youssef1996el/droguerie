@@ -125,6 +125,11 @@ class PermissionTableSeeder extends Seeder
             'Solde-modifier',
             'Solde-supprimer',
 
+            'Change',
+            'Change-ajoute',
+            'Change-modifier',
+            'Change-supprimer',
+
 
 
         ];
