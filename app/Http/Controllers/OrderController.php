@@ -1126,15 +1126,27 @@ class OrderController extends Controller
 
     public function getUniteVenteByProduct(Request $request)
     {
-        $products = DB::table('products as p')
+        /* ->where('p.name','like',"%{$request->name}%") */
+       /*  $products = DB::table('products as p')
             ->join('categorys as c', 'p.idcategory', '=', 'c.id')
             ->join('setting as s', 'c.id', '=', 's.idcategory')
             ->join('company as co','co.id', '=', 's.idcompany')
-            ->where('p.name','like',"%{$request->name}%")
+
+            ->where('p.name','=',$request->name)
             ->where('co.status','=','Active')
             ->select('s.type','s.id')
-            ->groupBy('s.type')
+            ->groupBy('s.id')
+            ->get(); */
+        $products = DB::table('products as p')
+            ->join('categorys as c', 'p.idcategory', '=', 'c.id')
+            ->join('setting as s', 'c.id', '=', 's.idcategory')
+            ->join('company as co', 's.idcompany', '=', 'co.id')
+            ->select('s.id', 's.type')
+            ->where('co.status', 'Active')
+            ->where('s.name_product', $request->name)
+            ->groupBy('s.id')
             ->get();
+
 
         if($products->isNotEmpty())
         {
