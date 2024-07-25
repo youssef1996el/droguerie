@@ -458,14 +458,17 @@ class OrderController extends Controller
 
 
             $Qte_Stock = Stock::where('idproduct',$idproduct)->value('qte');
-
+            $Qte_Stock = floatval(str_replace(',', '.', $Qte_Stock));
             $checkPorductInTableTmp = TmpLineOrder::where(['idclient' => $idclient , 'idproduct' => $idproduct ])->count();
 
             if($checkPorductInTableTmp == 0)
             {
                 $value_array = [];
+                //dd($Setting);
+
                 foreach($Setting as $item)
                 {
+
                     $value_array[$item->id] = round($Qte_Stock / $item->convert ,2);
                 }
                 $TmpLineOrder = TmpLineOrder::where(['idclient' => $idclient , 'idproduct' => $idproduct ])->get();
