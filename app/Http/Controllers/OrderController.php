@@ -917,6 +917,7 @@ class OrderController extends Controller
             ->orderBy('orders.id', 'desc')
             ->get();
 
+
             return DataTables::of($orders)->addIndexColumn()->addColumn('action', function ($row)
             {
 
@@ -960,7 +961,11 @@ class OrderController extends Controller
             ->where('o.id', $id)
             ->select(
                 'p.name',
-                DB::raw("CASE WHEN s.convert IS NOT NULL THEN CONCAT(l.qte / s.convert, ' ', s.type) ELSE l.qte END AS qte"),
+               /*  DB::raw("CASE WHEN s.convert IS NOT NULL THEN CONCAT(l.qte / s.convert, ' ', s.type) ELSE l.qte END AS qte"), */
+               DB::raw("CASE
+            WHEN s.convert IS NOT NULL THEN CONCAT(ROUND(l.qte / s.convert), ' ', s.type)
+            ELSE l.qte
+        END AS qte"),
                 'l.price',
                 'l.total',
                 'l.accessoire',
