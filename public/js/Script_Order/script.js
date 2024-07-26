@@ -811,7 +811,40 @@ $('.TableTmpVente').on('input', 'input.input-box', function () {
     {
         $(this).closest('tr').remove();
     });
+    $(document).on('input','.TableModePaiement .TotalModePaiement',function()
+    {
+        var TotalEntre = [];
+        $('.TableModePaiement .TotalModePaiement').each(function() {
+            var totalThisRow = parseFloat($(this).val()) || 0; // Parse the value as a float, defaulting to 0 if invalid
+            TotalEntre.push(totalThisRow);
+        });
 
+        var sumEntre = TotalEntre.reduce((accumulator, currentValue) => accumulator + currentValue, 0);
+        var TotalHT = parseFloat($('#TotalHT').text()) || 0;
+        var ResteTotalHT = TotalHT - sumEntre;
+        if(ResteTotalHT < 0)
+        {
+            ResteTotalHT = ResteTotalHT.toFixed(2);
+
+
+            $('#Reste_Total_HT').text(0.00 + " DH");
+        }
+        else
+        {
+            ResteTotalHT = ResteTotalHT.toFixed(2);
+
+
+            $('#Reste_Total_HT').text(ResteTotalHT + " DH");
+        }
+
+
+        var TotalTTC = parseFloat($('#TotalTTC').text()) || 0;
+        var ResteTotalTTC = TotalTTC - sumEntre;
+        ResteTotalTTC = ResteTotalTTC.toFixed(2);
+        $('#Reste_Total_TTC').text(ResteTotalTTC + " DH");
+
+
+    });
 
     $('#BtnSaveVente').on('click',function(e)
     {

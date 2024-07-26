@@ -365,12 +365,12 @@
                                         <div class="table-responsive">
                                             <div class="row bg-light p-2">
                                                 <div class="col-sm-12 col-md-12 col-xl-6">
-                                                    <label for="" class="fs-3 text-black">Le reste Total HT :</label>
-                                                    <span id="Reste_Total_HT" class="bg-danger text-black fs-5">0.00</span>
+                                                    <label for="" class="fs-2 text-black">Le reste Total HT :</label>
+                                                    <span id="Reste_Total_HT" class="bg-danger text-black fs-2 border rounded-2 p-2">0.00</span>
                                                 </div>
                                                 <div class="col-sm-12 col-md-12 col-xl-6">
-                                                    <label for="" class="fs-3 text-black">Le reste Total TTC :</label>
-                                                    <span id="Reste_Total_TTC" class="bg-danger text-black fs-5 border rounded-2">0.00</span>
+                                                    <label for="" class="fs-2 text-black">Le reste Total TTC :</label>
+                                                    <span id="Reste_Total_TTC" class="bg-danger text-black fs-2 border rounded-2 p-2">0.00</span>
                                                 </div>
                                             </div>
                                             <table class="table table-bordered table-striped TableModePaiement">
