@@ -152,6 +152,7 @@ class OrderController extends Controller
                 ->join('company as co', 'p.idcompany', '=', 'co.id')
                 ->leftJoin('tmplineorder as t', 't.idproduct', '=', 'p.id')
                 ->where('co.status', 'Active')
+                ->where('s.qte','>',0)
                 ->where('p.name', 'like', "%{$request->product}%");
 
 
