@@ -130,6 +130,11 @@ class PermissionTableSeeder extends Seeder
             'Change-modifier',
             'Change-supprimer',
 
+            'Versement',
+            'Versement-ajoute',
+            'Versement-modifier',
+            'Versement-supprimer',
+
 
 
         ];

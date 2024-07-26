@@ -352,6 +352,7 @@
 
 
 
+
                 <div class="sidebar-divider lg"></div>
             </li>
 
@@ -448,26 +449,48 @@
             @endcan
 
 
-            @can('charge')
+
                 <li class="sortable-group" data-id="group9">
                     <div class="nav-small-cap">
                         <iconify-icon icon="solar:menu-dots-linear" class="mini-icon"></iconify-icon>
                         <span class="hide-menu">dépenses</span>
                     </div>
-                    <div class="sidebar-item">
-                        <a class="sidebar-link {{Request::is('Charge') ? 'active' : ''}}" href="{{url('Charge')}}">
-                            <svg style="color: rgb(192, 188, 188)" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-shield-dollar">
-                                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                                <path d="M13.018 20.687c-.333 .119 -.673 .223 -1.018 .313a12 12 0 0 1 -8.5 -15a12 12 0 0 0 8.5 -3a12 12 0 0 0 8.5 3c.433 1.472 .575 2.998 .436 4.495" />
-                                <path d="M21 15h-2.5a1.5 1.5 0 0 0 0 3h1a1.5 1.5 0 0 1 0 3h-2.5" />
-                                <path d="M19 21v1m0 -8v1" />
-                            </svg>
-                            <span class="hide-menu">Charge</span>
-                        </a>
-                    </div>
+                    @can('charge')
+                        <div class="sidebar-item">
+                            <a class="sidebar-link {{Request::is('Charge') ? 'active' : ''}}" href="{{url('Charge')}}">
+                                <svg style="color: rgb(192, 188, 188)" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-shield-dollar">
+                                    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                                    <path d="M13.018 20.687c-.333 .119 -.673 .223 -1.018 .313a12 12 0 0 1 -8.5 -15a12 12 0 0 0 8.5 -3a12 12 0 0 0 8.5 3c.433 1.472 .575 2.998 .436 4.495" />
+                                    <path d="M21 15h-2.5a1.5 1.5 0 0 0 0 3h1a1.5 1.5 0 0 1 0 3h-2.5" />
+                                    <path d="M19 21v1m0 -8v1" />
+                                </svg>
+                                <span class="hide-menu">Charge</span>
+                            </a>
+                        </div>
+                    @endcan
+                    @can('Versement')
+                        <div class="sidebar-item">
+                            <a class="sidebar-link {{Request::is('versement') ? 'active' : ''}} " href="{{url('versement')}}" aria-expanded="false">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-building-bank">
+                                    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                                    <path d="M3 21l18 0" />
+                                    <path d="M3 10l18 0" />
+                                    <path d="M5 6l7 -3l7 3" />
+                                    <path d="M4 10l0 11" />
+                                    <path d="M20 10l0 11" />
+                                    <path d="M8 14l0 3" />
+                                    <path d="M12 14l0 3" />
+                                    <path d="M16 14l0 3" />
+                                </svg>
+                                <span class="hide-menu">Versement</span>
+                            </a>
+                        </div>
+                    @endcan
+
+
                     <div class="sidebar-divider lg"></div>
                 </li>
-            @endcan
+
 
 
             <li class="sortable-group" data-id="group10">
