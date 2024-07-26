@@ -36,7 +36,7 @@
         <div class="card card-body">
             <div class="row">
                 <div class="col-md-4 col-xl-3">
-                    @can('Change-ajoute')
+                    @can('change-ajoute')
                         <a href="#"  class="btn btn-primary d-flex align-items-center" data-bs-toggle="modal" data-bs-target="#ModelCharge">
                             <i class="ti ti-category text-white me-1 fs-5"></i> Ajouter le charge
                         </a>

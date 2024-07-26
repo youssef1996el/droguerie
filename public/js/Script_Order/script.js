@@ -584,6 +584,8 @@ $(document).ready(function ()
                 originalTotalHt = parseFloat($('#TotalHT').text().replace(' DH', ''));
                 tvaCalcul       = tvaFromDataBase;
                 originalTotalTTC = parseFloat($('#TotalTTC').text().replace(' DH', ''));
+                $('#Reste_Total_HT').text(data.sumTotal + ' DH');
+                $('#Reste_Total_TTC').text(data.TotalTTC.toFixed(2) + ' DH');
 
             },
             "json"
