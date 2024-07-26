@@ -896,7 +896,7 @@ class OrderController extends Controller
     {
         if($request->ajax())
         {
-            $orders = Order::select(
+           /*  $orders = Order::select(
                 'orders.id',
                 DB::raw('orders.total  AS totalvente'),
                 DB::raw('SUM(reglements.total) AS totalpaye'),
@@ -918,7 +918,62 @@ class OrderController extends Controller
             ->where('reglements.status','=',null)
             ->groupBy('orders.id')
             ->orderBy('orders.id', 'desc')
-            ->get();
+            ->get(); */
+            $subQuery1 = DB::table('orders as o')
+            ->select([
+                'o.id',
+                'o.total as totalvente',
+                DB::raw('0 as totalpaye'),
+                DB::raw('concat(c.nom, " ", c.prenom) as client'),
+                'u.name as user', // alias user
+                'co.title as company',
+                'o.idfacture',
+                DB::raw('DATE_FORMAT(o.created_at, "%Y-%m-%d") as created_at_formatted')
+            ])
+            ->join('clients as c', 'o.idclient', '=', 'c.id')
+            ->join('users as u', 'o.iduser', '=', 'u.id')
+            ->join('company as co', 'o.idcompany', '=', 'co.id')
+            ->where('co.status', 'Active')
+            ->where('o.total', '>', 0)
+            ->groupBy('o.id');
+
+            $subQuery2 = DB::table('orders as o')
+    ->select([
+        'o.id',
+        DB::raw('0 as totalvente'),
+        DB::raw('sum(p.total) as totalpaye'),
+        DB::raw('concat(c.nom, " ", c.prenom) as client'),
+        'u.name as user', // alias user
+        'co.title as company',
+        'o.idfacture',
+        DB::raw('DATE_FORMAT(o.created_at, "%Y-%m-%d") as created_at_formatted')
+    ])
+    ->join('clients as c', 'o.idclient', '=', 'c.id')
+    ->join('users as u', 'o.iduser', '=', 'u.id')
+    ->join('company as co', 'o.idcompany', '=', 'co.id')
+    ->join('reglements as r', 'o.id', '=', 'r.idorder')
+    ->join('paiements as p', 'r.id', '=', 'p.idreglement')
+    ->where('co.status', 'Active')
+    ->where('o.total', '>', 0)
+    ->groupBy('r.idorder');
+
+            $orders = DB::table(DB::raw("({$subQuery1->toSql()} UNION ALL {$subQuery2->toSql()}) as t"))
+            ->mergeBindings($subQuery1)
+            ->mergeBindings($subQuery2)
+            ->select([
+                'id',
+                DB::raw('sum(totalvente) as totalvente'),
+                DB::raw('sum(totalpaye) as totalpaye'),
+                DB::raw('sum(totalvente - totalpaye) as reste'),
+                'client',
+                'user', // matching alias
+                'company',
+                'idfacture',
+                'created_at_formatted'
+            ])
+                ->groupBy('id')
+                ->orderBy('id', 'desc')
+                ->get();
 
 
             return DataTables::of($orders)->addIndexColumn()->addColumn('action', function ($row)
