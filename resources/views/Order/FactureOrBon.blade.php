@@ -38,15 +38,17 @@
 
             <table style="width: 100%">
                 <tr>
-                    <th>
-                        <div class="left;" style="white-space: nowrap;">
-                            CLIENT : {{$Client->nom}} {{$Client->prenom}}
-                        </div>
+                    <th class="left;" style="white-space: nowrap;text-transform: uppercase;text-align: left">
+                        CLIENT : {{$Client->nom}} {{$Client->prenom}}
+
                     </th>
-                    <th>
-                        <div  class="right" style="float: right;">
+                    <th  class="right" style="float: right; text-align: right">
+                        {{-- Date : @php echo date('d/m/Y') @endphp --}}
+                        Date : {{ \Carbon\Carbon::parse($order->created_at)->format('d/m/Y') }}
+
+                        {{-- <div  class="right" style="float: right;">
                             Date : @php echo date('d/m/Y') @endphp
-                        </div>
+                        </div> --}}
 
                     </th>
                 </tr>
@@ -95,6 +97,10 @@
                 <td class="text-end"><strong>Total HT:</strong></td>
                 <td style="text-align: right">{{number_format($SumTotalHT ,2,","," ")}} DH</td>
             </tr>
+            @if($Credit)
+                <td class="text-end"><strong>Crédit Restant:</strong></td>
+                <td style="text-align: right">{{number_format($Credit ,2,","," ")}} DH</td>
+            @endif
             @if ($typeOrder)
                 @php
                     $taxRate                    = floatval(rtrim($Tva->name, '%')) / 100;

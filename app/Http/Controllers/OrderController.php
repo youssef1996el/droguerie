@@ -919,6 +919,7 @@ class OrderController extends Controller
             ->groupBy('orders.id')
             ->orderBy('orders.id', 'desc')
             ->get(); */
+
             $subQuery1 = DB::table('orders as o')
             ->select([
                 'o.id',
@@ -1009,6 +1010,19 @@ class OrderController extends Controller
         // extract client from order
         $IdClient = Order::where('id',$id)->select('idclient')->first();
         $Client   = Client::where('id',$IdClient->idclient)->first();
+
+        // extract id mode credit by company and extract credit this order
+        $IdCredit = DB::table('modepaiement as m')
+        ->join('company as c','c.id','=','m.idcompany')
+        ->where('c.status','=','Active')
+        ->where('m.name','=','crédit')
+        ->value('m.id');
+        // now extract credit
+        $Credit = DB::table('reglements as r')
+        ->where('idorder','=',$id)
+        ->where('idmode','=',$IdCredit)
+        ->value('total');
+
         // extract line order from id order
 
 
@@ -1051,7 +1065,7 @@ class OrderController extends Controller
 
         $Info = DB::table('infos as f')->join('company as c','c.id','=','f.idcompany')->where('c.status','=','Active')->select('f.*')->first();
         // Load view file into DOMPDF
-        $pdf            = PDF::loadView('Order.FactureOrBon',compact('Client','DataLine','order','typeOrder','Info','Tva','formattedId'))
+        $pdf            = PDF::loadView('Order.FactureOrBon',compact('Client','DataLine','order','typeOrder','Info','Tva','formattedId','Credit'))
         ->setOptions(['defaultFnt' => 'san-serif'])->setPaper('a4');
         if(!is_null($order->idfacture))
         {
