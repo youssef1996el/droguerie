@@ -40,16 +40,9 @@
                 <tr>
                     <th class="left;" style="white-space: nowrap;text-transform: uppercase;text-align: left">
                         CLIENT : {{$Client->nom}} {{$Client->prenom}}
-
                     </th>
                     <th  class="right" style="float: right; text-align: right">
-                        {{-- Date : @php echo date('d/m/Y') @endphp --}}
                         Date : {{ \Carbon\Carbon::parse($order->created_at)->format('d/m/Y') }}
-
-                        {{-- <div  class="right" style="float: right;">
-                            Date : @php echo date('d/m/Y') @endphp
-                        </div> --}}
-
                     </th>
                 </tr>
             </table>

@@ -285,7 +285,7 @@
                                             </div>
                                         </div>
                                         <div class="col-sm-12 col-md-12 col-xl-4">
-                                            <div class="mb-3 border bg-light p-2 d-flex justify-content-between align-items-center shadow rounded-1">
+                                            <div class="mb-3 border bg-danger-subtle text-dark p-2 d-flex justify-content-between align-items-center shadow rounded-1">
                                                 <span>Total crédit:</span>
                                                 <span class="text-end flex-grow-1"  id="TotalCredit">0.00 DH</span>
                                             </div>
