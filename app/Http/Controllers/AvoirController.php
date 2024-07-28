@@ -20,6 +20,8 @@ use App\Models\Reglements;
 use App\Models\Facture;
 use App\Models\Cheques;
 use App\Models\User;
+use App\Models\Tmplineavoir;
+
 use DB;
 use DataTables;
 use Illuminate\Support\Facades\Crypt;
@@ -68,9 +70,14 @@ class AvoirController extends Controller
 
         $Clients = DB::table('clients as cl')
                     ->join('company as c','c.id',"=","cl.idcompany")
+                    ->join('orders as o','o.idclient','=','cl.id')
                     ->where('cl.idcompany',$CompanyIsActive->id)
-                    ->select("cl.nom","cl.prenom","cl.cin","cl.adresse","cl.ville","cl.phone","cl.plafonnier","c.title","cl.id")
+                    ->where('o.total','>',0)
+                    ->select(DB::raw('concat(cl.nom," ",cl.prenom) as client'),"cl.cin","cl.adresse","cl.ville","cl.phone","cl.plafonnier","c.title","cl.id")
+                    ->groupBy('cl.id')
+                    ->orderBy('cl.nom','asc')
                     ->get();
+
 
 
         $Product = DB::table('products as p')
@@ -184,55 +191,69 @@ class AvoirController extends Controller
             $idclient = $request->idclient;
 
             // Subquery 1
-            $subQuery1 = DB::table('orders as o')
-                ->join('clients as c', 'o.idclient', '=', 'c.id')
-                ->join('company as co', 'o.idcompany', '=', 'co.id')
-                ->join('users as u', 'o.iduser', '=', 'u.id')
-                ->where('o.idclient', $idclient)
+            $orders = DB::table('orders as o')
                 ->select(
                     'o.id',
+                    DB::raw('o.total as totalvente'),
+                    DB::raw('0 as totalpaye'),
                     DB::raw('CONCAT(c.nom, " ", c.prenom) as client'),
+                    'u.name as user', // Alias u.name as user
                     'co.title',
-                    'u.name as user',
-                    DB::raw('DATE(o.created_at) as creer_le'),
-                    DB::raw('IF(o.total = 0, CAST((SELECT SUM(total) FROM reglements WHERE idclient = ' . $idclient . ' AND status = "SD") AS CHAR), o.total) as montantOrder'),
-                    DB::raw('0 as totalpaye'),'o.idfacture'
-                );
-
-            // Subquery 2
-            $subQuery2 = DB::table('orders as o')
-                ->join('reglements as r', 'o.id', '=', 'r.idorder')
-                ->join('clients as c', 'o.idclient', '=', 'c.id')
-                ->join('company as co', 'o.idcompany', '=', 'co.id')
-                ->join('users as u', 'o.iduser', '=', 'u.id')
-                ->whereNotIn('r.idmode', explode(',', $IdsCredit))
-                ->where('r.idclient', $idclient)
-                ->select(
-                    'r.idorder as id',
-                    DB::raw('CONCAT(c.nom, " ", c.prenom) as client'),
-                    'co.title',
-                    'u.name as user',
-                    DB::raw('DATE(o.created_at) as creer_le'),
-                    DB::raw('0 as montantOrder'),
-                    DB::raw('SUM(r.total) as totalpaye'),'o.idfacture'
+                    'o.idfacture',
+                    DB::raw('DATE_FORMAT(o.created_at, "%Y-%m-%d") as created_at_formatted')
                 )
+                ->join('clients as c', 'o.idclient', '=', 'c.id')
+                ->join('users as u', 'o.iduser', '=', 'u.id')
+                ->join('company as co', 'o.idcompany', '=', 'co.id')
+                ->where('co.status', 'Active')
+                ->where('o.total', '>', 0)
+                ->where('o.idclient', $idclient)
+                ->groupBy('o.id');
+
+            // Second query (payments with totalpaye)
+            $payments = DB::table('orders as o')
+                ->select(
+                    'o.id',
+                    DB::raw('0 as totalvente'),
+                    DB::raw('SUM(p.total) as totalpaye'),
+                    DB::raw('CONCAT(c.nom, " ", c.prenom) as client'),
+                    'u.name as user', // Alias u.name as user
+                    'co.title',
+                    'o.idfacture',
+                    DB::raw('DATE_FORMAT(o.created_at, "%Y-%m-%d") as created_at_formatted')
+                )
+                ->join('clients as c', 'o.idclient', '=', 'c.id')
+                ->join('users as u', 'o.iduser', '=', 'u.id')
+                ->join('company as co', 'o.idcompany', '=', 'co.id')
+                ->join('reglements as r', 'o.id', '=', 'r.idorder')
+                ->join('paiements as p', 'r.id', '=', 'p.idreglement')
+                ->where('co.status', 'Active')
+                ->where('o.total', '>', 0)
+                ->where('o.idclient', $idclient)
                 ->groupBy('r.idorder');
 
-            // Combine subqueries
-            $combinedQuery = $subQuery1->unionAll($subQuery2);
+            // Combine both queries using unionAll
+            $combined = $orders->unionAll($payments);
 
-            // Final query
-            $result = DB::table(DB::raw("({$combinedQuery->toSql()}) as t"))
-                ->mergeBindings($combinedQuery)
+            // Wrap the unioned query in a subquery and perform the final grouping
+            $results = DB::table(DB::raw("({$combined->toSql()}) as t"))
+                ->mergeBindings($combined) // Merge bindings to avoid SQL injection
                 ->select(
-                    'id','client','title','user','creer_le',DB::raw('SUM(montantOrder) as montantOrder'),DB::raw('SUM(totalpaye) as totalpaye'),
-                    DB::raw('SUM(montantOrder - totalPaye) as reste'),'idfacture'
+                    'id',
+                    DB::raw('SUM(totalvente) as totalvente'),
+                    DB::raw('SUM(totalpaye) as totalpaye'),
+                    DB::raw('SUM(totalvente - totalpaye) as reste'),
+                    'client',
+                    'user', // Select user
+                    'title',
+                    'idfacture',
+                    'created_at_formatted'
                 )
                 ->groupBy('id')
-                ->orderBy('id','desc')
+                ->orderBy('id', 'desc')
                 ->get();
 
-                return DataTables::of($result)
+                return DataTables::of($results)
                 ->addIndexColumn() // This adds the index column to DataTables
                 ->rawColumns([]) // No raw columns to set
                 ->make(true);
@@ -265,17 +286,179 @@ class AvoirController extends Controller
 
     public function GetProductByOrderClient(Request $request)
     {
-        $Products = DB::table('lineorder as l')
-            ->leftJoin('setting as s', 'l.idsetting', '=', 's.id')
-            ->join('stock as st', 'l.idstock', '=', 'st.id')
-            ->join('bonentres as b', 'st.idbonentre', '=', 'b.id')
-            ->join('products as p', 'l.idproduct', '=', 'p.id')
-            ->select('l.id', 'b.numero_bon', 'p.name', 'l.qte as qte', 'l.price', 'l.total', 'l.accessoire', 's.convert', DB::raw('(l.qte / s.convert) as qte_convert'), 's.type')
-            ->where('l.idorder', '=', $request->idorder)
-            ->get();
+
+        $Products = DB::select('SELECT o.idcompany as idcompany,o.idclient,l.id as idline,b.numero_bon,IF(idsetting is not null, round(l.qte / s.convert),l.qte )  as qte_convert,l.price,(l.total + l.accessoire) as total,l.accessoire, p.name,p.id as idproduct,s.type,s.convert,l.idsetting,st.id as idstock,IF(idsetting is not null, round(l.qte / s.convert),l.qte )  as qte,o.id as idorder
+            FROM lineorder l
+            LEFT JOIN setting s ON l.idsetting = s.id  -- Add this LEFT JOIN
+            JOIN stock st ON l.idstock = st.id
+            JOIN bonentres b ON st.idbonentre = b.id
+            JOIN products p ON l.idproduct = p.id
+            JOIN orders o ON l.idorder = o.id
+
+            WHERE l.idorder = ?
+            GROUP BY l.id',[$request->idorder]);
+
         return DataTables::of($Products)
             ->addIndexColumn() // This adds the index column to DataTables
             ->rawColumns([]) // No raw columns to set
             ->make(true);
+    }
+
+    public function StoreTmpAvoir(Request $request)
+    {
+
+        $check_product_has_table_tmp = DB::table('tmpavoir')
+        ->where('idproduct' ,$request->idproduct)
+        ->where('idclient'  ,$request->idclient)
+        ->where('idsetting' ,$request->idsetting)
+        ->where('idstock'   ,$request->idstock)
+        ->count();
+        if($check_product_has_table_tmp !=0)
+        {
+            return response()->json([
+                'status'   => 422,
+                'message'  => 'Le produit est déjà dans le tableau',
+            ]);
+        }
+        else
+        {
+            $data            = $request->all();
+            $data['iduser']  = Auth::user()->id;
+
+            $TmpLineOrder = Tmplineavoir::create($data);
+            if($TmpLineOrder)
+            {
+                return response()->json([
+                    'status'        => 200,
+                    'message'       => 'Le Produit créer avec succès',
+                    'Data'          => $TmpLineOrder,
+                ]);
+            }
+            else
+            {
+                return response()->json([
+                    'status'        => 400,
+                    'message'       => 'Veuillez contacter le support'
+                ]);
+            }
+        }
+
+    }
+
+    public function DisplayProductsTableTmpAvoir(Request $request)
+    {
+        if($request->ajax())
+        {
+            $data = DB::table('products as p')
+                ->join('stock as s', 's.idproduct', '=', 'p.id')
+                ->join('tmpavoir as t', 't.idproduct', '=', 'p.id')
+                ->leftjoin('setting as se','se.id','=','t.idsetting')
+                ->where('t.idcompany', $request->idcompany)
+                ->where('t.idclient' , $request->idclient)
+                ->where('t.iduser'   , Auth::user()->id)
+                ->select('t.id', 't.qte','t.price',DB::raw('t.total + t.accessoire as total'), 'p.name', 'se.type','t.accessoire','se.convert','t.idorder','t.idproduct')
+                ->groupBy('t.id')
+                ->orderBy('t.id','desc')
+                ->get();
+            return DataTables::of($data)->addIndexColumn()->addColumn('action', function ($row)
+            {
+                $encryptedId = Crypt::encrypt($row->id);
+
+                $btn =  '<div class="action-btn d-flex">
+                            <a href="#" class="text-light trash ms-2"  value="' . $row->id . '">
+                                <i class="ti ti-trash-x fs-5 border rounded-2 bg-danger p-1" title="Supprimer le produit du panier"></i>
+                            </a>
+                        </div>';
+                return $btn;
+            })->rawColumns(['action'])->make(true);
+        }
+    }
+
+    public function CheckQteChangeNotSuperQteOrderAndUpdateQte(Request $request)
+    {
+
+        $convert        = $request->convert;
+        $Qte_Order      = $request->qte;
+        $Qte_Enter      = $request->newValue;
+        $IdProduct      = $request->idproduct;
+        // extract qte vendus par product
+        $Qte_LineOrder = DB::table('orders as o')
+        ->join('lineorder as l', 'l.idorder', '=', 'o.id')
+        ->leftJoin('setting as s', 's.id', '=', 'l.idsetting')
+        ->where('o.id', $request->idorder)
+        ->where('l.idproduct', $request->idproduct)
+        ->where('l.price', $request->price)
+        ->value(DB::raw('IF(l.idsetting IS NOT NULL, round(l.qte / s.convert), l.qte) as Qte_LineOrder'));
+
+
+
+        if($Qte_Enter > $Qte_LineOrder)
+        {
+            return response()->json([
+                'status'        => 422,
+                'message'       => 'La quantité vendue est supérieure à la quantité disponible à l\'échange',
+            ]);
+        }
+        else
+        {
+            if(!is_null($convert))
+            {
+                // convert QTE VENDUE to KG
+                $Qte_Vendue_KG = $convert * $request->qte;
+
+                // Convert QTE Changé to KG
+                $QTE_Change    = $convert * $Qte_Enter;
+
+                // update tmpAvoir
+                $UpdateTmpAvoir = Tmplineavoir::where('id',$request->id)
+                ->update([
+                    'qte'         => $Qte_Enter,
+                    'total'       => $Qte_Enter * $request->price,
+                ]);
+
+                return response()->json([
+                    'status'        => 200,
+                ]);
+
+                // extract id ligneorder
+
+
+
+                // update linetmpavoir qte with Qte_enter  and get total tmp this achange
+                // 1 - update lineorder product qte with qte change where idorder and idproduct
+                // 2 - update total order
+                // 3 - update total reglement
+                // 4 - update total paiement if not credit
+
+            }
+            else
+            {
+
+            }
+        }
+
+    }
+
+    public function TotalTmpAvoir(Request $request)
+    {
+        $Total_HT  = DB::table('tmpavoir')
+        ->where('idclient', $request->idclient)
+        ->sum('total');
+
+        $TVA  = DB::table('tva as t')
+            ->join('company as c', 'c.id', '=', 't.idcompany')
+            ->where('c.status', 'Active')
+            ->value(DB::raw('CAST(REGEXP_REPLACE(name, "[^0-9]", "") AS UNSIGNED)'));
+
+        $Total_TTC = $Total_HT + ($Total_HT * $TVA / 100);
+        $Total_TVA = $Total_HT * $TVA;
+
+        return response()->json([
+            'status'   => 200,
+            'Total_HT' => floatval($Total_HT),
+            'TVA'      => floatval($Total_TVA),
+            'Total_TTC'=> floatval($Total_TTC),
+        ]);
+
     }
 }

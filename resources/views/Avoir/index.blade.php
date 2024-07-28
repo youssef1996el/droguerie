@@ -8,9 +8,15 @@
     var GetTotalByClientCompanyaVoir        = "{{url('GetTotalByClientCompanyaVoir')}}";
     var GetOrderClient                      = "{{url('GetOrderClient')}}";
     var GetProductByOrderClient             = "{{url('GetProductByOrderClient')}}";
+    var StoreTmpAvoir                       = "{{url('StoreTmpAvoir')}}";
+    var DisplayProductsTableTmpAvoir        = "{{url('DisplayProductsTableTmpAvoir')}}";
+    var CheckQteChangeNotSuperQteOrderAndUpdateQte  = "{{url('CheckQteChangeNotSuperQteOrderAndUpdateQte')}}";
+    var TotalTmpAvoir                       = "{{url('TotalTmpAvoir')}}";
     var IdCompanyActiveExtren               = @Json($CompanyIsActive);
     var ModePaiement                        = @Json($ModePaiement);
     var tvaFromDataBase                     = @Json($tva);
+    var Clients                             = @Json($Clients);
+    var csrf_token                          = "{{csrf_token()}}";
 </script>
 <style>
     @keyframes slideDown
@@ -174,6 +180,12 @@
         white-space: nowrap;
         cursor: pointer;
     }
+    .TableProductsByOrder
+    {
+        font-size: 12px;
+        white-space: nowrap;
+        cursor: pointer;
+    }
 
 </style>
 <div class="container-fluid">
@@ -320,7 +332,7 @@
                             <div class="row">
                                 <div class="col-12 col-xl-5 mb-3">
                                     <div class="card card-body border rounded-2 p-2">
-                                        <h5 class="card-title border p-2 bg-light rounded-2 text-center text-uppercase fst-italic">Tableau du produit par client</h5>
+                                        <h5 class="card-title border p-2 bg-light rounded-2 text-center text-uppercase fst-italic">Tableau du produit par vente</h5>
                                         <div class="table-responsive">
                                             <table class="table table-bordered table-striped TableProductsByOrder">
                                                 <thead>
@@ -384,7 +396,7 @@
                                     <div class="card card-body border rounded-2 p-2">
                                         <h5 class="card-title border p-2 bg-light rounded-2 text-center text-uppercase fst-italic">Tableau panier par client</h5>
                                         <div class="table-responsive">
-                                            <table class="table table-bordered table-striped TableTmpVente">
+                                            <table class="table table-bordered table-striped TableTmpAvoir">
                                                 <thead>
                                                     <tr>
                                                         <th>Produit</th>

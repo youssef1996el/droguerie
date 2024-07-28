@@ -46,7 +46,7 @@ class EtatController extends Controller
         ->join('paiements', 'reglements.id', '=', 'paiements.idreglement')
         ->whereNotNull('reglements.datepaiement')
         ->where('company.status','=','Active')
-        ->whereDate('reglements.created_at', $today)
+        ->whereDate('reglements.datepaiement', $today)
         ->where('modepaiement.name', 'espèce')
         ->first();
 
@@ -151,7 +151,7 @@ class EtatController extends Controller
                     ->join('company' ,'company.id', '=','reglements.idcompany')
                     ->whereNotNull('reglements.datepaiement')
                     ->where('company.status','=','Active')
-                    ->whereBetween(DB::raw('DATE(reglements.created_at)'), [$dateDebut, $datefin])
+                    ->whereBetween(DB::raw('DATE(reglements.datepaiement)'), [$dateDebut, $datefin])
                     ->where('modepaiement.name', 'espèce')
                     ->first();
         $totalReglementCheque = DB::table('reglements')

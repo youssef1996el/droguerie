@@ -13,6 +13,6 @@ class Tmplineavoir extends Model
     protected $fillable =
     [
 
-        'qte', 'price', 'total', 'idproduct', 'idclient', 'iduser','idcompany','idsetting','idstock','accessoire'
+        'qte', 'price', 'total', 'idproduct', 'idclient', 'iduser','idcompany','idsetting','idstock','accessoire','idorder'
     ];
 }

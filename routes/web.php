@@ -208,13 +208,20 @@ Route::group(['middleware' => ['web','auth']], function ()
     Route::get('GetOrderClient'              ,[AvoirController::class,'GetOrderClient'                  ]);
     Route::get('checkClientHasOrder'         ,[AvoirController::class,'checkClientHasOrder'             ]);
     Route::get('GetProductByOrderClient'     ,[AvoirController::class,'GetProductByOrderClient'         ]);
+    Route::post('StoreTmpAvoir'              ,[AvoirController::class,'StoreTmpAvoir'                   ]);
+    Route::get('DisplayProductsTableTmpAvoir',[AvoirController::class,'DisplayProductsTableTmpAvoir'    ]);
+    Route::get('CheckQteChangeNotSuperQteOrderAndUpdateQte',[AvoirController::class,'CheckQteChangeNotSuperQteOrderAndUpdateQte']);
+    Route::get('TotalTmpAvoir'               ,[AvoirController::class,'TotalTmpAvoir'                   ]);
     /*********************************** End Avoir ********************************************************/
 
-     /***********************************  versement ********************************************************/
+    /***********************************  versement ********************************************************/
      Route::get('versement'                  ,[VersementController::class,'index'                       ]);
      Route::post('StoreVersement'            ,[VersementController::class,'StoreVersement'              ]);
      Route::post('updateVersement'           ,[VersementController::class,'updateVersement'             ]);
-     Route::post('TrashVersement'           ,[VersementController::class,'TrashVersement'             ]);
-     /*********************************** End versement *******************************************************/
+     Route::post('TrashVersement'           ,[VersementController::class,'TrashVersement'               ]);
+    /*********************************** End versement *****************************************************/
+
+
+
 
 });
