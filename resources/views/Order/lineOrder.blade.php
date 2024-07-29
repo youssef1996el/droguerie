@@ -121,7 +121,7 @@
                             <td>{{$item->name}}</td>
 
                             <td>{{$item->qte}}</td>
-                            @if ($item->accessoire !=0)
+                            @if ($item->accessoire <0)
                                 @php
                                     $AccessoireParUnit = abs($item->accessoire / $item->qtedevision);
                                     $Price             = $item->price - $AccessoireParUnit;
