@@ -114,14 +114,25 @@
 
                             $totalHT += $item->total + $item->accessoire ;
                             $TotalAccessoire = $item->accessoire;
-
+                            $AccessoireParUnit   = 0;
+                            $Price               = 0;
                         @endphp
                         <tr>
                             <td>{{$item->name}}</td>
 
                             <td>{{$item->qte}}</td>
+                            @if ($item->accessoire !=0)
+                                @php
+                                    $AccessoireParUnit = abs($item->accessoire / $item->qtedevision);
+                                    $Price             = $item->price - $AccessoireParUnit;
 
+                                @endphp
+                                <td>{{number_format($Price,2,","," ")}}</td>
+                            @else
                             <td>{{number_format($item->price + $item->accessoire,2,","," ")}}</td>
+
+                            @endif
+
 
 
                             <td>{{number_format($item->total + $item->accessoire ,2,","," ")}}</td>

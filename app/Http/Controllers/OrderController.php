@@ -30,6 +30,8 @@ use App\Notifications\StockNotification;
 use App\Notifications\ChequeNotification;
 use Illuminate\Support\Facades\Notification;
 use Carbon\Carbon;
+use Mpdf\Mpdf;
+use ArPHP\I18N\Arabic;
 class OrderController extends Controller
 {
     public function index()
@@ -1041,6 +1043,7 @@ class OrderController extends Controller
         END AS qte"),
                 'l.price',
                 'l.total',
+                DB::raw("CASE WHEN s.convert IS NOT NULL THEN ROUND(l.qte / s.convert) ELSE l.qte END AS qtedevision"),
                 'l.accessoire',
                 's.type'
             )
@@ -1064,10 +1067,16 @@ class OrderController extends Controller
         ->select('t.name')
         ->first();
 
+
+        /* $imagePath = public_path('images_login/Add_a_heading-removebg-preview (3).png'); // Adjust the path as needed
+        $imageData = base64_encode(file_get_contents($imagePath)); */
         $Info = DB::table('infos as f')->join('company as c','c.id','=','f.idcompany')->where('c.status','=','Active')->select('f.*')->first();
         // Load view file into DOMPDF
         $pdf            = PDF::loadView('Order.FactureOrBon',compact('Client','DataLine','order','typeOrder','Info','Tva','formattedId','Credit'))
-        ->setOptions(['defaultFnt' => 'san-serif'])->setPaper('a4');
+        ->setOptions([
+            'defaultFnt' => 'Amiri'
+
+            ])->setPaper('a4');
         if(!is_null($order->idfacture))
         {
             return $pdf->download('Facture.pdf');
@@ -1076,6 +1085,8 @@ class OrderController extends Controller
         {
             return $pdf->download('Bon.pdf');
         }
+
+
 
 
 
@@ -1160,8 +1171,9 @@ class OrderController extends Controller
             ->join('orders as o', 'l.idorder', '=', 'o.id')
             ->leftJoin('setting as s', 'l.idsetting', '=', 's.id')
             ->where('o.id', $id)
-            ->select('p.name',DB::raw("CASE WHEN s.convert IS NOT NULL THEN CONCAT(l.qte / s.convert, ' ', s.type) ELSE l.qte END AS qte"),
-                'l.price','l.total','l.accessoire','s.type')
+            ->select('p.name',
+            DB::raw("CASE WHEN s.convert IS NOT NULL THEN CONCAT(ROUND(l.qte / s.convert), ' ', s.type) ELSE l.qte END AS qte"),
+                'l.price','l.total','l.accessoire','s.type',DB::raw("CASE WHEN s.convert IS NOT NULL THEN ROUND(l.qte / s.convert) ELSE l.qte END AS qtedevision"))
             ->get();
 
 
