@@ -2,6 +2,11 @@
 @section('content')
 <script src="{{asset('js/Script_Etat/script.js')}}"></script>
 <link rel="stylesheet" href="{{asset('css/Etat/style.css')}}">
+<script>
+    var SearchEtatTable  = "{{url('SearchEtatTable')}}";
+    var EtatProduction  = "{{url('EtatProduction')}}";
+    var TotalUniteByDate  = "{{url('TotalUniteByDate')}}";
+</script>
 <div class="container-fluid">
     <div class="card card-body py-3">
         <div class="row align-items-center">
@@ -124,5 +129,65 @@
             </div>
         </div>
     </div>
+    <div class="row">
+        <div class="col-sm-12 col-md-12 col-xl-12">
+            <h3 class="text-uppercase rounded-2 border text-center p-2 mt-3 text-white bg-dark">
+                <i class="ti ti-arrow-down"></i>
+                    tableau Production
+                <i class="ti ti-arrow-down"></i>
+            </h3>
+            <table class="table table-striped table-bordered" id="TableProduction">
+                <thead>
+                    <tr>
+                        <th>Client</th>
+                        <th>Montant Vente</th>
+                        <th>Montant Payé</th>
+                        <th>Reste</th>
+                        <th>Créer le</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+        <div class="col-sm-12 col-md-12 col-xl-6">
+            <h3 class="text-uppercase rounded-2 border text-center p-2 mt-3 text-white bg-dark">
+                <i class="ti ti-arrow-down"></i>
+                    tableau Détail produit
+                <i class="ti ti-arrow-down"></i>
+            </h3>
+            <table class="table table-striped table-bordered" id="TableEtat">
+                <thead>
+                    <tr>
+                        <th>Client</th>
+                        <th>Quantité</th>
+                        <th>Créer le</th>
+
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+
+        <div class="col-sm-12 col-md-12 col-xl-6">
+            <h3 class="text-uppercase rounded-2 border text-center p-2 mt-3 text-white bg-dark">
+                <i class="ti ti-arrow-down"></i>
+                    tableau Total Unité
+                <i class="ti ti-arrow-down"></i>
+            </h3>
+            <table class="table table-striped table-bordered" id="TableTotalUnit">
+                <thead>
+                    <tr>
+                        <th>Unité</th>
+                        <th>Total</th>
+
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+
+
+
 </div>
 @endsection

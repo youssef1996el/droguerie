@@ -9,9 +9,10 @@ use App\Models\Charge;
 use App\Models\ModePaiement;
 use Carbon\Carbon;
 use DB;
+use DataTables;
 class EtatController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         $CountCompany          = Company::count();
         if($CountCompany == 0)
@@ -89,6 +90,7 @@ class EtatController extends Controller
                             ->where('company.status','=','Active')
                             ->whereDate('paiements.created_at', $today)
                             ->first();
+
 
         return view('Etat.index')
         ->with('CompanyIsActive'         ,$CompanyIsActive)
@@ -185,5 +187,102 @@ class EtatController extends Controller
         ->with('totalReglementCheque'    ,$totalReglementCheque)
         ->with('virement'                ,$virement)
         ;
+    }
+
+
+    public function SearchEtatTable(Request $request)
+    {
+        if($request->ajax())
+        {
+            $today = Carbon::today(); // Get today's date using Carbon
+
+            /* $etat = DB::table('lineorder as l')
+            ->select(
+                's.type',
+                DB::raw('SUM(
+                    CASE
+                        WHEN l.idsetting IS NOT NULL THEN ROUND(l.qte / s.convert)
+                        ELSE l.qte
+                    END
+                ) AS total_qte'),
+                'p.name',
+                DB::raw('CONCAT(c.nom, " ", c.prenom) AS client'),
+                'o.created_at','o.total as montantvente','o.id'
+            )
+            ->leftJoin('setting as s', 's.id', '=', 'l.idsetting')
+            ->join('orders as o', 'o.id', '=', 'l.idorder')
+            ->join('clients as c', 'c.id', '=', 'o.idclient')
+            ->join('products as p', 'p.id', '=', 'l.idproduct')
+            ->where('l.qte', '>', 0)
+            ->whereDate('o.created_at', '=', $today) // Correct usage of whereDate
+            ->groupBy('s.type', 'o.idclient')
+            ->get(); */
+            $etat = DB::select("SELECT s.type,SUM(CASE  WHEN l.idsetting IS NOT NULL THEN ROUND(l.qte / s.convert) ELSE l.qte END) AS total_qte,
+                        CONCAT(c.nom, ' ', c.prenom) AS client,o.created_at,o.total,o.id
+
+                FROM lineorder l LEFT JOIN setting s ON s.id = l.idsetting JOIN orders o ON o.id = l.idorder JOIN clients c ON c.id = o.idclient
+
+                where l.qte > 0 and Date(o.created_at) = ?
+                GROUP BY s.type,o.idclient",[$today]);
+
+        return DataTables::of($etat)
+            ->addIndexColumn()
+            ->addColumn('encrypted_id', function ($order) {
+               /*  return $order->encrypted_id; */ // Ensure you have the correct column name
+            })
+            ->rawColumns(['encrypted_id'])
+            ->make(true);
+        }
+    }
+
+    public function EtatProduction(Request $request)
+    {
+        if($request->ajax())
+        {
+            $today = Carbon::today();
+            $IdCredit = DB::table('modepaiement as m')
+                ->join('company as c','c.id','=','m.idcompany')
+                ->where('c.status','=','Active')
+                ->where('m.name','=','crédit')
+                ->value('m.id');
+            $Production = DB::select('select id, sum(total) as total, sum(totalpaye) as totalpaye,sum(total - totalpaye) as reste,client,created_at from (
+                                select o.id,total,0 as totalpaye,concat(c.nom," ",c.prenom) client,o.created_at from orders o , clients c  where c.id = o.idclient and date(o.created_at) =?
+                                group by o.id
+                                union all
+                                select r.idorder,0 as totalvente,sum(r.total) as totalpaye ,concat(c.nom," ",c.prenom) client,o.created_at
+                                from reglements r , orders o , clients c where o.idclient = c.id and o.id = r.idorder and date(r.created_at) = ? and r.idmode != ?
+                                group by r.idorder) as t group by id',[$today,$today,$IdCredit]);
+
+            return DataTables::of($Production)
+            ->addIndexColumn()
+            ->addColumn('encrypted_id', function ($order) {
+                /*  return $order->encrypted_id; */ // Ensure you have the correct column name
+            })
+            ->rawColumns(['encrypted_id'])
+            ->make(true);
+        }
+    }
+
+    public function TotalUniteByDate(Request $request)
+    {
+        if($request->ajax())
+        {
+            $today = Carbon::today();
+            $Data = DB::select("SELECT s.type,SUM(CASE  WHEN l.idsetting IS NOT NULL THEN ROUND(l.qte / s.convert) ELSE l.qte END) AS total_qte
+
+
+                FROM lineorder l LEFT JOIN setting s ON s.id = l.idsetting JOIN orders o ON o.id = l.idorder
+
+                where l.qte > 0 and Date(o.created_at) = ?
+                GROUP BY s.type",[$today]);
+
+                return DataTables::of($Data)
+                ->addIndexColumn()
+                ->addColumn('encrypted_id', function ($order) {
+                    /*  return $order->encrypted_id; */ // Ensure you have the correct column name
+                })
+                ->rawColumns(['encrypted_id'])
+                ->make(true);
+        }
     }
 }
