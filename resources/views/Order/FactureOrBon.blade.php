@@ -511,12 +511,12 @@
                     <tr>
                         <td style="text-align: center">{{ $item->name }}</td>
                         <td style="text-align: center">{{ $item->qte }}</td>
-                        @if ($item->accessoire !=0)
-                        @php
-                            $AccessoireParUnit = abs($item->accessoire / $item->qtedevision);
-                            $Price             = $item->price - $AccessoireParUnit;
+                        @if ($item->accessoire <0)
+                            @php
+                                $AccessoireParUnit = abs($item->accessoire / $item->qtedevision);
+                                $Price             = $item->price - $AccessoireParUnit;
 
-                        @endphp
+                            @endphp
                         <td>{{number_format($Price,2,","," ")}} DH</td>
                     @else
                     <td>{{number_format($item->price + $item->accessoire,2,","," ")}} DH</td>
