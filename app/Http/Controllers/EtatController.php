@@ -290,41 +290,12 @@ class EtatController extends Controller
 
     public function EtatByClient()
     {
-        /* $DataByClient = DB::select('SELECT CONCAT(c.nom, " ", c.prenom) AS client, p.name, l.qte, l.price, l.total, l.idsetting, s.convert,
-                            IF(l.idsetting IS NOT NULL, CONCAT(ROUND(l.qte / s.convert), " ", s.type), l.qte) AS QteConvert
-                            FROM clients c
-                            JOIN orders o ON c.id = o.idclient
-                            JOIN lineorder l ON o.id = l.idorder
-                            JOIN products p ON l.idproduct = p.id
-                            LEFT JOIN setting s ON l.idsetting = s.id
-                            WHERE DATE(o.created_at) = "2024-07-29"');
-
-        $DataByClient = collect($DataByClient)->groupBy('client')->toArray();
-
-        $DataByClientCredit = DB::select('SELECT r.total, CONCAT(c.nom, " ", c.prenom) AS client
-                                        FROM reglements r
-                                        JOIN clients c ON c.id = r.idclient
-                                        WHERE DATE(r.created_at) = "2024-07-29" AND r.idmode = 2');
-
-        $DataByClientCredit = collect($DataByClientCredit)->groupBy('client')->toArray();
-
-
-        foreach ($DataByClientCredit as $client => $creditData)
-        {
-            if (isset($DataByClient[$client]))
-            {
-
-                foreach ($creditData as $credit)
-                {
-                    $DataByClient[$client][] = $credit;
-                }
-            }
-            else
-            {
-
-                $DataByClient[$client] = $creditData;
-            }
-        } */
+        $today = Carbon::today();
+        $IdsCredit  = DB::table('modepaiement as m')
+        ->join('company as c','c.id','m.idcompany')
+        ->where('m.name','crédit')
+        ->where('c.status','Active')
+        ->value('m.id');
         $DataByClient = DB::select('SELECT CONCAT(c.nom, " ", c.prenom) AS client, p.name, l.qte, l.price, l.total, l.idsetting, s.convert,
         IF(l.idsetting IS NOT NULL, CONCAT(ROUND(l.qte / s.convert), " ", s.type), l.qte) AS QteConvert
         FROM clients c
@@ -332,7 +303,7 @@ class EtatController extends Controller
         JOIN lineorder l ON o.id = l.idorder
         JOIN products p ON l.idproduct = p.id
         LEFT JOIN setting s ON l.idsetting = s.id
-        WHERE DATE(o.created_at) = "2024-07-29"');
+        WHERE DATE(o.created_at) = ?',[$today]);
 
         $DataByClient = collect($DataByClient)->groupBy('client')->toArray();
 
@@ -348,7 +319,7 @@ class EtatController extends Controller
         $DataByClientCredit = DB::select('SELECT r.total AS credit_total, CONCAT(c.nom, " ", c.prenom) AS client
                     FROM reglements r
                     JOIN clients c ON c.id = r.idclient
-                    WHERE DATE(r.created_at) = "2024-07-29" AND r.idmode = 2');
+                    WHERE DATE(r.created_at) = ? AND r.idmode = ?',[$today,$IdsCredit]);
 
         $DataByClientCredit = collect($DataByClientCredit)->groupBy('client')->toArray();
 
@@ -387,25 +358,7 @@ class EtatController extends Controller
 
     // Stream PDF to browser (inline view), 'D' to force download
     return $pdf->stream('Report.pdf', ['Attachment' => 1]);
-        /* $pdf            = PDF::loadView('Etat.EtatTEST',compact('CompanyIsActive',
-        'DataByClient',
-        'TotalByClient',
-        'LastRowByClient',
-        'TotalCreditByClient',
-        'GrandTotal',
-        'GrandTotalCredit'))
-        ->setOptions([
-            'defaultFnt' => 'Amiri'
 
-            ])->setPaper('a4'); */
-      /*   return view('Etat.EtatTEST')
-        ->with('CompanyIsActive'         ,$CompanyIsActive)
-        ->with('DataByClient',$DataByClient)
-        ->with('',$TotalByClient)
-        ->with('',$LastRowByClient)
-        ->with('',$TotalCreditByClient)
-        ->with('', $GrandTotal)
-         ->with('', $GrandTotalCredit); */
 
 
 

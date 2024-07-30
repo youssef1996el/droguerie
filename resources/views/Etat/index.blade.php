@@ -133,7 +133,7 @@
             </div>
         </div>
     </div>
-    <div class="row">
+    {{-- <div class="row">
         <div class="col-sm-12 col-md-12 col-xl-12">
             <h3 class="text-uppercase rounded-2 border text-center p-2 mt-3 text-white bg-dark">
                 <i class="ti ti-arrow-down"></i>
@@ -189,7 +189,7 @@
                 <tbody></tbody>
             </table>
         </div>
-    </div>
+    </div> --}}
 
 
 
