@@ -146,15 +146,19 @@ class OrderController extends Controller
         {
 
 
+
             $CompanyIsActive = Company::where('status', 'Active')->select('id')->first();
 
             $query = DB::table('products as p')
-                ->join('stock as s', 'p.id', '=', 's.idproduct')
-                ->join('bonentres as b', 'b.id', '=', 's.idbonentre')
-                ->join('company as co', 'p.idcompany', '=', 'co.id')
-                ->leftJoin('tmplineorder as t', 't.idproduct', '=', 'p.id')
+                ->join('stock as s'             , 'p.id'            , '='   , 's.idproduct')
+                ->join('categorys as ct'        , 'ct.id'           , '='   , 'p.idcategory')
+                ->join('bonentres as b'         , 'b.id'            , '='   , 's.idbonentre')
+                ->join('company as co'          , 'p.idcompany'     , '='   , 'co.id')
+                ->leftJoin('tmplineorder as t'  , 't.idproduct'     , '='   , 'p.id')
+                ->leftJoin('setting as  set'     , 'set.id'           , '='   , 't.idsetting')
                 ->where('co.status', 'Active')
-                ->where('s.qte','>',0)
+                //  ->where('s.qte','>',0)
+                ->where(DB::raw('(s.qte) - (t.qte * set.convert)') , '>' ,1)
                 ->where('p.name', 'like', "%{$request->product}%");
 
 
@@ -162,7 +166,7 @@ class OrderController extends Controller
 
             $sumQteSubquery = DB::table('tmplineorder as t')
                 ->leftjoin('setting as s','s.id','=','t.idsetting')
-                ->select('t.idproduct', DB::raw('SUM(t.qte * s.convert) as sum_qte') ,DB::raw('SUM(t.qte) as sum_qte_without_unite'))
+                ->select('t.idproduct', DB::raw('SUM(t.qte * s.convert) as sum_qte') ,DB::raw('SUM(t.qte) as sum_qte_without_unite'),'t.idsetting')
                 ->groupBy('t.idproduct');
 
             $query->leftJoinSub($sumQteSubquery, 't_sum', function ($join) {
@@ -174,15 +178,18 @@ class OrderController extends Controller
             {
 
                 $query->addSelect(
-                    'p.id', 'p.name', 'co.title', 's.price', 'p.created_at','s.id as idstock','b.numero_bon',
+                    'p.id', 'p.name', 'co.title', 's.price', 'p.created_at','s.id as idstock','b.numero_bon','ct.id as idcategory',
+
+
                     DB::raw('s.qte - IFNULL(t_sum.sum_qte_without_unite, 0) as qte') // Adjust stock quantity
                 );
+
             } else {
                 $query->join('categorys as c', 'p.idcategory', '=', 'c.id')
                     ->join('setting as se', 'c.id', '=', 'se.idcategory')
                     ->addSelect(
                         'p.id', 'p.name', 'co.title', DB::raw('FORMAT((s.price * se.convert), 2) as price'), 'p.created_at', 'se.convert', 'se.type',
-                        's.id as idstock','b.numero_bon',
+                        's.id as idstock','b.numero_bon','c.id as idcategory',
                         DB::raw('CONCAT(ROUND(((s.qte - IFNULL(t_sum.sum_qte, 0)) / se.convert), 1), " ", se.type) as qte')
                     )
                     ->where('se.id', $request->type);
@@ -221,7 +228,7 @@ class OrderController extends Controller
                 'iduser'            => $idUser,
                 'idcompany'         => $idCompany,
                 'idsetting'         => $idSetting,
-                'idstock'           => $idStock,
+                /* 'idstock'           => $idStock, */
             ])->count();
 
             $data_Product = Stock::where([
@@ -257,7 +264,7 @@ class OrderController extends Controller
                     'idcompany' => $idCompany,
                     'idclient' => $idClient,
                     'idsetting' => $idSetting,
-                    'idstock'   => $request->idstock,
+                    /* 'idstock'   => $request->idstock, */
                 ])->first();
 
                 TmpLineOrder::where([
@@ -266,7 +273,7 @@ class OrderController extends Controller
                     'idcompany' => $idCompany,
                     'idclient' => $idClient,
                     'idsetting' => $idSetting,
-                    'idstock'   => $request->idstock,
+                    /* 'idstock'   => $request->idstock, */
                 ])->update([
                     'qte' => $Old_Data->qte + 1,
                     'total' => ($Old_Data->qte + 1) * $price,
@@ -456,12 +463,27 @@ class OrderController extends Controller
 
         $name_product = Product::where('id',$idproduct)->value('name');
         $Setting      = Setting::where('name_product',$name_product)->get();
+
         if($idsetting)
         {
 
 
-            $Qte_Stock = Stock::where('idproduct',$idproduct)->value('qte');
+            // check product has parameters
+            $check_Product_has_parameters = Setting::where('name_product',$name_product)
+            ->where('idstock',$request->idstock)
+            ->count();
+
+            if($check_Product_has_parameters == 0)
+            {
+                return response()->json([
+                    'status'    => '550',
+                    'message'   => 'Le produit n\'a aucun paramètre',
+                ]);
+            }
+            $Qte_Stock = Stock::where('idproduct',$idproduct)->where('id',$request->idstock)->value('qte');
+
             $Qte_Stock = floatval(str_replace(',', '.', $Qte_Stock));
+
             $checkPorductInTableTmp = TmpLineOrder::where(['idclient' => $idclient , 'idproduct' => $idproduct ])->count();
 
             if($checkPorductInTableTmp == 0)
@@ -522,6 +544,7 @@ class OrderController extends Controller
                 ->join('setting as s', 's.idcategory', '=', 'c.id')
                 ->whereColumn('t.idsetting', 's.id')
                 ->get();
+
                 $totalQteStock = $DataTmp->sum('qteStock');
 
                 $resteQteStock = $Qte_Stock - $totalQteStock;

@@ -395,6 +395,8 @@ $(document).ready(function ()
             'idproduct' :data.id,
             'type'      : $('#DropDownTypeVente').val(),
             'idclient'  : $('#IdClient').val(),
+            'idstock'   : data.idstock,
+            'idcategory': data.idcategory,
         };
         $.ajax({
             type: "get",
@@ -432,6 +434,10 @@ $(document).ready(function ()
                     );
                 }
                 else if(response.status == 422)
+                {
+                    toastr.error(response.message, 'Error');
+                }
+                else if(response.status == 550)
                 {
                     toastr.error(response.message, 'Error');
                 }
