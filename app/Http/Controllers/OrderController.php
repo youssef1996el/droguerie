@@ -500,7 +500,7 @@ class OrderController extends Controller
                 ]);
             } */
             $Qte_Stock = Stock::where('idproduct',$idproduct)->where('id',$request->idstock)->value('qte');
-            dd($idproduct,$request->idstock);
+            dd($Qte_Stock);
             $Qte_Stock = floatval(str_replace(',', '.', $Qte_Stock));
 
             $checkPorductInTableTmp = TmpLineOrder::where(['idclient' => $idclient , 'idproduct' => $idproduct ])->count();
