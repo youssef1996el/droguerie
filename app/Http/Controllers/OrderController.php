@@ -148,8 +148,11 @@ class OrderController extends Controller
 
 
             $CompanyIsActive = Company::where('status', 'Active')->select('id')->first();
-
-            $query = DB::table('products as p')
+            // check product has setting
+            $hasSetting = Setting::where('name_product','=',$request->prododuct)->count();
+            if($hasSetting > 0)
+            {
+                $query = DB::table('products as p')
                 ->join('stock as s'             , 'p.id'            , '='   , 's.idproduct')
                 ->join('categorys as ct'        , 'ct.id'           , '='   , 'p.idcategory')
                 ->join('bonentres as b'         , 'b.id'            , '='   , 's.idbonentre')
@@ -157,9 +160,25 @@ class OrderController extends Controller
                 ->leftJoin('tmplineorder as t'  , 't.idproduct'     , '='   , 'p.id')
                 ->leftJoin('setting as  set'     , 'set.id'           , '='   , 't.idsetting')
                 ->where('co.status', 'Active')
-                //  ->where('s.qte','>',0)
+                  /* ->where('s.qte','>',0) */
                 ->where(DB::raw('(s.qte) - (t.qte * set.convert)') , '>' ,1)
                 ->where('p.name', 'like', "%{$request->product}%");
+
+            }
+            else
+            {
+                $query = DB::table('products as p')
+                ->join('stock as s'             , 'p.id'            , '='   , 's.idproduct')
+                ->join('categorys as ct'        , 'ct.id'           , '='   , 'p.idcategory')
+                ->join('bonentres as b'         , 'b.id'            , '='   , 's.idbonentre')
+                ->join('company as co'          , 'p.idcompany'     , '='   , 'co.id')
+                ->leftJoin('tmplineorder as t'  , 't.idproduct'     , '='   , 'p.id')
+                ->leftJoin('setting as  set'     , 'set.id'           , '='   , 't.idsetting')
+                ->where('co.status', 'Active')
+                  ->where('s.qte','>',0)
+                /* ->where(DB::raw('(s.qte) - (t.qte * set.convert)') , '>' ,1) */
+                ->where('p.name', 'like', "%{$request->product}%");
+            }
 
 
 
