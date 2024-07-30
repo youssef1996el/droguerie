@@ -25,6 +25,7 @@
     var StoreRemark                     = "{{url('StoreRemark')}}";
     var changeAccessoireTmp             = "{{url('changeAccessoireTmp')}}";
     var ChangeQteByPress                = "{{url('ChangeQteByPress')}}";
+    var TrashOrder                      = "{{url('TrashOrder')}}";
 </script>
 <style>
     @keyframes slideDown

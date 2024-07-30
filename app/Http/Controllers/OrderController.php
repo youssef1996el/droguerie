@@ -974,7 +974,7 @@ class OrderController extends Controller
                 'u.name as user', // alias user
                 'co.title as company',
                 'o.idfacture',
-                DB::raw('DATE_FORMAT(o.created_at, "%Y-%m-%d") as created_at_formatted')
+                DB::raw('DATE_FORMAT(o.created_at, "%Y-%m-%d") as created_at_formatted'),'o.created_at as created_With_Time_Zone'
             ])
             ->join('clients as c', 'o.idclient', '=', 'c.id')
             ->join('users as u', 'o.iduser', '=', 'u.id')
@@ -992,7 +992,8 @@ class OrderController extends Controller
         'u.name as user', // alias user
         'co.title as company',
         'o.idfacture',
-        DB::raw('DATE_FORMAT(o.created_at, "%Y-%m-%d") as created_at_formatted')
+        DB::raw('DATE_FORMAT(o.created_at, "%Y-%m-%d") as created_at_formatted'),'o.created_at as created_With_Time_Zone'
+
     ])
     ->join('clients as c', 'o.idclient', '=', 'c.id')
     ->join('users as u', 'o.iduser', '=', 'u.id')
@@ -1015,7 +1016,8 @@ class OrderController extends Controller
                 'user', // matching alias
                 'company',
                 'idfacture',
-                'created_at_formatted'
+                'created_at_formatted',
+                'created_With_Time_Zone'
             ])
                 ->groupBy('id')
                 ->orderBy('id', 'desc')
@@ -1035,12 +1037,22 @@ class OrderController extends Controller
                             </a>';
                 }
 
+                $orderCreatedTime = Carbon::parse($row->created_With_Time_Zone);
+                $hoursSinceCreation = $orderCreatedTime->diffInHours(Carbon::now());
+
+                // Display "Annuler vente" button if order was created less than 12 hours ago
+                if ($hoursSinceCreation < 12) {
+                    $btn .= '<a href="#" class="text-light ms-2 Trash" value="' . $row->id . '">
+                                <i class="ti ti-shopping-cart-off fs-5 border rounded-2 bg-danger p-1" title="Annuler vente"></i>
+                            </a>';
+                }
                 // Print button with permission check
                 if (auth()->user()->can('vente-imprimer')) {
                     $btn .= '<a href="' . url('invoices/' . $row->id) . '" class="text-light ms-2" target="_blank" value="' . $row->id . '">
                                 <i class="ti ti-file-invoice fs-5 border rounded-2 bg-success p-1" title="Imprimer bon ou facture"></i>
                             </a>';
                 }
+
 
                 $btn .= '</div>';
                 return $btn;
@@ -1408,5 +1420,56 @@ class OrderController extends Controller
         ]);
 
         return response()->json(['status' => 200]);
+    }
+
+    public function TrashOrder(Request $request)
+    {
+        // extract line order
+        $lineorder  = Lineorder::where('idorder',$request->id)->get();
+        foreach($lineorder as $item)
+        {
+            // update stock
+            DB::select("update stock set qte = qte + ? where idproduct = ? and id = ?",[$item->qte ,$item->idproduct , $item->idstock]);
+        }
+        // delete line order
+        Lineorder::where('idorder',$request->id)->delete();
+
+        // Extract id reglement by idorder and save in another variable
+        $IdReglement = DB::table('orders as o')
+        ->join('reglements as r', 'r.idorder', '=', 'o.id')
+        ->where('r.idorder', $request->id)
+        ->pluck('r.id');  // Do not implode here
+
+        // Extract paiement by reglement (for debugging purposes)
+        $Paiement = DB::table('paiements as p')
+        ->join('reglements as r', 'r.id', '=', 'p.idreglement')
+        ->whereIn('p.idreglement', $IdReglement->toArray())
+        ->get();
+
+
+        // Save idreglement in another variable before deletion
+        $idReglementArray = $IdReglement->toArray();
+        // delete reglements
+        $Reglements = Reglements::where('idorder',$request->id)->delete();
+
+        // Delete paiements associated with the reglements
+        Paiements::whereIn('idreglement', $idReglementArray)->delete();
+
+        // delete order
+        $DeleteOrder = Order::where('id',$request->id)->delete();
+        if($DeleteOrder)
+        {
+            return response()->json([
+                'status'    => 200,
+            ]);
+        }
+        else
+        {
+            return response()->json([
+                'status'    => 400,
+                'message'   => 'Contact support',
+            ]);
+        }
+
     }
 }

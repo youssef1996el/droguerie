@@ -61,7 +61,7 @@ $(document).ready(function ()
                 $('#nameEdit').val(name);
                 $('#BtnUpdateCategory').attr('data-value',IdCategory);
                 $('#EditCategory').modal("show");
-                
+
             });
 
             $(selector + ' tbody').on('click', '.trash', function(e)
@@ -76,9 +76,9 @@ $(document).ready(function ()
                     dangerMode: true,
                   })
                   .then((willDelete) => {
-                    if (willDelete) 
+                    if (willDelete)
                     {
-                        var data = 
+                        var data =
                         {
                             'id' : IdCategory,
                             '_token'     : csrf_token,
@@ -87,9 +87,9 @@ $(document).ready(function ()
                             type: "post",
                             url: TrashCategory,
                             data: data,
-                          
+
                             dataType: "json",
-                            success: function (response) 
+                            success: function (response)
                             {
                                 if(response.status == 200)
                                 {
@@ -104,18 +104,18 @@ $(document).ready(function ()
                                 }
                             }
                         });
-                        
-                    } 
-                    else 
+
+                    }
+                    else
                     {
                         swal("Votre catégorie est sécurisée !");
                     }
-                  });
-                
+                });
+
             });
         }
 
-        
+
 
     });
 
@@ -127,7 +127,7 @@ $(document).ready(function ()
     $('#BtnSaveCategory').on('click',function(e)
     {
         e.preventDefault();
-        var data = 
+        var data =
         {
             'name'   : $('#name').val(),
             '_token'     : csrf_token,
@@ -137,7 +137,7 @@ $(document).ready(function ()
             url: StoreCategory,
             data: data,
             dataType: "json",
-            success: function (response) 
+            success: function (response)
             {
                 if(response.status == 200)
                 {
@@ -162,7 +162,7 @@ $(document).ready(function ()
     $('#BtnUpdateCategory').on('click',function(e)
     {
         e.preventDefault();
-        var data = 
+        var data =
         {
             'name'   : $('#nameEdit').val(),
             '_token'     : csrf_token,
@@ -173,7 +173,7 @@ $(document).ready(function ()
             url: UpdateCaegory,
             data: data,
             dataType: "json",
-            success: function (response) 
+            success: function (response)
             {
                 if(response.status == 200)
                 {

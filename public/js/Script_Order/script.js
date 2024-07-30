@@ -123,20 +123,56 @@ $(document).ready(function ()
                 }
             });
 
-           /*  $(selector + "tbody").on('click','.view',function(e)
+            $(selector + ' tbody').on('click', '.Trash', function(e)
             {
                 e.preventDefault();
-                var data = $('.TableVente').DataTable().row(this).data();
-                var idToEncrypt = data.id.toString(); // Ensure id is in string format if necessary
+                var idOrder = $(this).attr('value');
+                swal({
+                    title: "es-tu sûr de supprimer cette vente",
+                    text: "Une fois supprimée, vous ne pourrez plus récupérer cette vente !",
+                    icon: "warning",
+                    buttons: true,
+                    dangerMode: true,
+                  })
+                  .then((willDelete) => {
+                    if (willDelete)
+                    {
+                        var data =
+                        {
+                            'id' : idOrder,
+                            '_token'     : csrf_token,
+                        };
+                        $.ajax({
+                            type: "post",
+                            url: TrashOrder,
+                            data: data,
 
-                // Encode ID using base64
-                var encryptedId = btoa(idToEncrypt);
+                            dataType: "json",
+                            success: function (response)
+                            {
+                                if(response.status == 200)
+                                {
+                                    swal("Votre vente a été supprimée !", {
+                                        icon: "success",
+                                    });
+                                    $('.TableVente').DataTable().ajax.reload();
+                                }
+                                else if(response.status ==400)
+                                {
+                                    swal("Oops !", response.message, "error");
+                                }
+                            }
+                        });
 
-                // Redirect to ShowOrder route with encryptedId as parameter
-                window.location.href = ShowOrder + "/" + encryptedId;
+                    }
+                    else
+                    {
+                        swal("Votre vente est sécurisée !");
+                    }
+                });
 
 
-            }); */
+            });
 
 
         }
