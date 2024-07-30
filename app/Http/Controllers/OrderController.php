@@ -183,6 +183,7 @@ class OrderController extends Controller
 
 
 
+
             $sumQteSubquery = DB::table('tmplineorder as t')
                 ->leftjoin('setting as s','s.id','=','t.idsetting')
                 ->select('t.idproduct', DB::raw('SUM(t.qte * s.convert) as sum_qte') ,DB::raw('SUM(t.qte) as sum_qte_without_unite'),'t.idsetting')
@@ -247,7 +248,7 @@ class OrderController extends Controller
                 'iduser'            => $idUser,
                 'idcompany'         => $idCompany,
                 'idsetting'         => $idSetting,
-                /* 'idstock'           => $idStock, */
+                'idstock'           => $idStock,
             ])->count();
 
             $data_Product = Stock::where([
@@ -263,7 +264,8 @@ class OrderController extends Controller
                 $price = $data_Product->price;
             }
 
-            if ($check_Product_In_TmpLineOrder == 0) {
+            if ($check_Product_In_TmpLineOrder == 0)
+            {
                 TmpLineOrder::create([
                     'qte' => 1,
                     'price' => $price,
@@ -275,7 +277,8 @@ class OrderController extends Controller
                     'idcompany' => $idCompany,
                     'idstock'   => $request->idstock,
                 ]);
-            } else
+            }
+            else
             {
                 $Old_Data = TmpLineOrder::where([
                     'idproduct' => $idProduct,
@@ -283,7 +286,7 @@ class OrderController extends Controller
                     'idcompany' => $idCompany,
                     'idclient' => $idClient,
                     'idsetting' => $idSetting,
-                    /* 'idstock'   => $request->idstock, */
+                    'idstock'   => $request->idstock,
                 ])->first();
 
                 TmpLineOrder::where([
@@ -292,7 +295,7 @@ class OrderController extends Controller
                     'idcompany' => $idCompany,
                     'idclient' => $idClient,
                     'idsetting' => $idSetting,
-                    /* 'idstock'   => $request->idstock, */
+                    'idstock'   => $request->idstock,
                 ])->update([
                     'qte' => $Old_Data->qte + 1,
                     'total' => ($Old_Data->qte + 1) * $price,
