@@ -9,7 +9,9 @@ use App\Models\Charge;
 use App\Models\ModePaiement;
 use Carbon\Carbon;
 use DB;
-use DataTables;
+use PDF;
+use Dompdf\Dompdf;
+use Dompdf\Options;
 class EtatController extends Controller
 {
     public function index(Request $request)
@@ -284,5 +286,130 @@ class EtatController extends Controller
                 ->rawColumns(['encrypted_id'])
                 ->make(true);
         }
+    }
+
+    public function EtatByClient()
+    {
+        /* $DataByClient = DB::select('SELECT CONCAT(c.nom, " ", c.prenom) AS client, p.name, l.qte, l.price, l.total, l.idsetting, s.convert,
+                            IF(l.idsetting IS NOT NULL, CONCAT(ROUND(l.qte / s.convert), " ", s.type), l.qte) AS QteConvert
+                            FROM clients c
+                            JOIN orders o ON c.id = o.idclient
+                            JOIN lineorder l ON o.id = l.idorder
+                            JOIN products p ON l.idproduct = p.id
+                            LEFT JOIN setting s ON l.idsetting = s.id
+                            WHERE DATE(o.created_at) = "2024-07-29"');
+
+        $DataByClient = collect($DataByClient)->groupBy('client')->toArray();
+
+        $DataByClientCredit = DB::select('SELECT r.total, CONCAT(c.nom, " ", c.prenom) AS client
+                                        FROM reglements r
+                                        JOIN clients c ON c.id = r.idclient
+                                        WHERE DATE(r.created_at) = "2024-07-29" AND r.idmode = 2');
+
+        $DataByClientCredit = collect($DataByClientCredit)->groupBy('client')->toArray();
+
+
+        foreach ($DataByClientCredit as $client => $creditData)
+        {
+            if (isset($DataByClient[$client]))
+            {
+
+                foreach ($creditData as $credit)
+                {
+                    $DataByClient[$client][] = $credit;
+                }
+            }
+            else
+            {
+
+                $DataByClient[$client] = $creditData;
+            }
+        } */
+        $DataByClient = DB::select('SELECT CONCAT(c.nom, " ", c.prenom) AS client, p.name, l.qte, l.price, l.total, l.idsetting, s.convert,
+        IF(l.idsetting IS NOT NULL, CONCAT(ROUND(l.qte / s.convert), " ", s.type), l.qte) AS QteConvert
+        FROM clients c
+        JOIN orders o ON c.id = o.idclient
+        JOIN lineorder l ON o.id = l.idorder
+        JOIN products p ON l.idproduct = p.id
+        LEFT JOIN setting s ON l.idsetting = s.id
+        WHERE DATE(o.created_at) = "2024-07-29"');
+
+        $DataByClient = collect($DataByClient)->groupBy('client')->toArray();
+
+        // Calculate total and last row
+        $TotalByClient = [];
+        $LastRowByClient = [];
+        foreach ($DataByClient as $client => $values) {
+        $TotalByClient[$client] = array_sum(array_column($values, 'total'));
+        $LastRowByClient[$client] = end($values); // Get the last item
+        }
+
+        // Fetch credit data
+        $DataByClientCredit = DB::select('SELECT r.total AS credit_total, CONCAT(c.nom, " ", c.prenom) AS client
+                    FROM reglements r
+                    JOIN clients c ON c.id = r.idclient
+                    WHERE DATE(r.created_at) = "2024-07-29" AND r.idmode = 2');
+
+        $DataByClientCredit = collect($DataByClientCredit)->groupBy('client')->toArray();
+
+        // Calculate total credit
+        $TotalCreditByClient = [];
+        foreach ($DataByClientCredit as $client => $values) {
+        $TotalCreditByClient[$client] = array_sum(array_column($values, 'credit_total'));
+        }
+        $GrandTotal = array_sum($TotalByClient);
+
+        // Calculate the sum of all TotalCreditByClient values
+        $GrandTotalCredit = array_sum($TotalCreditByClient);
+
+        $CompanyIsActive       = Company::where('status','Active')->select('title','id')->first();
+        $pdf = new Dompdf();
+
+    // Load view and render HTML
+    $html = view('Etat.EtatTEST', compact(
+        'CompanyIsActive',
+        'DataByClient',
+        'TotalByClient',
+        'LastRowByClient',
+        'TotalCreditByClient',
+        'GrandTotal',
+        'GrandTotalCredit'
+    ))->render();
+
+    // Load HTML to dompdf
+    $pdf->loadHtml($html);
+
+    // (Optional) Setup default paper size and orientation
+    $pdf->setPaper('A4', 'portrait');
+
+    // Render PDF (first pass)
+    $pdf->render();
+
+    // Stream PDF to browser (inline view), 'D' to force download
+    return $pdf->stream('Report.pdf', ['Attachment' => 1]);
+        /* $pdf            = PDF::loadView('Etat.EtatTEST',compact('CompanyIsActive',
+        'DataByClient',
+        'TotalByClient',
+        'LastRowByClient',
+        'TotalCreditByClient',
+        'GrandTotal',
+        'GrandTotalCredit'))
+        ->setOptions([
+            'defaultFnt' => 'Amiri'
+
+            ])->setPaper('a4'); */
+      /*   return view('Etat.EtatTEST')
+        ->with('CompanyIsActive'         ,$CompanyIsActive)
+        ->with('DataByClient',$DataByClient)
+        ->with('',$TotalByClient)
+        ->with('',$LastRowByClient)
+        ->with('',$TotalCreditByClient)
+        ->with('', $GrandTotal)
+         ->with('', $GrandTotalCredit); */
+
+
+
+
+
     }
 }

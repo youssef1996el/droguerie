@@ -54,6 +54,10 @@
                         </div>
                     </form>
 
+                    <form action="{{url('EtatByClient')}}" method="get">
+                        <button type="submit" class="btn btn-primary btn-block">etat</button>
+                    </form>
+
 
                 </div>
             </div>
