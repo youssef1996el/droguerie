@@ -488,7 +488,7 @@ class OrderController extends Controller
 
 
             // check product has parameters
-            $check_Product_has_parameters = Setting::where('name_product',$name_product)
+            /* $check_Product_has_parameters = Setting::where('name_product',$name_product)
             ->where('idstock',$request->idstock)
             ->count();
 
@@ -498,7 +498,7 @@ class OrderController extends Controller
                     'status'    => '550',
                     'message'   => 'Le produit n\'a aucun paramètre',
                 ]);
-            }
+            } */
             $Qte_Stock = Stock::where('idproduct',$idproduct)->where('id',$request->idstock)->value('qte');
 
             $Qte_Stock = floatval(str_replace(',', '.', $Qte_Stock));
