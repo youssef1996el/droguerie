@@ -7,6 +7,7 @@ use App\Models\Company;
 use App\Models\Order;
 use App\Models\Charge;
 use App\Models\ModePaiement;
+use App\Models\Versement;
 use Carbon\Carbon;
 use DB;
 use PDF;
@@ -288,7 +289,7 @@ class EtatController extends Controller
         }
     }
 
-    public function EtatByClient()
+    public function EtatByClient(Request $request)
     {
         $today = Carbon::today();
         $IdsCredit  = DB::table('modepaiement as m')
@@ -296,14 +297,15 @@ class EtatController extends Controller
         ->where('m.name','crédit')
         ->where('c.status','Active')
         ->value('m.id');
+
         $DataByClient = DB::select('SELECT CONCAT(c.nom, " ", c.prenom) AS client, p.name, l.qte, l.price, l.total, l.idsetting, s.convert,
-        IF(l.idsetting IS NOT NULL, CONCAT(ROUND(l.qte / s.convert), " ", s.type), l.qte) AS QteConvert
-        FROM clients c
-        JOIN orders o ON c.id = o.idclient
-        JOIN lineorder l ON o.id = l.idorder
-        JOIN products p ON l.idproduct = p.id
-        LEFT JOIN setting s ON l.idsetting = s.id
-        WHERE DATE(o.created_at) = ?',[$today]);
+                                    IF(l.idsetting IS NOT NULL, CONCAT(ROUND(l.qte / s.convert), " ", s.type), l.qte) AS QteConvert
+                                    FROM clients c
+                                    JOIN orders o ON c.id = o.idclient
+                                    JOIN lineorder l ON o.id = l.idorder
+                                    JOIN products p ON l.idproduct = p.id
+                                    LEFT JOIN setting s ON l.idsetting = s.id
+                                    WHERE DATE(o.created_at) BETWEEN ? AND ?',[$request->startDate,$request->endDate]);
 
         $DataByClient = collect($DataByClient)->groupBy('client')->toArray();
 
@@ -319,7 +321,7 @@ class EtatController extends Controller
         $DataByClientCredit = DB::select('SELECT r.total AS credit_total, CONCAT(c.nom, " ", c.prenom) AS client
                     FROM reglements r
                     JOIN clients c ON c.id = r.idclient
-                    WHERE DATE(r.created_at) = ? AND r.idmode = ?',[$today,$IdsCredit]);
+                    WHERE DATE(r.created_at) BETWEEN ? AND ? AND r.idmode = ?',[$request->startDate,$request->endDate,$IdsCredit]);
 
         $DataByClientCredit = collect($DataByClientCredit)->groupBy('client')->toArray();
 
@@ -336,6 +338,30 @@ class EtatController extends Controller
         $CompanyIsActive       = Company::where('status','Active')->select('title','id')->first();
         $pdf = new Dompdf();
 
+        $DateStart = $request->startDate;
+        $DateEnd   = $request->endDate;
+
+        // Charge
+        $Charge = DB::table('Charge as ch')
+        ->join('company as c','c.id','=','ch.idcompany')
+        ->where('c.status','=','Active')
+        ->whereBetween(DB::raw('DATE(ch.created_at)'), [$DateStart, $DateEnd])
+        ->sum('ch.total');
+        // Versement
+        $Versement = DB::table('versement as v')
+        ->join('company as c','c.id','=','v.idcompany')
+        ->where('c.status','=','Active')
+        ->whereBetween(DB::raw('DATE(v.created_at)'), [$DateStart, $DateEnd])
+        ->sum('v.total');
+        // Total By Mode Paiement
+        $TotalByModePaiement = DB::table('paiements as p')
+            ->join('modepaiement as m', 'p.idmode', '=', 'm.id')
+            ->join('company as c', 'p.idcompany', '=', 'c.id')
+            ->select(DB::raw('UPPER(m.name) as name'), DB::raw('SUM(p.total) as totalpaye'))
+            ->where('c.status', 'Active')
+            ->whereBetween(DB::raw('DATE(p.created_at)'), [$DateStart, $DateEnd])
+            ->groupBy('p.idmode')
+            ->get();
     // Load view and render HTML
     $html = view('Etat.EtatTEST', compact(
         'CompanyIsActive',
@@ -344,7 +370,12 @@ class EtatController extends Controller
         'LastRowByClient',
         'TotalCreditByClient',
         'GrandTotal',
-        'GrandTotalCredit'
+        'GrandTotalCredit',
+        'DateStart',
+        'DateEnd',
+        'Charge',
+        'Versement',
+        'TotalByModePaiement'
     ))->render();
 
     // Load HTML to dompdf

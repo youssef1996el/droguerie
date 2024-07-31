@@ -36,7 +36,7 @@
         <div class="widget-content searchable-container list">
             <div class="card card-body">
                 <div class="row align-items-end">
-                    <form id="searchForm" action="{{url('SearchEtat')}}" method="get">
+                    {{-- <form id="searchForm" action="{{url('SearchEtat')}}" method="get">
                         <div class="row">
                             <div class="col-md-4 mb-3">
                                 <label for="startDate" class="form-label mb-0">Date début :</label>
@@ -52,10 +52,29 @@
                                 <button type="submit" class="btn btn-primary btn-block">Search</button>
                             </div>
                         </div>
-                    </form>
+                    </form> --}}
 
                     <form action="{{url('EtatByClient')}}" method="get">
-                        <button type="submit" class="btn btn-primary btn-block">etat</button>
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label for="startDate" class="form-label mb-0">Date début :</label>
+                                @php
+                                    $startDate = request()->get('startDate', \Carbon\Carbon::today()->toDateString());
+                                @endphp
+                                <input type="date" class="form-control" id="startDate" name="startDate" value="{{ $startDate }}">
+                            </div>
+
+                            <div class="col-md-4 mb-3">
+                                <label for="endDate" class="form-label mb-0">Date fin :</label>
+                                @php
+                                    $endDate = request()->get('endDate', \Carbon\Carbon::today()->toDateString());
+                                @endphp
+                                <input type="date" class="form-control" id="endDate" name="endDate" value="{{ $endDate }}">
+                            </div>
+                            <div class="col-md-4 mt-4">
+                                <button type="submit" class="btn btn-primary btn-block text-uppercase">etat</button>
+                            </div>
+
                     </form>
 
 
