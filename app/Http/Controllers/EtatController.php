@@ -298,14 +298,35 @@ class EtatController extends Controller
         ->where('c.status','Active')
         ->value('m.id');
 
-        $DataByClient = DB::select('SELECT CONCAT(c.nom, " ", c.prenom) AS client, p.name, l.qte, l.price, l.total, l.idsetting, s.convert,
-                                    IF(l.idsetting IS NOT NULL, CONCAT(ROUND(l.qte / s.convert), " ", s.type), l.qte) AS QteConvert
+        /* $DataByClient = DB::select('SELECT CONCAT(c.nom, " ", c.prenom) AS client, p.name, l.qte, l.price,l.accessoire, l.total, l.idsetting, s.convert,
+                                    IF(l.idsetting IS NOT NULL, CONCAT(ROUND(l.qte / s.convert), " ", s.type), l.qte) AS QteConvert,
+                                    IF(l.idsetting IS NOT NULL, ROUND(l.qte / s.convert), l.qte) AS QteConvertWithOutConcat, l.accessoire /
                                     FROM clients c
                                     JOIN orders o ON c.id = o.idclient
                                     JOIN lineorder l ON o.id = l.idorder
                                     JOIN products p ON l.idproduct = p.id
                                     LEFT JOIN setting s ON l.idsetting = s.id
-                                    WHERE DATE(o.created_at) BETWEEN ? AND ?',[$request->startDate,$request->endDate]);
+                                    WHERE DATE(o.created_at) BETWEEN ? AND ?',[$request->startDate,$request->endDate]); */
+        $DataByClient = DB::select('SELECT CONCAT(c.nom, " ", c.prenom) AS client, p.name, l.qte, l.price,l.accessoire, l.total, l.idsetting,
+        s.convert,IF(l.idsetting IS NOT NULL, CONCAT(ROUND(l.qte / s.convert), " ", s.type), l.qte) AS QteConvert,
+        IF(l.idsetting IS NOT NULL, ROUND(l.qte / s.convert), l.qte) AS QteConvertWithOutConcat,
+            ROUND(l.accessoire / IF(l.idsetting IS NOT NULL, ROUND(l.qte / s.convert), l.qte)) AS remise,
+        IF(
+            ROUND(l.accessoire / IF(l.idsetting IS NOT NULL, ROUND(l.qte / s.convert), l.qte)) < 0,
+            l.price - (-1 * ROUND(l.accessoire / IF(l.idsetting IS NOT NULL, ROUND(l.qte / s.convert), l.qte))),
+            l.price + ROUND(l.accessoire / IF(l.idsetting IS NOT NULL, ROUND(l.qte / s.convert), l.qte))
+        ) AS price_new,
+        IF(
+            ROUND(l.accessoire / IF(l.idsetting IS NOT NULL, ROUND(l.qte / s.convert), l.qte)) < 0,
+            l.price - (-1 * ROUND(l.accessoire / IF(l.idsetting IS NOT NULL, ROUND(l.qte / s.convert), l.qte))),
+            l.price + ROUND(l.accessoire / IF(l.idsetting IS NOT NULL, ROUND(l.qte / s.convert), l.qte))
+        ) * IF(l.idsetting IS NOT NULL, ROUND(l.qte / s.convert), l.qte) AS totalnew
+        FROM clients c JOIN orders o ON c.id = o.idclient
+        JOIN lineorder l ON o.id = l.idorder
+        JOIN products p ON l.idproduct = p.id
+        LEFT JOIN setting s ON l.idsetting = s.id
+        WHERE DATE(o.created_at) BETWEEN ? AND ?',[$request->startDate,$request->endDate]);
+                                   // dd($DataByClient);
 
         $DataByClient = collect($DataByClient)->groupBy('client')->toArray();
 
@@ -313,7 +334,7 @@ class EtatController extends Controller
         $TotalByClient = [];
         $LastRowByClient = [];
         foreach ($DataByClient as $client => $values) {
-        $TotalByClient[$client] = array_sum(array_column($values, 'total'));
+        $TotalByClient[$client] = array_sum(array_column($values, 'totalnew'));
         $LastRowByClient[$client] = end($values); // Get the last item
         }
 

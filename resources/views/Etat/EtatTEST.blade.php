@@ -238,6 +238,7 @@
                     <tr>
                         <th>Produit</th>
                         <th>Quantité</th>
+                        <th>Remise</th>
                         <th>Prix</th>
                         <th>Total</th>
                     </tr>
@@ -251,16 +252,19 @@
                             <tr>
                                 <td>{{ $item->name ?? 'N/A' }}</td>
                                 <td>{{ $item->QteConvert ?? 'N/A' }}</td>
-                                <td style="text-align: end">{{ $item->price ?? 'N/A' }} DH</td>
-                                <td style="text-align: end">{{ $item->total ?? 'N/A' }} DH</td>
+
+                                <td>{{ $item->remise ?? 'N/A' }}</td>
+                                <td style="text-align: end">{{ $item->price_new ?? 'N/A' }} DH</td>
+                                <td style="text-align: end">{{ $item->totalnew ?? 'N/A' }} DH</td>
                             </tr>
                         @endif
                     @endforeach
                     <tr>
                         <td>{{ $LastRowByClient[$client]->name ?? 'N/A' }}</td>
                         <td>{{ $LastRowByClient[$client]->QteConvert ?? 'N/A' }}</td>
-                        <td style="text-align: end">{{ $LastRowByClient[$client]->price ?? 'N/A' }} DH</td>
-                        <td style="text-align: end">{{ $LastRowByClient[$client]->total ?? 'N/A' }} DH</td>
+                        <td>{{ $LastRowByClient[$client]->remise ?? 'N/A' }}</td>
+                        <td style="text-align: end">{{ $LastRowByClient[$client]->price_new ?? 'N/A' }} DH</td>
+                        <td style="text-align: end">{{ $LastRowByClient[$client]->totalnew ?? 'N/A' }} DH</td>
                     </tr>
                 </tbody>
             </table>
@@ -287,25 +291,33 @@
         <div class="d-flex justify-content-end align-items-end">
             <table class="" id="tableDetail" style="width: 50%">
                 <tr>
-                    <th colspan="3">Total général HT</th>
-                    <th>{{ number_format($GrandTotal, 2, ".", "") }} DH</th>
+                    <th colspan="3">Total général des ventes</th>
+                    <th style="text-align: right">{{ number_format($GrandTotal, 2, ".", "") }} DH</th>
                 </tr>
                 <tr>
                     <th colspan="3">Total général des crédits</th>
-                    <th>{{ number_format($GrandTotalCredit, 2, ".", "") }} DH</th>
+                    <th style="text-align: right">{{ number_format($GrandTotalCredit, 2, ".", "") }} DH</th>
                 </tr>
+
+            </table>
+        </div>
+        <div>
+            <table id="tableDetail" style="width: 50%">
+                 @foreach ($TotalByModePaiement as $item)
+                 <tr>
+                    <th colspan="3">{{$item->name}}</th>
+                    <th style="text-align: right">{{ number_format($item->totalpaye, 2, ".", "") }} DH</th>
+                 </tr>
+                @endforeach
                 <tr>
                     <th colspan="3">Charge</th>
-                    <th>{{ number_format($Charge, 2, ".", "") }} DH</th>
+                    <th style="text-align: right">{{ number_format($Charge, 2, ".", "") }} DH</th>
                 </tr>
                 <tr>
                     <th colspan="3">Versement</th>
-                    <th>{{ number_format($Versement, 2, ".", "") }} DH</th>
+                    <th style="text-align: right">{{ number_format($Versement, 2, ".", "") }} DH</th>
                 </tr>
-                @foreach ($TotalByModePaiement as $item)
-                    <th colspan="3">{{$item->name}}</th>
-                    <th>{{ number_format($item->totalpaye, 2, ".", "") }} DH</th>
-                @endforeach
+
             </table>
         </div>
 
