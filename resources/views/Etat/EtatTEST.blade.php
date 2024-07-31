@@ -133,13 +133,13 @@
         .TitleClient
         {
             text-transform: uppercase !important;
-            text-align: center !important;
+            text-align: left !important;
             padding: .5rem !important;
             margin-top: 1rem !important;
             line-height: normal !important;
             font-size: calc(1.3rem + .6vw);
-            border: 1px solid black;
-            border-radius: 10px
+           /*  border: 1px solid black;
+            border-radius: 10px */
 
         }
     </style>
@@ -232,7 +232,7 @@
                 <div class="page-break"></div>
             @endif
 
-            <h3 class="TitleClient">{{ $client }}</h3>
+            <u class="TitleClient">Client : {{ $client }}</u>
             <table class="" id="tableDetail">
                 <thead>
                     <tr>
@@ -254,8 +254,8 @@
                                 <td>{{ $item->QteConvert ?? 'N/A' }}</td>
 
                                 <td>{{ $item->remise ?? 'N/A' }}</td>
-                                <td style="text-align: end">{{ $item->price_new ?? 'N/A' }} DH</td>
-                                <td style="text-align: end">{{ $item->totalnew ?? 'N/A' }} DH</td>
+                                <td style="text-align: right">{{ $item->price_new ?? 'N/A' }} DH</td>
+                                <td style="text-align: right">{{ $item->totalnew ?? 'N/A' }} DH</td>
                             </tr>
                         @endif
                     @endforeach
@@ -263,20 +263,24 @@
                         <td>{{ $LastRowByClient[$client]->name ?? 'N/A' }}</td>
                         <td>{{ $LastRowByClient[$client]->QteConvert ?? 'N/A' }}</td>
                         <td>{{ $LastRowByClient[$client]->remise ?? 'N/A' }}</td>
-                        <td style="text-align: end">{{ $LastRowByClient[$client]->price_new ?? 'N/A' }} DH</td>
-                        <td style="text-align: end">{{ $LastRowByClient[$client]->totalnew ?? 'N/A' }} DH</td>
+                        <td style="text-align: right">{{ $LastRowByClient[$client]->price_new ?? 'N/A' }} DH</td>
+                        <td style="text-align: right">{{ $LastRowByClient[$client]->totalnew ?? 'N/A' }} DH</td>
                     </tr>
                 </tbody>
             </table>
             <div class="d-flex justify-content-end align-items-end" style="display: flex;justify-content: flex-end;align-items: flex-end;">
                 <table class="" id="tableDetail" style="width: 50%">
                     <tr>
-                        <th colspan="3">Totaux HT</th>
-                        <th style="text-align: end">{{ number_format($TotalByClient[$client] ?? '0.00', 2, ".", "") }} DH</th>
+                        <th >Totaux HT</th>
+                        <th style="text-align: right">{{ number_format($TotalByClient[$client] ?? '0.00', 2, ".", "") }} DH</th>
                     </tr>
                     <tr>
-                        <th colspan="3">Total Credit</th>
-                        <th style="text-align: end">{{ number_format($TotalCreditByClient[$client] ?? '0.00', 2, ".", "") }} DH</th>
+                        <th >Total Payé</th>
+                        <th style="text-align: right">{{ number_format($TotalPayeByClient[$client] ?? '0.00', 2, ".", "") }} DH</th>
+                    </tr>
+                    <tr>
+                        <th >Total Credit</th>
+                        <th style="text-align: right">{{ number_format($TotalCreditByClient[$client] ?? '0.00', 2, ".", "") }} DH</th>
                     </tr>
                 </table>
             </div>

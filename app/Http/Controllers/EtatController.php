@@ -344,12 +344,24 @@ class EtatController extends Controller
                     JOIN clients c ON c.id = r.idclient
                     WHERE DATE(r.created_at) BETWEEN ? AND ? AND r.idmode = ?',[$request->startDate,$request->endDate,$IdsCredit]);
 
+        $DataByClientPaye  = DB::select('select p.total as totalpaye,CONCAT(c.nom, " ", c.prenom) AS client from reglements r,paiements p,clients c
+                                    where r.id = p.idreglement and c.id = r.idclient  and date(p.created_at) BETWEEN ? AND ?',[$request->startDate,$request->endDate]);
+
         $DataByClientCredit = collect($DataByClientCredit)->groupBy('client')->toArray();
+
+        $DataByClientPaye   = collect($DataByClientPaye)->groupBy('client')->toArray();
 
         // Calculate total credit
         $TotalCreditByClient = [];
-        foreach ($DataByClientCredit as $client => $values) {
-        $TotalCreditByClient[$client] = array_sum(array_column($values, 'credit_total'));
+        // Calculate total paye
+        $TotalPayeByClient = [];
+        foreach($DataByClientPaye as $client => $values)
+        {
+            $TotalPayeByClient[$client] = array_sum(array_column($values,'totalpaye'));
+        }
+        foreach ($DataByClientCredit as $client => $values)
+        {
+            $TotalCreditByClient[$client] = array_sum(array_column($values, 'credit_total'));
         }
         $GrandTotal = array_sum($TotalByClient);
 
@@ -396,7 +408,8 @@ class EtatController extends Controller
         'DateEnd',
         'Charge',
         'Versement',
-        'TotalByModePaiement'
+        'TotalByModePaiement',
+        'TotalPayeByClient'
     ))->render();
 
     // Load HTML to dompdf
