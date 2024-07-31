@@ -363,7 +363,7 @@ class EtatController extends Controller
         $DateEnd   = $request->endDate;
 
         // Charge
-        $Charge = DB::table('Charge as ch')
+        $Charge = DB::table('charge as ch')
         ->join('company as c','c.id','=','ch.idcompany')
         ->where('c.status','=','Active')
         ->whereBetween(DB::raw('DATE(ch.created_at)'), [$DateStart, $DateEnd])
