@@ -44,6 +44,18 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
 
     <script src="https://code.jquery.com/ui/1.13.3/jquery-ui.js"></script>
+    <script>
+        $(document).ready(function() {
+            $(document).on('keydown', function(event)
+            {
+
+
+                if (event.ctrlKey && event.key === " ") {
+                    window.location.href = "Order"; // Replace with your desired URL
+                }
+            });
+        });
+    </script>
    <!-- Toast -->
    <div class="toast toast-onload align-items-center text-bg-primary border-0" role="alert" aria-live="assertive" aria-atomic="true">
      <div class="toast-body hstack align-items-start gap-6">
