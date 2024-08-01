@@ -201,19 +201,22 @@
                     <tr>
                         <td style="text-align: center">{{ $item->name }}</td>
                         <td style="text-align: center">{{ $item->qte }}</td>
-                        @if ($item->accessoire <0)
+                        <td style="text-align: right">{{number_format($item->price_new,2,","," ")}}</td>
+                        <td style="text-align: right">{{number_format($item->totalnew,2,","," ")}}</td>
+
+                        {{-- @if ($item->accessoire <0)
                             @php
                                 $AccessoireParUnit = abs($item->accessoire / $item->qtedevision);
                                 $Price             = $item->price - $AccessoireParUnit;
 
                             @endphp
-                        <td>{{number_format($Price,2,","," ")}} DH</td>
-                    @else
-                    <td>{{number_format($item->price + $item->accessoire,2,","," ")}} DH</td>
+                            <td>{{number_format($Price,2,","," ")}} DH</td>
+                        @else
+                            <td>{{number_format($item->price + $item->accessoire,2,","," ")}} DH</td>
 
-                    @endif
-                       {{--  <td style="text-align: center">{{ number_format($item->price + $item->accessoire, 2, ",", " ") }} DH</td> --}}
-                        <td style="text-align: right">{{ number_format($item->total + $item->accessoire, 2, ",", " ") }} DH</td>
+                        @endif
+
+                        <td style="text-align: right">{{ number_format($item->total + $item->accessoire, 2, ",", " ") }} DH</td> --}}
                     </tr>
                 @endforeach
             </tbody>

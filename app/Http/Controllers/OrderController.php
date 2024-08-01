@@ -1103,7 +1103,18 @@ class OrderController extends Controller
                 'l.total',
                 DB::raw("CASE WHEN s.convert IS NOT NULL THEN ROUND(l.qte / s.convert) ELSE l.qte END AS qtedevision"),
                 'l.accessoire',
-                's.type'
+                's.type',
+                DB::raw('IF(l.idsetting IS NOT NULL, ROUND(l.qte / s.convert), l.qte) AS QteConvertWithOutConcat,
+                        ROUND(l.accessoire / IF(l.idsetting IS NOT NULL, ROUND(l.qte / s.convert), l.qte)) AS remise'),
+                DB::raw('IF(ROUND(l.accessoire / IF(l.idsetting IS NOT NULL, ROUND(l.qte / s.convert), l.qte)) < 0,
+                            l.price - (-1 * ROUND(l.accessoire / IF(l.idsetting IS NOT NULL, ROUND(l.qte / s.convert), l.qte))),
+                            l.price + ROUND(l.accessoire / IF(l.idsetting IS NOT NULL, ROUND(l.qte / s.convert), l.qte))
+                        ) AS price_new'),
+                DB::raw('IF(
+                    ROUND(l.accessoire / IF(l.idsetting IS NOT NULL, ROUND(l.qte / s.convert), l.qte)) < 0,
+                    l.price - (-1 * ROUND(l.accessoire / IF(l.idsetting IS NOT NULL, ROUND(l.qte / s.convert), l.qte))),
+                    l.price + ROUND(l.accessoire / IF(l.idsetting IS NOT NULL, ROUND(l.qte / s.convert), l.qte))
+                ) * IF(l.idsetting IS NOT NULL, ROUND(l.qte / s.convert), l.qte) AS totalnew')
             )
             ->get();
 
@@ -1231,8 +1242,21 @@ class OrderController extends Controller
             ->where('o.id', $id)
             ->select('p.name',
             DB::raw("CASE WHEN s.convert IS NOT NULL THEN CONCAT(ROUND(l.qte / s.convert), ' ', s.type) ELSE l.qte END AS qte"),
-                'l.price','l.total','l.accessoire','s.type',DB::raw("CASE WHEN s.convert IS NOT NULL THEN ROUND(l.qte / s.convert) ELSE l.qte END AS qtedevision"))
+                'l.price','l.total','l.accessoire','s.type',
+                DB::raw("CASE WHEN s.convert IS NOT NULL THEN ROUND(l.qte / s.convert) ELSE l.qte END AS qtedevision"),
+                DB::raw('IF(l.idsetting IS NOT NULL, ROUND(l.qte / s.convert), l.qte) AS QteConvertWithOutConcat,
+                        ROUND(l.accessoire / IF(l.idsetting IS NOT NULL, ROUND(l.qte / s.convert), l.qte)) AS remise'),
+                DB::raw('IF(ROUND(l.accessoire / IF(l.idsetting IS NOT NULL, ROUND(l.qte / s.convert), l.qte)) < 0,
+                            l.price - (-1 * ROUND(l.accessoire / IF(l.idsetting IS NOT NULL, ROUND(l.qte / s.convert), l.qte))),
+                            l.price + ROUND(l.accessoire / IF(l.idsetting IS NOT NULL, ROUND(l.qte / s.convert), l.qte))
+                        ) AS price_new'),
+                DB::raw('IF(
+                    ROUND(l.accessoire / IF(l.idsetting IS NOT NULL, ROUND(l.qte / s.convert), l.qte)) < 0,
+                    l.price - (-1 * ROUND(l.accessoire / IF(l.idsetting IS NOT NULL, ROUND(l.qte / s.convert), l.qte))),
+                    l.price + ROUND(l.accessoire / IF(l.idsetting IS NOT NULL, ROUND(l.qte / s.convert), l.qte))
+                ) * IF(l.idsetting IS NOT NULL, ROUND(l.qte / s.convert), l.qte) AS totalnew'))
             ->get();
+
 
 
         $CompanyIsActive       = Company::where('status','Active')->select('title','id')->first();
