@@ -149,10 +149,11 @@ Route::group(['middleware' => ['web','auth']], function ()
 
 
     /********************************  Recouverement **************************************************/
-    Route::get('Recouverement'          ,[RecouverementController::class,'index'                     ]);
-    Route::get('GetRecouvementClient'   ,[RecouverementController::class,'GetRecouvementClient'      ]);
-    Route::get('GetDataSelectedRecouvement',[RecouverementController::class,'GetDataSelectedRecouvement']);
-    Route::post('StoreRecouvement'      ,[RecouverementController::class,'StoreRecouvement'          ]);
+    Route::get('Recouverement'              ,[RecouverementController::class,'index'                        ]);
+    Route::get('GetRecouvementClient'       ,[RecouverementController::class,'GetRecouvementClient'         ]);
+    Route::get('GetDataSelectedRecouvement' ,[RecouverementController::class,'GetDataSelectedRecouvement'   ]);
+    Route::get('Suivirecouverement'         ,[RecouverementController::class,'Suivirecouverement'           ]);
+    Route::post('StoreRecouvement'          ,[RecouverementController::class,'StoreRecouvement'             ]);
     /******************************** end Recouverement ***********************************************/
 
     /********************************  Etat **********************************************************/

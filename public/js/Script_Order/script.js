@@ -38,7 +38,7 @@ $(document).ready(function ()
         {
             var tableVente = $(selector).DataTable({
                 processing: true,
-
+                ordering: false,
                 serverSide: true,
                 ajax: {
                     url: url,

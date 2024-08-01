@@ -285,4 +285,19 @@ class RecouverementController extends Controller
             throw $th;
         }
     }
+
+
+    public function Suivirecouverement()
+    {
+        $CountCompany          = Company::count();
+        if($CountCompany == 0)
+        {
+            return view('Errors.index')
+            ->with('title','Il n\'est pas possible d\'accéder à la page Suivi Recouverement')
+            ->with('body',"Parce qu'il n'y a pas de société active");
+        }
+        $CompanyIsActive       = Company::where('status','Active')->select('title')->first();
+        return view('Recouverement.suivi')
+        ->with('CompanyIsActive'         ,$CompanyIsActive);
+    }
 }
