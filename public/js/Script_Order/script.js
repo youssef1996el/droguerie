@@ -81,7 +81,7 @@ $(document).ready(function ()
                         data: 'idfacture',
                         name: 'idfacture',
                         render: function (data, type, row) {
-                            var html = row.idfacture ? '<span class="btn btn-md btn-success">Facture</span>' : '<span class="btn btn-md btn-info">Bon</span>';
+                            var html = row.idfacture ? '<span class="badge bg-success-subtle text-success">Facture</span>' : '<span class="badge bg-danger-subtle text-danger">Bon</span>';
                             return html;
                         },
 
@@ -91,6 +91,14 @@ $(document).ready(function ()
                     {data: 'created_at_formatted'     , name: 'created_at_formatted'},
                     {data: 'action', name: 'action', orderable: false, searchable: false}
 
+                ],
+                columnDefs: [
+                    {
+                        targets: 7, // the index of the `created_at_formatted` column
+                        render: function (data, type, row) {
+                            return '<div style="white-space: nowrap;">' + data + '</div>';
+                        }
+                    }
                 ],
                 language: {
                     "sInfo": "Affichage de l'élément _START_ à _END_ sur _TOTAL_ éléments",

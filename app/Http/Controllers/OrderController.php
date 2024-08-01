@@ -1040,11 +1040,12 @@ class OrderController extends Controller
                             </a>';
                 }
 
-                $orderCreatedTime = Carbon::parse($row->created_With_Time_Zone);
-                $hoursSinceCreation = $orderCreatedTime->diffInHours(Carbon::now());
-
+                /* $orderCreatedTime = Carbon::parse($row->created_With_Time_Zone);
+                $hoursSinceCreation = $orderCreatedTime->diffInHours(Carbon::now()); */
+                $today = Carbon::today();
+                $createdOrder = Carbon::parse($row->created_With_Time_Zone);
                 // Display "Annuler vente" button if order was created less than 12 hours ago
-                if ($hoursSinceCreation < 12) {
+                if ($createdOrder->isSameDay($today)) {
                     $btn .= '<a href="#" class="text-light ms-2 Trash" value="' . $row->id . '">
                                 <i class="ti ti-shopping-cart-off fs-5 border rounded-2 bg-danger p-1" title="Annuler vente"></i>
                             </a>';
