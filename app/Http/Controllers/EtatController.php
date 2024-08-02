@@ -389,12 +389,15 @@ class EtatController extends Controller
         // Total By Mode Paiement
         $TotalByModePaiement = DB::table('paiements as p')
             ->join('modepaiement as m', 'p.idmode', '=', 'm.id')
+            ->join('reglements as r','r.id','=', 'p.idreglement')
             ->join('company as c', 'p.idcompany', '=', 'c.id')
             ->select(DB::raw('UPPER(m.name) as name'), DB::raw('SUM(p.total) as totalpaye'))
             ->where('c.status', 'Active')
+           /*  ->whereNull('r.datepaiement') */
             ->whereBetween(DB::raw('DATE(p.created_at)'), [$DateStart, $DateEnd])
             ->groupBy('p.idmode')
             ->get();
+            dd($TotalByModePaiement);
     // Load view and render HTML
     $html = view('Etat.EtatTEST', compact(
         'CompanyIsActive',

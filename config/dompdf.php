@@ -95,6 +95,13 @@ return array(
             "http://" => ["rules" => []],
             "https://" => ["rules" => []]
         ],
+        /* 'http_context' => [
+            'ssl'=>[
+                'verify_peer'=>false,
+                'verify_peer_name'=>false,
+                'allow_self_signed'=>true
+            ]
+        ], */
 
          /**
           * @var string

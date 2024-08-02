@@ -143,29 +143,25 @@
                 <tr>
                     <th>
                         <div class="left titleLeft">
-                            <h3 style="text-transform: uppercase;">{{$Info->title}}</h3>
-                           {{--  @if ($typeOrder)
-                                <h3 style="text-transform: uppercase;">{{$Info->title}}</h3>
-                            @else
-                            <img src="data:image/png;base64,{{ base64_encode(file_get_contents(public_path('images_login/Add_a_heading-removebg-preview (3).png'))) }}">
-                            @endif --}}
-                            {{-- <h3 style="text-transform: uppercase;">
-                                {{ $typeOrder == true ? $Info->title : <img src="" alt=""> }}
-                            </h3> --}}
+                            <h3 style="text-transform: uppercase;">{{ $Info->title }}</h3>
                             <h5>TEL: {{ $formattedPhone }} / {{ $formattedFix }}</h5>
                         </div>
                     </th>
                     <th>
                         <div class="right titleRight">
-                            <p>{{ $typeOrder ? 'Facture' : 'Bon' }}</p>
-                            <p>N° {{ $formattedId }}</p>
+                            <img src="data:image/png;base64,{{ $imageData }}" alt="" style="width: 150px; height: 150px;">
                         </div>
+
                     </th>
                 </tr>
             </table>
         </div>
         <div>
             <div class="container DivContentInformationClient">
+                <div class="" style="margin-left: 15px;">
+                    <p>{{ $typeOrder ? 'Facture :' : 'Bon :' }} N° {{ $formattedId }}</p>
+
+                </div>
                 <table style="width: 100%">
                     <tr>
                         <th class="left" style="white-space: nowrap; text-transform: uppercase; text-align: left;">

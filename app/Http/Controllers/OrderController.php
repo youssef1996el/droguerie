@@ -26,6 +26,7 @@ use Illuminate\Support\Facades\Crypt;
 use Auth;
 use PDF;
 use Dompdf\Dompdf;
+use Dompdf\Options;
 use App\Notifications\StockNotification;
 use App\Notifications\ChequeNotification;
 use Illuminate\Support\Facades\Notification;
@@ -1137,23 +1138,78 @@ class OrderController extends Controller
         ->first();
 
 
-        /* $imagePath = public_path('images_login/Add_a_heading-removebg-preview (3).png'); // Adjust the path as needed
-        $imageData = base64_encode(file_get_contents($imagePath)); */
-        $Info = DB::table('infos as f')->join('company as c','c.id','=','f.idcompany')->where('c.status','=','Active')->select('f.*')->first();
-        // Load view file into DOMPDF
-        $pdf            = PDF::loadView('Order.FactureOrBon',compact('Client','DataLine','order','typeOrder','Info','Tva','formattedId','Credit'))
-        ->setOptions([
-            'defaultFnt' => 'Amiri'
-
-            ])->setPaper('a4');
-        if(!is_null($order->idfacture))
-        {
+        $imagePath = public_path('images/R.png');
+        $imageData = base64_encode(file_get_contents($imagePath));
+        $Info = DB::table('infos as f')->join('company as c', 'c.id', '=', 'f.idcompany')->where('c.status', '=', 'Active')->select('f.*')->first();
+        $pdf = app('dompdf.wrapper');
+        $context = stream_context_create([
+            'ssl'  => [
+                'verify_peer'  => FALSE,
+                'verify_peer_name' => FALSE,
+                'allow_self_signed' => TRUE,
+            ]
+        ]);
+        $pdf = PDF::setOptions(['isHTML5ParserEnabled' => true, 'isRemoteEnabled' => true]);
+        $pdf->getDomPDF()->setHttpContext($context);
+        $pdf->loadView('Order.FactureOrBon',
+        compact('Client', 'DataLine', 'order', 'typeOrder', 'Info', 'Tva', 'formattedId', 'Credit', 'imageData'));
+        $pdf->setPaper('A4', 'landscape');
+        if (!is_null($order->idfacture)) {
             return $pdf->download('Facture.pdf');
-        }
-        else
-        {
+        } else {
             return $pdf->download('Bon.pdf');
         }
+
+       /*  $pdf            = PDF::loadView('Order.FactureOrBon',
+        compact('Client','DataLine','order','typeOrder','Info','Tva','formattedId','Credit','imageData'))
+        ->setOptions([
+            'defaultFnt' => 'Amiri',
+            'isRemoteEnabled' => true,
+
+            ])->setPaper('a4'); */
+
+
+
+
+       /*  $options = new Options();
+        $options->set('chroot', [__DIR__.'/Librairie', __DIR__.'/PICS', __DIR__.'/PHOTOS']);
+        $options->set('isRemoteEnabled', true);
+        $options->set('isHtml5ParserEnabled', true);
+        $options->set('isPhpEnabled', false);
+
+        $pdf = new Dompdf($options);
+
+
+        $data = [
+            'Client' => $Client,
+            'DataLine' => $DataLine,
+            'order' => $order,
+            'typeOrder' => $typeOrder,
+            'Info' => $Info,
+            'Tva' => $Tva,
+            'formattedId' => $formattedId,
+            'Credit' => $Credit,
+            'imageData' => $imageData,
+        ];
+
+
+        $html = view('Order.FactureOrBon', $data)->render();
+
+
+        $pdf->loadHtml($html);
+
+
+        $pdf->setPaper('A4', 'portrait');
+
+
+        $pdf->render();
+
+
+        file_put_contents('Bon.pdf', $pdf->output());
+
+
+        $pdf->stream('dompdf', ['Attachment' => 0]); */
+
 
 
 
