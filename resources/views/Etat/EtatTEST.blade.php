@@ -314,12 +314,27 @@
                  </tr>
                 @endforeach
                 <tr>
-                    <th colspan="3">Charge</th>
-                    <th style="text-align: right">{{ number_format($Charge, 2, ".", "") }} DH</th>
+                    <th colspan="3" style="text-transform: uppercase">Total Reglement</th>
+                    <th style="text-align: right">{{ number_format($TotalReglementPaye, 2, ".", "") }} DH</th>
                 </tr>
                 <tr>
-                    <th colspan="3">Versement</th>
-                    <th style="text-align: right">{{ number_format($Versement, 2, ".", "") }} DH</th>
+                    <th colspan="3" style="text-transform: uppercase">Solde de départ la caisse </th>
+                    <th style="text-align: right">{{ number_format($SoldeCaisse, 2, ".", "") }} DH</th>
+                </tr>
+                <tr>
+                    <th colspan="3" style="text-transform: uppercase">Charge</th>
+                    <th style="text-align: right">{{ number_format($Charge, 2, ".", "") }} DH</th>
+                </tr>
+                @foreach ($Versement as $item)
+                <tr>
+                    <th colspan="3" style="text-transform: uppercase">Versement / {{$item->comptable}}</th>
+                    <th style="text-align: right">{{ number_format($item->total, 2, ".", "") }} DH</th>
+                </tr>
+                @endforeach
+
+                <tr>
+                    <th colspan="3">Reste</th>
+                    <th style="text-align: right">{{ number_format($reste, 2, ".", "") }} DH</th>
                 </tr>
 
             </table>

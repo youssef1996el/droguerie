@@ -345,7 +345,7 @@ class EtatController extends Controller
                     WHERE DATE(r.created_at) BETWEEN ? AND ? AND r.idmode = ?',[$request->startDate,$request->endDate,$IdsCredit]);
 
         $DataByClientPaye  = DB::select('select p.total as totalpaye,CONCAT(c.nom, " ", c.prenom) AS client from reglements r,paiements p,clients c
-                                    where r.id = p.idreglement and c.id = r.idclient  and date(p.created_at) BETWEEN ? AND ?',[$request->startDate,$request->endDate]);
+                                    where r.id = p.idreglement and c.id = r.idclient  and date(p.created_at) BETWEEN ? AND ? and r.datepaiement is null',[$request->startDate,$request->endDate]);
 
         $DataByClientCredit = collect($DataByClientCredit)->groupBy('client')->toArray();
 
@@ -385,7 +385,11 @@ class EtatController extends Controller
         ->join('company as c','c.id','=','v.idcompany')
         ->where('c.status','=','Active')
         ->whereBetween(DB::raw('DATE(v.created_at)'), [$DateStart, $DateEnd])
-        ->sum('v.total');
+        ->groupBy('v.comptable')
+        ->select('v.comptable','v.total')
+        ->get();
+
+        /* ->sum('v.total') */
         // Total By Mode Paiement
         $TotalByModePaiement = DB::table('paiements as p')
             ->join('modepaiement as m', 'p.idmode', '=', 'm.id')
@@ -393,11 +397,26 @@ class EtatController extends Controller
             ->join('company as c', 'p.idcompany', '=', 'c.id')
             ->select(DB::raw('UPPER(m.name) as name'), DB::raw('SUM(p.total) as totalpaye'))
             ->where('c.status', 'Active')
-           /*  ->whereNull('r.datepaiement') */
+            ->whereNull('r.datepaiement')
             ->whereBetween(DB::raw('DATE(p.created_at)'), [$DateStart, $DateEnd])
             ->groupBy('p.idmode')
             ->get();
-            dd($TotalByModePaiement);
+        $TotalReglementPaye = DB::table('reglements as r')
+        ->join('paiements as p','r.id','=','p.idreglement')
+        ->join('company as c','c.id','=','p.idcompany')
+        ->where('c.status','Active')
+        ->whereBetween('r.datepaiement',[$DateStart,$DateEnd])
+        ->sum('p.total');
+
+        $SoldeCaisse  = DB::table('soldecaisse as s')
+        ->join('company as c','c.id','=','s.idcompany')
+        ->where('c.status','Active')
+        ->whereBetween(DB::raw('DATE(s.created_at)'),[$DateStart,$DateEnd])
+        ->sum('s.total');
+
+        $reste =  ( $TotalByModePaiement->sum('totalpaye') + $TotalReglementPaye +  $SoldeCaisse ) - ($Charge + $Versement->sum('total'));
+
+
     // Load view and render HTML
     $html = view('Etat.EtatTEST', compact(
         'CompanyIsActive',
@@ -412,7 +431,10 @@ class EtatController extends Controller
         'Charge',
         'Versement',
         'TotalByModePaiement',
-        'TotalPayeByClient'
+        'TotalPayeByClient',
+        'TotalReglementPaye',
+        'SoldeCaisse',
+        'reste'
     ))->render();
 
     // Load HTML to dompdf
