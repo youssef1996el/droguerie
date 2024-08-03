@@ -430,7 +430,14 @@
                     <th style="text-align: right">{{ number_format($item->total, 2, ".", "") }} DH</th>
                 </tr>
                 @endforeach
-
+                @if (count($Paiement_Employee) > 0)
+                    @foreach ($Paiement_Employee as $item)
+                    <tr>
+                        <th colspan="3">{{$item->employe}}</th>
+                        <th style="text-align: right">{{ number_format($item->total, 2, ".", "") }} DH</th>
+                     </tr>
+                    @endforeach
+                @endif
                 <tr>
                     <th colspan="3">Reste</th>
                     <th style="text-align: right">{{ number_format($reste, 2, ".", "") }} DH</th>
