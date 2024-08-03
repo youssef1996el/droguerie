@@ -414,6 +414,19 @@ class EtatController extends Controller
         ->whereBetween(DB::raw('DATE(s.created_at)'),[$DateStart,$DateEnd])
         ->sum('s.total');
 
+
+        // tableau enccaissement crédit
+       /*  $Tableau_enccaissement = DB::table('clients as c')
+        ->join('reglements as r', 'c.id', '=', 'r.idclient')
+        ->join('company as co'   ,'co.id','=','r.idcompany')
+        ->select(DB::raw('concat(c.nom, " ", c.prenom) as client'), 'r.total')
+        ->whereNotNull('r.datepaiement')
+        ->where(DB::raw('Date(r.datepaiement)'), '!=', DB::raw('Date(r.created_at)'))
+        ->where('co.status','Active')
+        ->whereBetween(DB::raw('DATE(r.datepaiement)'),[$DateStart,$DateEnd])
+        ->get(); */
+
+
         $reste =  ( $TotalByModePaiement->sum('totalpaye') + $TotalReglementPaye +  $SoldeCaisse ) - ($Charge + $Versement->sum('total'));
 
 
@@ -434,7 +447,8 @@ class EtatController extends Controller
         'TotalPayeByClient',
         'TotalReglementPaye',
         'SoldeCaisse',
-        'reste'
+        'reste',
+        'Tableau_enccaissement'
     ))->render();
 
     // Load HTML to dompdf

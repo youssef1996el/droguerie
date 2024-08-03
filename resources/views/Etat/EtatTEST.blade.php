@@ -142,6 +142,80 @@
             border-radius: 10px */
 
         }
+
+        .row {
+            display: flex;
+            flex-wrap: wrap;
+            margin-right: -15px;
+            margin-left: -15px;
+        }
+        .col-6 {
+            flex: 0 0 50%;
+            max-width: 50%;
+            padding-right: 15px;
+            padding-left: 15px;
+        }
+        .border {
+            border: 1px solid #dee2e6;
+        }
+        .rounded-2 {
+            border-radius: 0.25rem; /* 4px */
+        }
+        .bg-light {
+            background-color: #f8f9fa;
+        }
+        .text-dark {
+            color: #343a40;
+        }
+        .text-center
+        {
+            text-align: center;
+        }
+        .p-2 {
+            padding: 0.5rem; /* 8px */
+        }
+        .text-uppercase
+        {
+            text-transform: uppercase;
+        }
+        .table {
+            width: 100%;
+            margin-bottom: 1rem;
+            color: #212529;
+            border-collapse: collapse;
+        }
+
+        /* Bordered table */
+        .table-bordered {
+            border: 1px solid #dee2e6;
+        }
+
+        .table-bordered th,
+        .table-bordered td {
+            border: 1px solid #dee2e6;
+        }
+
+        /* Striped table */
+        .table-striped tbody tr:nth-of-type(odd) {
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+
+        /* Table header styling */
+        .table th,
+        .table td {
+            padding: 0.75rem;
+            vertical-align: top;
+            border-top: 1px solid #dee2e6;
+        }
+
+        .table thead th {
+            vertical-align: bottom;
+            border-bottom: 2px solid #dee2e6;
+        }
+
+        .table tbody + tbody {
+            border-top: 2px solid #dee2e6;
+        }
     </style>
 </head>
 <body>
@@ -305,7 +379,32 @@
 
             </table>
         </div>
+        {{-- <div class="row">
+            <div class="col-6">
+                <h3 class="border rounded-2 bg-light text-dark text-center p-2 text-uppercase">Tableau encaissement</h3>
+                <table  class="table table-striped table-bordered">
+                    @foreach ($TotalByModePaiement as $item)
+                    <tr>
+                       <th colspan="3">{{$item->name}}</th>
+                       <th style="text-align: right">{{ number_format($item->totalpaye, 2, ".", "") }} DH</th>
+                    </tr>
+                   @endforeach
+                </table>
+            </div>
+            <div class="col-6">
+                <h3 class="border rounded-2 bg-light text-dark text-center p-2 text-uppercase">Tableau encaissement crédit</h3>
+                <table  class="table table-striped table-bordered">
+                    @foreach ($Tableau_enccaissement as $item)
+                        <tr>
+                            <th colspan="3">{{$item->client}}</th>
+                            <th style="text-align: right">{{ number_format($item->total, 2, ".", "") }} DH</th>
+                        </tr>
+                    @endforeach
+                </table>
+            </div>
+        </div> --}}
         <div>
+
             <table id="tableDetail" style="width: 50%">
                  @foreach ($TotalByModePaiement as $item)
                  <tr>
