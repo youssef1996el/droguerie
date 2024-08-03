@@ -223,6 +223,10 @@
                     <td class="text-end"><strong>Total HT:</strong></td>
                     <td style="text-align: right">{{ number_format($SumTotalHT, 2, ",", " ") }} DH</td>
                 </tr>
+                <tr>
+                    <td class="text-end"><strong>Total Payé :</strong></td>
+                    <td style="text-align: right">{{number_format($SumTotalHT - $Credit ,2,","," ")}} DH</td>
+                </tr>
                 @if ($Credit)
                     <tr>
                         <td class="text-end"><strong>Crédit Restant:</strong></td>

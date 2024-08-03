@@ -298,15 +298,7 @@ class EtatController extends Controller
         ->where('c.status','Active')
         ->value('m.id');
 
-        /* $DataByClient = DB::select('SELECT CONCAT(c.nom, " ", c.prenom) AS client, p.name, l.qte, l.price,l.accessoire, l.total, l.idsetting, s.convert,
-                                    IF(l.idsetting IS NOT NULL, CONCAT(ROUND(l.qte / s.convert), " ", s.type), l.qte) AS QteConvert,
-                                    IF(l.idsetting IS NOT NULL, ROUND(l.qte / s.convert), l.qte) AS QteConvertWithOutConcat, l.accessoire /
-                                    FROM clients c
-                                    JOIN orders o ON c.id = o.idclient
-                                    JOIN lineorder l ON o.id = l.idorder
-                                    JOIN products p ON l.idproduct = p.id
-                                    LEFT JOIN setting s ON l.idsetting = s.id
-                                    WHERE DATE(o.created_at) BETWEEN ? AND ?',[$request->startDate,$request->endDate]); */
+
         $DataByClient = DB::select('SELECT CONCAT(c.nom, " ", c.prenom) AS client, p.name, l.qte, l.price,l.accessoire, l.total, l.idsetting,
         s.convert,IF(l.idsetting IS NOT NULL, CONCAT(ROUND(l.qte / s.convert), " ", s.type), l.qte) AS QteConvert,
         IF(l.idsetting IS NOT NULL, ROUND(l.qte / s.convert), l.qte) AS QteConvertWithOutConcat,
