@@ -225,8 +225,10 @@ class RecouverementController extends Controller
                                         ->select('id','total','idclient','idcompany')
                                         ->first();
 
-                if ($Reglements && intval($Reglements->total) == $item['prix'])
+
+                if ($Reglements && floatval($Reglements->total) == $item['prix'])
                 {
+
                     // Update reglement with mode paiement
                     $updateReglementModePaiement = Reglements::where('id', $Reglements->id)->update([
                         'datepaiement' => Carbon::now()->format('Y-m-d'),
@@ -244,6 +246,7 @@ class RecouverementController extends Controller
                 }
                 else if(intval($Reglements->total > $item['prix']))
                 {
+
                     $updateReglementModePaiement = Reglements::where('id',$Reglements->id)->update([
                         'total'           => $item['prix'],
                         'datepaiement'    => Carbon::now()->format('Y-m-d'),

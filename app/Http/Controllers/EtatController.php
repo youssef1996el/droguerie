@@ -367,11 +367,13 @@ class EtatController extends Controller
         $DateEnd   = $request->endDate;
 
         // Charge
+
         $Charge = DB::table('charge as ch')
-        ->join('company as c','c.id','=','ch.idcompany')
-        ->where('c.status','=','Active')
+        ->join('company as c', 'ch.idcompany', '=', 'c.id')
+        ->select('ch.name', 'ch.total')
+        ->where('c.status', 'Active')
         ->whereBetween(DB::raw('DATE(ch.created_at)'), [$DateStart, $DateEnd])
-        ->sum('ch.total');
+        ->get();
         // Versement
         $Versement = DB::table('versement as v')
         ->join('company as c','c.id','=','v.idcompany')
@@ -382,8 +384,8 @@ class EtatController extends Controller
         ->get();
 
         /* ->sum('v.total') */
-        // Total By Mode Paiement
-        $TotalByModePaiement = DB::table('paiements as p')
+        /*******************************************************   Tableau Encaissement = vente sample + vente credit paye the same day *******/
+        /* $TotalByModePaiement = DB::table('paiements as p')
             ->join('modepaiement as m', 'p.idmode', '=', 'm.id')
             ->join('reglements as r','r.id','=', 'p.idreglement')
             ->join('company as c', 'p.idcompany', '=', 'c.id')
@@ -392,7 +394,52 @@ class EtatController extends Controller
             ->whereNull('r.datepaiement')
             ->whereBetween(DB::raw('DATE(p.created_at)'), [$DateStart, $DateEnd])
             ->groupBy('p.idmode')
-            ->get();
+            ->get(); */
+        $VenteSample = DB::table('paiements as p')
+            ->join('modepaiement as m', 'p.idmode', '=', 'm.id')
+            ->join('reglements as r', 'r.id', '=', 'p.idreglement')
+            ->join('company as c', 'p.idcompany', '=', 'c.id')
+            ->select(DB::raw('UPPER(m.name) as name'), DB::raw('SUM(p.total) as totalpaye'))
+            ->where('c.status', 'Active')
+            ->whereNull('r.datepaiement')
+            ->whereBetween(DB::raw('DATE(p.created_at)'), [$DateStart, $DateEnd])
+            ->groupBy('p.idmode');
+
+        // Second subquery
+        $Credit_Paye_The_same_day = DB::table('reglements as r')
+            ->join('modepaiement as m', 'r.idmode', '=', 'm.id')
+            ->join('company as c', 'r.idcompany', '=', 'c.id')
+            ->select(DB::raw('UPPER(m.name) as name'), DB::raw('SUM(r.total) as totalpaye'))
+            ->where('c.status', 'Active')
+            ->whereRaw('r.datepaiement = DATE(r.created_at)')
+            ->whereBetween(DB::raw('DATE(r.created_at)'), [$DateStart, $DateEnd])
+            ->groupBy('r.idmode');
+
+        // Union the subqueries
+        $unionQuery = $VenteSample->unionAll($Credit_Paye_The_same_day);
+
+        $TotalByModePaiement = DB::table(DB::raw("({$unionQuery->toSql()}) as t"))
+                    ->mergeBindings($unionQuery)
+                    ->select('name', DB::raw('SUM(totalpaye) as totalpaye'))
+                    ->groupBy('name')
+                    ->havingRaw('SUM(totalpaye) IS NOT NULL')
+                    ->get();
+        /*******************************************************  End Tableau Encaissement = vente sample + vente credit paye the same day *******/
+
+        /******************************************************* Tableau Encaissement Credit  ******************************************/
+
+         $Tableau_enccaissement_Credit = DB::table('clients as c')
+         ->join('reglements as r', 'c.id', '=', 'r.idclient')
+         ->join('company as co'   ,'co.id','=','r.idcompany')
+         ->select(DB::raw('concat(c.nom, " ", c.prenom) as client'), 'r.total')
+         ->whereNotNull('r.datepaiement')
+         ->where(DB::raw('Date(r.datepaiement)'), '!=', DB::raw('Date(r.created_at)'))
+         ->where('co.status','Active')
+         ->whereBetween(DB::raw('DATE(r.datepaiement)'),[$DateStart,$DateEnd])
+         ->get();
+
+        /*******************************************************  End Tableau Encaissement Credit  ******************************************/
+
         $TotalReglementPaye = DB::table('reglements as r')
         ->join('paiements as p','r.id','=','p.idreglement')
         ->join('company as c','c.id','=','p.idcompany')
@@ -413,19 +460,10 @@ class EtatController extends Controller
         ->where('c.status', 'Active')
         ->whereBetween(DB::raw('DATE(r.created_at)'),[$DateStart,$DateEnd])
         ->get();
-        // tableau enccaissement crédit
-       /*  $Tableau_enccaissement = DB::table('clients as c')
-        ->join('reglements as r', 'c.id', '=', 'r.idclient')
-        ->join('company as co'   ,'co.id','=','r.idcompany')
-        ->select(DB::raw('concat(c.nom, " ", c.prenom) as client'), 'r.total')
-        ->whereNotNull('r.datepaiement')
-        ->where(DB::raw('Date(r.datepaiement)'), '!=', DB::raw('Date(r.created_at)'))
-        ->where('co.status','Active')
-        ->whereBetween(DB::raw('DATE(r.datepaiement)'),[$DateStart,$DateEnd])
-        ->get(); */
 
 
-        $reste =  ( $TotalByModePaiement->sum('totalpaye') + $TotalReglementPaye +  $SoldeCaisse ) - ($Charge + $Versement->sum('total') + $Paiement_Employee->sum('total'));
+
+        $reste =  ( $TotalByModePaiement->sum('totalpaye') + $TotalReglementPaye +  $SoldeCaisse ) - ($Charge->sum('total') + $Versement->sum('total') + $Paiement_Employee->sum('total'));
 
 
     // Load view and render HTML
@@ -446,8 +484,11 @@ class EtatController extends Controller
         'TotalReglementPaye',
         'SoldeCaisse',
         'reste',
-       /*  'Tableau_enccaissement', */
+        'Tableau_enccaissement_Credit',
         'Paiement_Employee'
+
+
+
     ))->render();
 
     // Load HTML to dompdf

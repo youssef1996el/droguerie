@@ -243,60 +243,7 @@
                 </tr>
             </table>
         </div>
-        {{-- @foreach ($DataByClient as $client => $values)
-            <h3 class="TitleClient" >{{ $client }}</h3>
-            <table class="" id="tableDetail">
-                <thead>
-                    <tr>
 
-                        <th>Produit</th>
-                        <th>Quantité</th>
-                        <th>Prix</th>
-                        <th>Total</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @php
-                        $totalItems = count($values);
-                    @endphp
-                    @foreach ($values as $index => $item)
-                        @if ($index < $totalItems - 1) <!-- Exclude the last row -->
-                            <tr>
-
-                                <td>{{ $item->name ?? 'N/A' }}</td>
-                                <td>{{ $item->QteConvert ?? 'N/A' }}</td>
-                                <td style="text-align: end">{{ $item->price ?? 'N/A' }} DH</td>
-                                <td style="text-align: end">{{ $item->total ?? 'N/A' }} DH</td>
-                            </tr>
-
-                        @endif
-                    @endforeach
-                    <tr>
-
-                        <td>{{ $LastRowByClient[$client]->name ?? 'N/A' }}</td>
-                        <td>{{ $LastRowByClient[$client]->QteConvert ?? 'N/A' }}</td>
-                        <td style="text-align: end">{{ $LastRowByClient[$client]->price ?? 'N/A' }} DH</td>
-                        <td style="text-align: end">{{ $LastRowByClient[$client]->total ?? 'N/A' }} DH</td>
-                    </tr>
-                </tbody>
-
-            </table>
-            <div class="d-flex justify-content-end align-items-end" style="display: flex;justify-content: flex-end;align-items: flex-end;">
-                <table class="" id="tableDetail" style="width: 50%">
-                    <tr>
-                        <th colspan="3">Totaux HT</th>
-
-                        <th style="text-align: end">{{ number_format($TotalByClient[$client] ?? '0.00',2,".","") }} DH</th>
-                    </tr>
-                    <tr>
-                        <th colspan="3">Total Credit</th>
-                        <th style="text-align: end">{{ number_format($TotalCreditByClient[$client] ?? '0.00',2,".","") }} DH</th>
-                    </tr>
-                </table>
-            </div>
-
-            <hr>
-        @endforeach --}}
         @php
             $clientCounter = 0;
         @endphp
@@ -366,7 +313,7 @@
             @endphp
         @endforeach
 
-        <div class="d-flex justify-content-end align-items-end">
+        {{-- <div class="d-flex justify-content-end align-items-end">
             <table class="" id="tableDetail" style="width: 50%">
                 <tr>
                     <th colspan="3">Total général des ventes</th>
@@ -378,32 +325,70 @@
                 </tr>
 
             </table>
-        </div>
-        {{-- <div class="row">
-            <div class="col-6">
-                <h3 class="border rounded-2 bg-light text-dark text-center p-2 text-uppercase">Tableau encaissement</h3>
-                <table  class="table table-striped table-bordered">
+        </div> --}}
+        <div style="width: 100%;  display:inline-block;">
+            <div style="width: 45%; padding: 15px; box-sizing: border-box; margin-right: 5%;">
+                <h3 style="border: 1px solid #ccc; border-radius: 5px; background-color: #f8f9fa; color: #000; text-align: center; padding: 10px; text-transform: uppercase; font-size: 14px;">Tableau encaissement</h3>
+                <table style="width: 100%; border-collapse: collapse;">
                     @foreach ($TotalByModePaiement as $item)
                     <tr>
-                       <th colspan="3">{{$item->name}}</th>
-                       <th style="text-align: right">{{ number_format($item->totalpaye, 2, ".", "") }} DH</th>
+                        <th colspan="3" style="border: 1px solid #ccc; padding: 8px;">{{ $item->name }}</th>
+                        <th style="border: 1px solid #ccc; padding: 8px; text-align: right;">{{ number_format($item->totalpaye, 2, ".", "") }} DH</th>
                     </tr>
-                   @endforeach
-                </table>
-            </div>
-            <div class="col-6">
-                <h3 class="border rounded-2 bg-light text-dark text-center p-2 text-uppercase">Tableau encaissement crédit</h3>
-                <table  class="table table-striped table-bordered">
-                    @foreach ($Tableau_enccaissement as $item)
-                        <tr>
-                            <th colspan="3">{{$item->client}}</th>
-                            <th style="text-align: right">{{ number_format($item->total, 2, ".", "") }} DH</th>
-                        </tr>
                     @endforeach
                 </table>
             </div>
-        </div> --}}
-        <div>
+
+            <div style="width: 45%; padding: 15px; box-sizing: border-box;">
+                <h3 style="border: 1px solid #ccc; border-radius: 5px; background-color: #f8f9fa; color: #000; text-align: center; padding: 10px; text-transform: uppercase; font-size: 14px;">Tableau encaissement crédit</h3>
+                <table style="width: 100%; border-collapse: collapse;">
+                    @foreach ($Tableau_enccaissement_Credit as $item)
+                    <tr>
+                        <th colspan="3" style="border: 1px solid #ccc; padding: 8px;">{{ $item->client }}</th>
+                        <th style="border: 1px solid #ccc; padding: 8px; text-align: right;">{{ number_format($item->total, 2, ".", "") }} DH</th>
+                    </tr>
+                    @endforeach
+                </table>
+            </div>
+        </div>
+
+        <div style="width: 100%;  display:inline-block; margin-top: 80px;">
+            <div style="width: 45%; padding: 15px; box-sizing: border-box; margin-right: 5%;">
+                <h3 style="border: 1px solid #ccc; border-radius: 5px; background-color: #f8f9fa; color: #000; text-align: center; padding: 10px; text-transform: uppercase; font-size: 14px;">Tableau charge</h3>
+                <table style="width: 100%; border-collapse: collapse;">
+                    @foreach ($Charge as $item)
+                    <tr>
+                        <th colspan="3" style="border: 1px solid #ccc; padding: 8px;">{{ $item->name }}</th>
+                        <th style="border: 1px solid #ccc; padding: 8px; text-align: right;">{{ number_format($item->total, 2, ".", "") }} DH</th>
+                    </tr>
+                    @endforeach
+                </table>
+            </div>
+
+            <div style="width: 45%; padding: 15px; box-sizing: border-box;">
+                <h3 style="border: 1px solid #ccc; border-radius: 5px; background-color: #f8f9fa; color: #000; text-align: center; padding: 10px; text-transform: uppercase; font-size: 14px;">Tableau versement</h3>
+                <table style="width: 100%; border-collapse: collapse;">
+                    @foreach ($Versement as $item)
+                    <tr>
+                        <th colspan="3" style="border: 1px solid #ccc; padding: 8px;">{{ $item->comptable }}</th>
+                        <th style="border: 1px solid #ccc; padding: 8px; text-align: right;">{{ number_format($item->total, 2, ".", "") }} DH</th>
+                    </tr>
+                    @endforeach
+                </table>
+            </div>
+        </div>
+
+
+
+
+
+
+
+
+
+
+
+        {{-- <div>
 
             <table id="tableDetail" style="width: 50%">
                  @foreach ($TotalByModePaiement as $item)
@@ -444,7 +429,7 @@
                 </tr>
 
             </table>
-        </div>
+        </div> --}}
 
     </div>
 </body>
