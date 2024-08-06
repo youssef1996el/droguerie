@@ -310,7 +310,7 @@ class RecouverementController extends Controller
                     DB::raw('date(p.created_at) as date_paye'),DB::raw('date(r.created_at) as date_credit'),'co.title')
             ->where('co.status', 'Active')
             ->whereRaw('r.datepaiement != date(r.created_at)')
-            ->groupBy(DB::raw('date(p.created_at)'))
+            ->groupBy(DB::raw('concat(c.nom, " ", c.prenom)'))
             ->get();
 
             return DataTables::of($Recouvement)->addIndexColumn()->make(true);
