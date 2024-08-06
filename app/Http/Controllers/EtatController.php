@@ -428,15 +428,17 @@ class EtatController extends Controller
 
         /******************************************************* Tableau Encaissement Credit  ******************************************/
 
-         $Tableau_enccaissement_Credit = DB::table('clients as c')
-         ->join('reglements as r', 'c.id', '=', 'r.idclient')
-         ->join('company as co'   ,'co.id','=','r.idcompany')
-         ->select(DB::raw('concat(c.nom, " ", c.prenom) as client'), 'r.total')
-         ->whereNotNull('r.datepaiement')
-         ->where(DB::raw('Date(r.datepaiement)'), '!=', DB::raw('Date(r.created_at)'))
-         ->where('co.status','Active')
-         ->whereBetween(DB::raw('DATE(r.datepaiement)'),[$DateStart,$DateEnd])
-         ->get();
+        $Tableau_enccaissement_Credit = DB::table('clients as c')
+        ->join('reglements as r', 'c.id', '=', 'r.idclient')
+        ->join('company as co', 'co.id', '=', 'r.idcompany')
+        ->select(DB::raw('concat(c.nom, " ", c.prenom) as client'), DB::raw('SUM(r.total) as total'))
+        ->whereNotNull('r.datepaiement')
+        ->where(DB::raw('Date(r.datepaiement)'), '!=', DB::raw('Date(r.created_at)'))
+        ->where('co.status', 'Active')
+        ->whereBetween(DB::raw('DATE(r.datepaiement)'), [$DateStart, $DateEnd])
+        ->groupBy(DB::raw('concat(c.nom, " ", c.prenom)'))
+        ->get();
+
 
         /*******************************************************  End Tableau Encaissement Credit  ******************************************/
 
