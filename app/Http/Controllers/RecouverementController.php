@@ -290,7 +290,7 @@ class RecouverementController extends Controller
     }
 
 
-    public function Suivirecouverement()
+    public function Suivirecouverement(Request $request)
     {
         $CountCompany          = Company::count();
         if($CountCompany == 0)
@@ -300,6 +300,22 @@ class RecouverementController extends Controller
             ->with('body',"Parce qu'il n'y a pas de société active");
         }
         $CompanyIsActive       = Company::where('status','Active')->select('title')->first();
+        if($request->ajax())
+        {
+            $Recouvement           = DB::table('clients as c')
+            ->join('reglements as r', 'c.id', '=', 'r.idclient')
+            ->join('paiements as p', 'r.id', '=', 'p.idreglement')
+            ->join('company as co', 'p.idcompany', '=', 'co.id')
+            ->select('r.id',DB::raw('concat(c.nom, " ", c.prenom) as client'),DB::raw('sum(p.total) as total'),
+                    DB::raw('date(p.created_at) as date_paye'),DB::raw('date(r.created_at) as date_credit'),'co.title')
+            ->where('co.status', 'Active')
+            ->whereRaw('r.datepaiement != date(r.created_at)')
+            ->groupBy(DB::raw('date(p.created_at)'))
+            ->get();
+
+            return DataTables::of($Recouvement)->addIndexColumn()->make(true);
+        }
+
         return view('Recouverement.suivi')
         ->with('CompanyIsActive'         ,$CompanyIsActive);
     }

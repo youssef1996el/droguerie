@@ -383,7 +383,7 @@
 
 
 
-          <div style="display: flex; justify-content: space-between; align-items: stretch; margin-bottom: 40px;">
+          <div style="display: flex; justify-content: space-between; align-items: stretch; margin-bottom: 40px;margin-top:10px">
             <div style="float: left; width: 50%; border: 1px solid black">
                 <u class="TitleTable">Tableau encaissement</u>
                 <table style="width: 100%; border-collapse: collapse; margin-top: 20px;">

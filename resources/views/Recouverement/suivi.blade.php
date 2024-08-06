@@ -1,5 +1,9 @@
 @extends('Dashboard.app')
 @section('content')
+<script>
+    var Suivirecouverement = "{{url('Suivirecouverement')}}";
+</script>
+<script src="{{asset('js/Script_SuiviRecouvrement/script.js')}}"></script>
 <div class="container-fluid">
     <div class="card card-body py-3">
         <div class="row align-items-center">
@@ -25,39 +29,18 @@
         </div>
     </div>
 
-    {{-- <div class="widget-content searchable-container list">
-        <div class="card card-body">
-            <div class="row">
-                <div class="col-md-4 col-xl-4">
-                    <div class="form-group d-flex align-items-center">
-                        <label for="" class="me-2">Clients</label>
-                        <select name="" id="IdClient" class="form-select">
-                            <option value="0">veuillez sélectionner le client</option>
-                            @foreach ($Clients as $item)
-                                <option value="{{$item->id}}">{{ $item->client}} </option>
-                            @endforeach
-                        </select>
-                    </div>
-                </div>
-            </div>
 
-        </div>
-    </div> --}}
     <div class="card card-body">
-        <h5 class="card-title border p-2 bg-light rounded-2">Fiche Recouverement</h5>
+        <h5 class="card-title border p-2 bg-light rounded-2">Fiche suivi Recouvrement</h5>
         <div class="table-responsive">
-            <table class="table table-bordered table-striped TableRecouverement">
+            <table class="table table-bordered table-striped TableSuiviRecouverement">
                 <thead>
                     <tr>
-                        <th></th>
                         <th>Client</th>
-                        <th>Montant Vente</th>
                         <th>Montant Payé</th>
-                        <th>Montant Rest</th>
-                        <th>Type</th>
                         <th>Compagnie</th>
-                        <th>Créer par</th>
-                        <th>Créer Le</th>
+                        <th>Date Payé</th>
+                        <th>Date Crédit</th>
                     </tr>
                 </thead>
                 <tbody>
