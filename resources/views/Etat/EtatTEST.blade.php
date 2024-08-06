@@ -228,6 +228,50 @@
             margin-top: 10px;
 
         }
+        @media print {
+    .page-break {
+        page-break-before: always;
+    }
+
+    .client-section {
+        page-break-inside: avoid;
+        break-inside: avoid;
+    }
+
+    .TitleClient {
+        font-weight: bold;
+        font-size: 18px;
+        margin-bottom: 10px;
+    }
+
+    #tableDetail {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 20px;
+    }
+
+    #tableDetail th, #tableDetail td {
+        border: 1px solid #000;
+        padding: 8px;
+        text-align: left;
+    }
+
+    #tableDetail th {
+        background-color: #f2f2f2;
+    }
+
+    .d-flex {
+        display: flex !important;
+    }
+
+    .justify-content-end {
+        justify-content: flex-end !important;
+    }
+
+    .align-items-end {
+        align-items: flex-end !important;
+    }
+}
     </style>
 </head>
 <body>
@@ -257,220 +301,117 @@
         </div>
 
         @php
-            $clientCounter = 0;
-        @endphp
+    $clientCounter = 0;
+@endphp
 
-        @foreach ($DataByClient as $client => $values)
-            @if ($clientCounter % 2 == 0 && $clientCounter != 0)
-                <div class="page-break"></div>
-            @endif
+@foreach ($DataByClient as $client => $values)
+    @if ($clientCounter % 2 == 0 && $clientCounter != 0)
+        <div class="page-break"></div>
+    @endif
 
-            <u class="TitleClient">Client : {{ $client }}</u>
-            <table class="" id="tableDetail">
-                <thead>
-                    <tr>
-                        <th>Produit</th>
-                        <th>Quantité</th>
-                        <th>Remise</th>
-                        <th>Prix</th>
-                        <th>Total</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @php
-                        $totalItems = count($values);
-                    @endphp
-                    @foreach ($values as $index => $item)
-                        @if ($index < $totalItems - 1) <!-- Exclude the last row -->
-                            <tr>
-                                <td>{{ $item->name ?? 'N/A' }}</td>
-                                <td>{{ $item->QteConvert ?? 'N/A' }}</td>
-
-                                <td>{{ $item->remise ?? 'N/A' }}</td>
-                                <td style="text-align: right">{{ $item->price_new ?? 'N/A' }} DH</td>
-                                <td style="text-align: right">{{ $item->totalnew ?? 'N/A' }} DH</td>
-                            </tr>
-                        @endif
-                    @endforeach
-                    <tr>
-                        <td>{{ $LastRowByClient[$client]->name ?? 'N/A' }}</td>
-                        <td>{{ $LastRowByClient[$client]->QteConvert ?? 'N/A' }}</td>
-                        <td>{{ $LastRowByClient[$client]->remise ?? 'N/A' }}</td>
-                        <td style="text-align: right">{{ $LastRowByClient[$client]->price_new ?? 'N/A' }} DH</td>
-                        <td style="text-align: right">{{ $LastRowByClient[$client]->totalnew ?? 'N/A' }} DH</td>
-                    </tr>
-                </tbody>
-            </table>
-            <div class="d-flex justify-content-end align-items-end" style="display: flex;justify-content: flex-end;align-items: flex-end;">
-                <table class="" id="tableDetail" style="width: 50%">
-                    <tr>
-                        <th >Totaux HT</th>
-                        <th style="text-align: right">{{ number_format($TotalByClient[$client] ?? '0.00', 2, ".", "") }} DH</th>
-                    </tr>
-                    <tr>
-                        <th >Total Payé</th>
-                        <th style="text-align: right">{{ number_format($TotalPayeByClient[$client] ?? '0.00', 2, ".", "") }} DH</th>
-                    </tr>
-                    <tr>
-                        <th >Total Credit</th>
-                        <th style="text-align: right">{{ number_format($TotalCreditByClient[$client] ?? '0.00', 2, ".", "") }} DH</th>
-                    </tr>
-                </table>
-            </div>
-
-            <hr>
-
-            @php
-                $clientCounter++;
-            @endphp
-        @endforeach
-
-        {{-- <div class="d-flex justify-content-end align-items-end">
+    <div class="client-section" style="page-break-inside: avoid; break-inside: avoid;">
+        <u class="TitleClient">Client : {{ $client }}</u>
+        <table class="" id="tableDetail">
+            <thead>
+                <tr>
+                    <th>Produit</th>
+                    <th>Quantité</th>
+                    <th>Remise</th>
+                    <th>Prix</th>
+                    <th>Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                @php
+                    $totalItems = count($values);
+                @endphp
+                @foreach ($values as $index => $item)
+                    @if ($index < $totalItems - 1) <!-- Exclude the last row -->
+                        <tr>
+                            <td>{{ $item->name ?? 'N/A' }}</td>
+                            <td>{{ $item->QteConvert ?? 'N/A' }}</td>
+                            <td>{{ $item->remise ?? 'N/A' }}</td>
+                            <td style="text-align: right">{{ $item->price_new ?? 'N/A' }} DH</td>
+                            <td style="text-align: right">{{ $item->totalnew ?? 'N/A' }} DH</td>
+                        </tr>
+                    @endif
+                @endforeach
+                <tr>
+                    <td>{{ $LastRowByClient[$client]->name ?? 'N/A' }}</td>
+                    <td>{{ $LastRowByClient[$client]->QteConvert ?? 'N/A' }}</td>
+                    <td>{{ $LastRowByClient[$client]->remise ?? 'N/A' }}</td>
+                    <td style="text-align: right">{{ $LastRowByClient[$client]->price_new ?? 'N/A' }} DH</td>
+                    <td style="text-align: right">{{ $LastRowByClient[$client]->totalnew ?? 'N/A' }} DH</td>
+                </tr>
+            </tbody>
+        </table>
+        <div class="d-flex justify-content-end align-items-end" style="display: flex;justify-content: flex-end;align-items: flex-end;">
             <table class="" id="tableDetail" style="width: 50%">
                 <tr>
-                    <th colspan="3">Total général des ventes</th>
-                    <th style="text-align: right">{{ number_format($GrandTotal, 2, ".", "") }} DH</th>
+                    <th>Totaux HT</th>
+                    <th style="text-align: right">{{ number_format($TotalByClient[$client] ?? '0.00', 2, ".", "") }} DH</th>
                 </tr>
                 <tr>
-                    <th colspan="3">Total général des crédits</th>
-                    <th style="text-align: right">{{ number_format($GrandTotalCredit, 2, ".", "") }} DH</th>
+                    <th>Total Payé</th>
+                    <th style="text-align: right">{{ number_format($TotalPayeByClient[$client] ?? '0.00', 2, ".", "") }} DH</th>
                 </tr>
-
+                <tr>
+                    <th>Total Credit</th>
+                    <th style="text-align: right">{{ number_format($TotalCreditByClient[$client] ?? '0.00', 2, ".", "") }} DH</th>
+                </tr>
             </table>
-        </div> --}}
-        {{-- <div style="width: 100%;  display:inline-block;">
-            <div style="width: 45%; padding: 15px; box-sizing: border-box; margin-right: 5%;">
-                <u style=" background-color: #f8f9fa; color: #000; text-align: center; padding: 10px; text-transform: uppercase; font-size: 14px;">Tableau encaissement</u>
-                <table style="width: 100%; border-collapse: collapse;">
-                    @foreach ($TotalByModePaiement as $item)
-                    <tr>
-                        <th style="border: 1px solid #ccc; padding: 8px;">{{ $item->name }}</th>
-                        <th style="border: 1px solid #ccc; padding: 8px; text-align: right;">{{ number_format($item->totalpaye, 2, ".", "") }} DH</th>
-                    </tr>
-                    @endforeach
-                </table>
-            </div>
-
-            <div style="width: 45%; padding: 15px; box-sizing: border-box;">
-                <h3 style="background-color: #f8f9fa; color: #000; text-align: center; padding: 10px; text-transform: uppercase; font-size: 14px;">Tableau encaissement crédit</h3>
-                <table style="width: 100%; border-collapse: collapse;">
-                    @foreach ($Tableau_enccaissement_Credit as $item)
-                    <tr>
-                        <th  style="border: 1px solid #ccc; padding: 8px;">{{ $item->client }}</th>
-                        <th style="border: 1px solid #ccc; padding: 8px; text-align: right;">{{ number_format($item->total, 2, ".", "") }} DH</th>
-                    </tr>
-                    @endforeach
-                </table>
-            </div>
         </div>
+    </div>
 
-        <div style="width: 100%;  display:inline-block; margin-top: 80px;">
-            <div style="width: 45%; padding: 15px; box-sizing: border-box; margin-right: 5%;">
-                <h3 style="background-color: #f8f9fa; color: #000; text-align: center; padding: 10px; text-transform: uppercase; font-size: 14px;">Tableau charge</h3>
-                <table style="width: 100%; border-collapse: collapse;">
-                    @foreach ($Charge as $item)
-                    <tr>
-                        <th colspan="3" style="border: 1px solid #ccc; padding: 8px;">{{ $item->name }}</th>
-                        <th style="border: 1px solid #ccc; padding: 8px; text-align: right;">{{ number_format($item->total, 2, ".", "") }} DH</th>
-                    </tr>
-                    @endforeach
-                </table>
-            </div>
+    <hr>
 
-            <div style="width: 45%; padding: 15px; box-sizing: border-box;">
-                <h3 style="background-color: #f8f9fa; color: #000; text-align: center; padding: 10px; text-transform: uppercase; font-size: 14px;">Tableau versement</h3>
-                <table style="width: 100%; border-collapse: collapse;">
-                    @foreach ($Versement as $item)
-                    <tr>
-                        <th colspan="3" style="border: 1px solid #ccc; padding: 8px;">{{ $item->comptable }}</th>
-                        <th style="border: 1px solid #ccc; padding: 8px; text-align: right;">{{ number_format($item->total, 2, ".", "") }} DH</th>
-                    </tr>
-                    @endforeach
-                </table>
-            </div>
-        </div>
-        <div style="width: 100%;  display:inline-block; margin-top: 80px;">
-            <div style="width: 45%; padding: 15px; box-sizing: border-box; margin-right: 5%;">
-                <h3 style="background-color: #f8f9fa; color: #000; text-align: center; padding: 10px; text-transform: uppercase; font-size: 14px;">Tableau Solde De Caisse</h3>
-                <table style="width: 100%; border-collapse: collapse;">
-
-                    <tr>
-                        <th colspan="3" style="border: 1px solid #ccc; padding: 8px;">Solde</th>
-                        <th style="border: 1px solid #ccc; padding: 8px; text-align: right;">{{ number_format($SoldeCaisse, 2, ".", "") }} DH</th>
-                    </tr>
-
-                </table>
-            </div>
-            <div style="width: 45%; padding: 15px; box-sizing: border-box; margin-right: 5%;">
-                <h3 style="background-color: #f8f9fa; color: #000; text-align: center; padding: 10px; text-transform: uppercase; font-size: 14px;">Tableau reste</h3>
-                <table style="width: 100%; border-collapse: collapse;">
-
-                    <tr>
-                        <th colspan="3" style="border: 1px solid #ccc; padding: 8px;">reste</th>
-                        <th style="border: 1px solid #ccc; padding: 8px; text-align: right;">{{ number_format($reste, 2, ".", "") }} DH</th>
-                    </tr>
-
-                </table>
-            </div>
-        </div> --}}
+    @php
+        $clientCounter++;
+    @endphp
+@endforeach
 
 
 
-        {{-- <div>
-            <div style="float: left; width: 40%;">
+<style>
+    .page-break {
+        page-break-before: always;
+    }
+</style>
+
+
+<div class="page-break"></div>
+
+
+
+          <div style="display: flex; justify-content: space-between; align-items: stretch; margin-bottom: 40px;">
+            <div style="float: left; width: 50%; border: 1px solid black">
                 <u class="TitleTable">Tableau encaissement</u>
-                <table style="width: 100%; border-collapse: collapse;margin-top:15px">
+                <table style="width: 100%; border-collapse: collapse; margin-top: 20px;">
+                    @php
+                        $TotalEncaissementPaye = 0;
+                    @endphp
                     @foreach ($TotalByModePaiement as $item)
-                    <tr>
-                        <th style="border: 1px solid #ccc; padding: 8px;">{{ $item->name }}</th>
-                        <th style="border: 1px solid #ccc; padding: 8px; text-align: right;">{{ number_format($item->totalpaye, 2, ".", "") }} DH</th>
-                    </tr>
-                    @endforeach
-                </table>
-            </div>
-            <div style="margin-left: 35%; width: 50%;">
-                <h3 class="TitleTable">Tableau encaissement crédit</h3>
-                <table style="width: 100%; border-collapse: collapse;margin-top:15px">
-                    @foreach ($Tableau_enccaissement_Credit as $item)
-                    <tr>
-                        <th style="border: 1px solid #ccc; padding: 8px;">{{ $item->client }}</th>
-                        <th style="border: 1px solid #ccc; padding: 8px; text-align: right;">{{ number_format($item->total, 2, ".", "") }} DH</th>
-                    </tr>
-                    @endforeach
-                </table>
-            </div>
-          </div> --}}
-
-
-            {{-- <div >
-                <div style="float: left; width: 50%; border: 1px solid black">
-                    <u class="TitleTable" >Tableau encaissement</u>
-                    <table style="width: 100%; border-collapse: collapse;margin-top:20px">
                         @php
-                            $TotalEncaissementPaye = 0;
+                            $TotalEncaissementPaye += $item->totalpaye;
                         @endphp
-                        @foreach ($TotalByModePaiement as $item)
-                            @php
-                                $TotalEncaissementPaye += $item->totalpaye;
-                            @endphp
-                            <tr>
-                                <th style="border: 1px solid #ccc; padding: 8px;">{{ $item->name }}</th>
-                                <th style="border: 1px solid #ccc; padding: 8px; text-align: right;">{{ number_format($item->totalpaye, 2, ".", "") }} DH</th>
-                            </tr>
-                        @endforeach
-                        <tr style="background-color: rgb(195, 255, 190)">
-                            <th style="border: 1px solid #ccc; padding: 8px;">TOTAL</th>
-                            <th style="border: 1px solid #ccc; padding: 8px; text-align: right;">{{ number_format($TotalEncaissementPaye, 2, ".", "") }} DH</th>
+                        <tr>
+                            <th style="border: 1px solid #ccc; padding: 8px;">{{ $item->name }}</th>
+                            <th style="border: 1px solid #ccc; padding: 8px; text-align: right;">{{ number_format($item->totalpaye, 2, ".", "") }} DH</th>
                         </tr>
-                    </table>
-                </div>
-                <div style="margin-left: 55%; width: 45%; border: 1px solid black">
-                    <u class="TitleTable" >Tableau charge</u>
-                    <table style="width: 100%; border-collapse: collapse;margin-top:20px">
-                        @php
-                            $TotalCharge = 0;
-                        @endphp
-                        @foreach ($Charge as $item)
+                    @endforeach
+                    <tr style="background-color: rgb(195, 255, 190);">
+                        <th style="border: 1px solid #ccc; padding: 8px;">TOTAL</th>
+                        <th style="border: 1px solid #ccc; padding: 8px; text-align: right;">{{ number_format($TotalEncaissementPaye, 2, ".", "") }} DH</th>
+                    </tr>
+                </table>
+            </div>
+            <div style="margin-left: 55%; width: 45%; border: 1px solid black">
+                <u class="TitleTable">Tableau charge</u>
+                <table style="width: 100%; border-collapse: collapse; margin-top: 20px;">
+                    @php
+                        $TotalCharge = 0;
+                    @endphp
+                    @foreach ($Charge as $item)
                         @php
                             $TotalCharge += $item->total;
                         @endphp
@@ -478,24 +419,23 @@
                             <th style="border: 1px solid #ccc; padding: 8px;">{{ $item->name }}</th>
                             <th style="border: 1px solid #ccc; padding: 8px; text-align: right;">{{ number_format($item->total, 2, ".", "") }} DH</th>
                         </tr>
-                        @endforeach
-                        <tr style="background-color: rgb(255, 190, 190)">
-                            <th style="border: 1px solid #ccc; padding: 8px;">TOTAL</th>
-                            <th style="border: 1px solid #ccc; padding: 8px; text-align: right;">{{ number_format($TotalCharge, 2, ".", "") }} DH</th>
-                        </tr>
-                    </table>
-                </div>
+                    @endforeach
+                    <tr style="background-color: rgb(255, 190, 190);">
+                        <th style="border: 1px solid #ccc; padding: 8px;">TOTAL</th>
+                        <th style="border: 1px solid #ccc; padding: 8px; text-align: right;">{{ number_format($TotalCharge, 2, ".", "") }} DH</th>
+                    </tr>
+                </table>
             </div>
-            <br><br><br><br><br><br>
+        </div>
 
-            <div >
-                <div style="float: left; width: 50%; border: 1px solid black">
-                    <u class="TitleTable" >Tableau ENCAISSEMENT CRÉDIT</u>
-                    <table style="width: 100%; border-collapse: collapse;margin-top:20px">
-                        @php
-                            $TotalEncaissement_Credit = 0;
-                        @endphp
-                        @foreach ($Tableau_enccaissement_Credit as $item)
+        <div style="display: flex; justify-content: space-between; align-items: stretch; margin-bottom: 40px;">
+            <div style="float: left; width: 50%; border: 1px solid black">
+                <u class="TitleTable">Tableau ENCAISSEMENT CRÉDIT</u>
+                <table style="width: 100%; border-collapse: collapse; margin-top: 20px;">
+                    @php
+                        $TotalEncaissement_Credit = 0;
+                    @endphp
+                    @foreach ($Tableau_enccaissement_Credit as $item)
                         @php
                             $TotalEncaissement_Credit += $item->total;
                         @endphp
@@ -503,20 +443,20 @@
                             <th style="border: 1px solid #ccc; padding: 8px;">{{ $item->client }}</th>
                             <th style="border: 1px solid #ccc; padding: 8px; text-align: right;">{{ number_format($item->total, 2, ".", "") }} DH</th>
                         </tr>
-                        @endforeach
-                        <tr style="background-color: rgb(195, 255, 190)">
-                            <th style="border: 1px solid #ccc; padding: 8px;">TOTAL</th>
-                            <th style="border: 1px solid #ccc; padding: 8px; text-align: right;">{{ number_format($TotalEncaissement_Credit, 2, ".", "") }} DH</th>
-                        </tr>
-                    </table>
-                </div>
-                <div style="margin-left: 55%; width: 45%; border: 1px solid black">
-                    <u class="TitleTable" >Tableau versement</u>
-                    <table style="width: 100%; border-collapse: collapse;margin-top:20px">
-                        @php
-                            $TotalVersement = 0;
-                        @endphp
-                        @foreach ($Versement as $item)
+                    @endforeach
+                    <tr style="background-color: rgb(195, 255, 190);">
+                        <th style="border: 1px solid #ccc; padding: 8px;">TOTAL</th>
+                        <th style="border: 1px solid #ccc; padding: 8px; text-align: right;">{{ number_format($TotalEncaissement_Credit, 2, ".", "") }} DH</th>
+                    </tr>
+                </table>
+            </div>
+            <div style="margin-left: 55%; width: 45%; border: 1px solid black">
+                <u class="TitleTable">Tableau versement</u>
+                <table style="width: 100%; border-collapse: collapse; margin-top: 20px;">
+                    @php
+                        $TotalVersement = 0;
+                    @endphp
+                    @foreach ($Versement as $item)
                         @php
                             $TotalVersement += $item->total;
                         @endphp
@@ -524,198 +464,62 @@
                             <th style="border: 1px solid #ccc; padding: 8px;">{{ $item->comptable }}</th>
                             <th style="border: 1px solid #ccc; padding: 8px; text-align: right;">{{ number_format($item->total, 2, ".", "") }} DH</th>
                         </tr>
-                        @endforeach
-                        <tr style="background-color: rgb(255, 190, 190)">
-                            <th style="border: 1px solid #ccc; padding: 8px;">TOTAL</th>
-                            <th style="border: 1px solid #ccc; padding: 8px; text-align: right;">{{ number_format($TotalVersement, 2, ".", "") }} DH</th>
-                        </tr>
-                    </table>
-                </div>
+                    @endforeach
+                    <tr style="background-color: rgb(255, 190, 190);">
+                        <th style="border: 1px solid #ccc; padding: 8px;">TOTAL</th>
+                        <th style="border: 1px solid #ccc; padding: 8px; text-align: right;">{{ number_format($TotalVersement, 2, ".", "") }} DH</th>
+                    </tr>
+                </table>
             </div>
-            <br><br><br><br><br><br>
-            <div >
-                <div style="float: left; width: 50%; border: 1px solid black">
-                    <u class="TitleTable" >Tableau solde de la caisse</u>
-                    <table style="width: 100%; border-collapse: collapse;margin-top:20px">
-
-                        <tr style="background-color: rgb(195, 255, 190)">
-                            <th style="border: 1px solid #ccc; padding: 8px;">Solde</th>
-                            <th style="border: 1px solid #ccc; padding: 8px; text-align: right;">{{ number_format($SoldeCaisse, 2, ".", "") }} DH</th>
-                        </tr>
-
-                    </table>
-                </div>
-                @if (count($Paiement_Employee) > 0)
-                    <div style="margin-left: 55%; width: 45%; border: 1px solid black">
-                        <u class="TitleTable" >Tableau Encaissement personnel</u>
-                        <table style="width: 100%; border-collapse: collapse;margin-top:20px">
-                            @php
-                                $TotalEncaissementPersonnel = 0;
-                            @endphp
-                            @foreach ($Paiement_Employee as $item)
-                                @php
-                                    $TotalEncaissementPersonnel += $item->total;
-                                @endphp
-                                <tr>
-                                    <th  style="border: 1px solid #ccc; padding: 8px;">{{$item->employe}}</th>
-                                    <th  style="border: 1px solid #ccc; padding: 8px; text-align: right;">{{ number_format($item->total, 2, ".", "") }} DH</th>
-                                </tr>
-                            @endforeach
-                            <tr style="background-color: rgb(255, 190, 190)">
-                                <th  style="border: 1px solid #ccc; padding: 8px;">TOTAL</th>
-                                <th  style="border: 1px solid #ccc; padding: 8px; text-align: right;">{{ number_format($TotalEncaissementPersonnel, 2, ".", "") }} DH</th>
-                            </tr>
-                        </table>
-                    </div>
-                @else
-                    <div style="margin-left: 55%; width: 45%; border: 1px solid black">
-                        <u class="TitleTable" >Tableau reste</u>
-                        <table style="width: 100%; border-collapse: collapse;margin-top:20px">
-                            <tr style="background-color: rgb(195, 255, 190)">
-                                <th style="border: 1px solid #ccc; padding: 8px;">Reste</th>
-                                <th style="border: 1px solid #ccc; padding: 8px; text-align: right;">{{ number_format($reste, 2, ".", "") }} DH</th>
-                            </tr>
-                        </table>
-                    </div>
-                @endif
-            </div> --}}
-
-            <div style="display: flex; justify-content: space-between; margin-bottom: 40px;">
-                <div style="float: left; width: 50%; border: 1px solid black">
-                    <u class="TitleTable">Tableau encaissement</u>
-                    <table style="width: 100%; border-collapse: collapse; margin-top: 20px;">
-                        @php
-                            $TotalEncaissementPaye = 0;
-                        @endphp
-                        @foreach ($TotalByModePaiement as $item)
-                            @php
-                                $TotalEncaissementPaye += $item->totalpaye;
-                            @endphp
-                            <tr>
-                                <th style="border: 1px solid #ccc; padding: 8px;">{{ $item->name }}</th>
-                                <th style="border: 1px solid #ccc; padding: 8px; text-align: right;">{{ number_format($item->totalpaye, 2, ".", "") }} DH</th>
-                            </tr>
-                        @endforeach
-                        <tr style="background-color: rgb(195, 255, 190);">
-                            <th style="border: 1px solid #ccc; padding: 8px;">TOTAL</th>
-                            <th style="border: 1px solid #ccc; padding: 8px; text-align: right;">{{ number_format($TotalEncaissementPaye, 2, ".", "") }} DH</th>
-                        </tr>
-                    </table>
-                </div>
-                <div style="margin-left: 55%; width: 45%; border: 1px solid black">
-                    <u class="TitleTable">Tableau charge</u>
-                    <table style="width: 100%; border-collapse: collapse; margin-top: 20px;">
-                        @php
-                            $TotalCharge = 0;
-                        @endphp
-                        @foreach ($Charge as $item)
-                            @php
-                                $TotalCharge += $item->total;
-                            @endphp
-                            <tr>
-                                <th style="border: 1px solid #ccc; padding: 8px;">{{ $item->name }}</th>
-                                <th style="border: 1px solid #ccc; padding: 8px; text-align: right;">{{ number_format($item->total, 2, ".", "") }} DH</th>
-                            </tr>
-                        @endforeach
-                        <tr style="background-color: rgb(255, 190, 190);">
-                            <th style="border: 1px solid #ccc; padding: 8px;">TOTAL</th>
-                            <th style="border: 1px solid #ccc; padding: 8px; text-align: right;">{{ number_format($TotalCharge, 2, ".", "") }} DH</th>
-                        </tr>
-                    </table>
-                </div>
-            </div>
-
-            <div style="display: flex; justify-content: space-between; margin-bottom: 40px;">
-                <div style="float: left; width: 50%; border: 1px solid black">
-                    <u class="TitleTable">Tableau ENCAISSEMENT CRÉDIT</u>
-                    <table style="width: 100%; border-collapse: collapse; margin-top: 20px;">
-                        @php
-                            $TotalEncaissement_Credit = 0;
-                        @endphp
-                        @foreach ($Tableau_enccaissement_Credit as $item)
-                            @php
-                                $TotalEncaissement_Credit += $item->total;
-                            @endphp
-                            <tr>
-                                <th style="border: 1px solid #ccc; padding: 8px;">{{ $item->client }}</th>
-                                <th style="border: 1px solid #ccc; padding: 8px; text-align: right;">{{ number_format($item->total, 2, ".", "") }} DH</th>
-                            </tr>
-                        @endforeach
-                        <tr style="background-color: rgb(195, 255, 190);">
-                            <th style="border: 1px solid #ccc; padding: 8px;">TOTAL</th>
-                            <th style="border: 1px solid #ccc; padding: 8px; text-align: right;">{{ number_format($TotalEncaissement_Credit, 2, ".", "") }} DH</th>
-                        </tr>
-                    </table>
-                </div>
-                <div style="margin-left: 55%; width: 45%; border: 1px solid black">
-                    <u class="TitleTable">Tableau versement</u>
-                    <table style="width: 100%; border-collapse: collapse; margin-top: 20px;">
-                        @php
-                            $TotalVersement = 0;
-                        @endphp
-                        @foreach ($Versement as $item)
-                            @php
-                                $TotalVersement += $item->total;
-                            @endphp
-                            <tr>
-                                <th style="border: 1px solid #ccc; padding: 8px;">{{ $item->comptable }}</th>
-                                <th style="border: 1px solid #ccc; padding: 8px; text-align: right;">{{ number_format($item->total, 2, ".", "") }} DH</th>
-                            </tr>
-                        @endforeach
-                        <tr style="background-color: rgb(255, 190, 190);">
-                            <th style="border: 1px solid #ccc; padding: 8px;">TOTAL</th>
-                            <th style="border: 1px solid #ccc; padding: 8px; text-align: right;">{{ number_format($TotalVersement, 2, ".", "") }} DH</th>
-                        </tr>
-                    </table>
-                </div>
-            </div>
-            <br><br><br><br>
-            <div style="display: flex; justify-content: space-between;">
-                <div style="float: left; width: 50%; border: 1px solid black">
-                    <u class="TitleTable">Tableau solde de la caisse</u>
-                    <table style="width: 100%; border-collapse: collapse; margin-top: 20px;">
-                        <tr style="background-color: rgb(195, 255, 190);">
-                            <th style="border: 1px solid #ccc; padding: 8px;">Solde</th>
-                            <th style="border: 1px solid #ccc; padding: 8px; text-align: right;">{{ number_format($SoldeCaisse, 2, ".", "") }} DH</th>
-                        </tr>
-                    </table>
-                </div>
-                @if (count($Paiement_Employee) > 0)
-                    <div style="margin-left: 55%; width: 45%; border: 1px solid black">
-                        <u class="TitleTable">Tableau Encaissement personnel</u>
-                        <table style="width: 100%; border-collapse: collapse; margin-top: 20px;">
-                            @php
-                                $TotalEncaissementPersonnel = 0;
-                            @endphp
-                            @foreach ($Paiement_Employee as $item)
-                                @php
-                                    $TotalEncaissementPersonnel += $item->total;
-                                @endphp
-                                <tr>
-                                    <th style="border: 1px solid #ccc; padding: 8px;">{{$item->employe}}</th>
-                                    <th style="border: 1px solid #ccc; padding: 8px; text-align: right;">{{ number_format($item->total, 2, ".", "") }} DH</th>
-                                </tr>
-                            @endforeach
-                            <tr style="background-color: rgb(255, 190, 190);">
-                                <th style="border: 1px solid #ccc; padding: 8px;">TOTAL</th>
-                                <th style="border: 1px solid #ccc; padding: 8px; text-align: right;">{{ number_format($TotalEncaissementPersonnel, 2, ".", "") }} DH</th>
-                            </tr>
-                        </table>
-                    </div>
-                @else
-                    <div style="margin-left: 55%; width: 45%; border: 1px solid black">
-                        <u class="TitleTable">Tableau reste</u>
-                        <table style="width: 100%; border-collapse: collapse; margin-top: 20px;">
-                            <tr style="background-color: rgb(195, 255, 190);">
-                                <th style="border: 1px solid #ccc; padding: 8px;">Reste</th>
-                                <th style="border: 1px solid #ccc; padding: 8px; text-align: right;">{{ number_format($reste, 2, ".", "") }} DH</th>
-                            </tr>
-                        </table>
-                    </div>
-                @endif
+        </div>
+        <br><br><br>
+        <div style="display: flex; justify-content: space-between; align-items: stretch; margin-bottom: 40px;">
+            <div style="float: left; width: 50%; border: 1px solid black">
+                <u class="TitleTable">Tableau solde de la caisse</u>
+                <table style="width: 100%; border-collapse: collapse; margin-top: 20px;">
+                    <tr style="background-color: rgb(195, 255, 190);">
+                        <th style="border: 1px solid #ccc; padding: 8px;">Solde</th>
+                        <th style="border: 1px solid #ccc; padding: 8px; text-align: right;">{{ number_format($SoldeCaisse, 2, ".", "") }} DH</th>
+                    </tr>
+                </table>
             </div>
             @if (count($Paiement_Employee) > 0)
-            <div style="display: flex; justify-content: space-between;">
+                <div style="margin-left: 55%; width: 45%; border: 1px solid black">
+                    <u class="TitleTable">Tableau Encaissement personnel</u>
+                    <table style="width: 100%; border-collapse: collapse; margin-top: 20px;">
+                        @php
+                            $TotalEncaissementPersonnel = 0;
+                        @endphp
+                        @foreach ($Paiement_Employee as $item)
+                            @php
+                                $TotalEncaissementPersonnel += $item->total;
+                            @endphp
+                            <tr>
+                                <th style="border: 1px solid #ccc; padding: 8px;">{{$item->employe}}</th>
+                                <th style="border: 1px solid #ccc; padding: 8px; text-align: right;">{{ number_format($item->total, 2, ".", "") }} DH</th>
+                            </tr>
+                        @endforeach
+                        <tr style="background-color: rgb(255, 190, 190);">
+                            <th style="border: 1px solid #ccc; padding: 8px;">TOTAL</th>
+                            <th style="border: 1px solid #ccc; padding: 8px; text-align: right;">{{ number_format($TotalEncaissementPersonnel, 2, ".", "") }} DH</th>
+                        </tr>
+                    </table>
+                </div>
+            @else
+                <div style="margin-left: 55%; width: 45%; border: 1px solid black">
+                    <u class="TitleTable">Tableau reste</u>
+                    <table style="width: 100%; border-collapse: collapse; margin-top: 20px;">
+                        <tr style="background-color: rgb(195, 255, 190);">
+                            <th style="border: 1px solid #ccc; padding: 8px;">Reste</th>
+                            <th style="border: 1px solid #ccc; padding: 8px; text-align: right;">{{ number_format($reste, 2, ".", "") }} DH</th>
+                        </tr>
+                    </table>
+                </div>
+            @endif
+        </div>
+
+        @if (count($Paiement_Employee) > 0)
+            <div style="display: flex; justify-content: space-between; align-items: stretch;">
                 <div style="float: left; width: 50%; border: 1px solid black">
                     <u class="TitleTable">Tableau reste</u>
                     <table style="width: 100%; border-collapse: collapse; margin-top: 20px;">
@@ -726,63 +530,10 @@
                     </table>
                 </div>
             </div>
-            @endif
+        @endif
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-        {{-- <div>
-
-            <table id="tableDetail" style="width: 50%">
-                 @foreach ($TotalByModePaiement as $item)
-                 <tr>
-                    <th colspan="3">{{$item->name}}</th>
-                    <th style="text-align: right">{{ number_format($item->totalpaye, 2, ".", "") }} DH</th>
-                 </tr>
-                @endforeach
-                <tr>
-                    <th colspan="3" style="text-transform: uppercase">Total Reglement</th>
-                    <th style="text-align: right">{{ number_format($TotalReglementPaye, 2, ".", "") }} DH</th>
-                </tr>
-                <tr>
-                    <th colspan="3" style="text-transform: uppercase">Solde de départ la caisse </th>
-                    <th style="text-align: right">{{ number_format($SoldeCaisse, 2, ".", "") }} DH</th>
-                </tr>
-                <tr>
-                    <th colspan="3" style="text-transform: uppercase">Charge</th>
-                    <th style="text-align: right">{{ number_format($Charge, 2, ".", "") }} DH</th>
-                </tr>
-                @foreach ($Versement as $item)
-                <tr>
-                    <th colspan="3" style="text-transform: uppercase">Versement / {{$item->comptable}}</th>
-                    <th style="text-align: right">{{ number_format($item->total, 2, ".", "") }} DH</th>
-                </tr>
-                @endforeach
-                @if (count($Paiement_Employee) > 0)
-                    @foreach ($Paiement_Employee as $item)
-                    <tr>
-                        <th colspan="3">{{$item->employe}}</th>
-                        <th style="text-align: right">{{ number_format($item->total, 2, ".", "") }} DH</th>
-                     </tr>
-                    @endforeach
-                @endif
-                <tr>
-                    <th colspan="3">Reste</th>
-                    <th style="text-align: right">{{ number_format($reste, 2, ".", "") }} DH</th>
-                </tr>
-
-            </table>
-        </div> --}}
 
     </div>
 </body>
