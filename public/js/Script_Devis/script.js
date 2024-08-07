@@ -5,13 +5,13 @@ $(document).ready(function ()
     let tvaCalcul         = tvaFromDataBase;
     let originalTotalTTC  = parseFloat($('#TotalTTC').text().replace(' DH', ''));
     $('.select2').select2({
-            dropdownParent: $('#AddOrder'), // Ensure it attaches to the modal
+            dropdownParent: $('#AddDevis'), // Ensure it attaches to the modal
             placeholder: "veuillez sélectionner le produit",
             allowClear: true
     });
 
     $('#IdClient').select2({
-        dropdownParent: $('#AddOrder'), // Ensure it attaches to the modal
+        dropdownParent: $('#AddDevis'), // Ensure it attaches to the modal
         placeholder: "veuillez sélectionner le client",
         allowClear: true
     });
@@ -33,7 +33,7 @@ $(document).ready(function ()
     });
     $(function ()
     {
-        initializeDataTable('.TableVente', GetMyVente);
+        initializeDataTable('.TableDevis', GetMyDevis);
         function initializeDataTable(selector, url)
         {
             var tableVente = $(selector).DataTable({
@@ -54,24 +54,8 @@ $(document).ready(function ()
 
                     {data: 'client'             , name: 'client'},
                     {
-                        data: 'totalvente',
-                        name: 'totalvente',
-                        render: function (data, type, row) {
-                            return data + ' DH';
-                        },
-                        className: "dt-right"
-                    },
-                    {
-                        data: 'totalpaye',
-                        name: 'totalpaye',
-                        render: function (data, type, row) {
-                            return data + ' DH';
-                        },
-                        className: "dt-right"
-                    },
-                    {
-                        data: 'reste',
-                        name: 'reste',
+                        data: 'total',
+                        name: 'total',
                         render: function (data, type, row) {
                             return data + ' DH';
                         },
@@ -94,7 +78,7 @@ $(document).ready(function ()
                 ],
                 columnDefs: [
                     {
-                        targets: 7, // the index of the `created_at_formatted` column
+                        targets: 5, // the index of the `created_at_formatted` column
                         render: function (data, type, row) {
                             return '<div style="white-space: nowrap;">' + data + '</div>';
                         }
@@ -134,10 +118,10 @@ $(document).ready(function ()
             $(selector + ' tbody').on('click', '.Trash', function(e)
             {
                 e.preventDefault();
-                var idOrder = $(this).attr('value');
+                var idDevis = $(this).attr('value');
                 swal({
-                    title: "es-tu sûr de supprimer cette vente",
-                    text: "Une fois supprimée, vous ne pourrez plus récupérer cette vente !",
+                    title: "es-tu sûr de supprimer cette devis",
+                    text: "Une fois supprimée, vous ne pourrez plus récupérer cette devis !",
                     icon: "warning",
                     buttons: true,
                     dangerMode: true,
@@ -147,12 +131,12 @@ $(document).ready(function ()
                     {
                         var data =
                         {
-                            'id' : idOrder,
+                            'id'         : idDevis,
                             '_token'     : csrf_token,
                         };
                         $.ajax({
                             type: "post",
-                            url: TrashOrder,
+                            url: TrashDevis,
                             data: data,
 
                             dataType: "json",
@@ -160,10 +144,10 @@ $(document).ready(function ()
                             {
                                 if(response.status == 200)
                                 {
-                                    swal("Votre vente a été supprimée !", {
+                                    swal("Votre devis a été supprimée !", {
                                         icon: "success",
                                     });
-                                    $('.TableVente').DataTable().ajax.reload();
+                                    $('.TableDevis').DataTable().ajax.reload();
                                 }
                                 else if(response.status ==400)
                                 {
@@ -175,7 +159,7 @@ $(document).ready(function ()
                     }
                     else
                     {
-                        swal("Votre vente est sécurisée !");
+                        swal("Votre devis est sécurisée !");
                     }
                 });
 
@@ -187,14 +171,14 @@ $(document).ready(function ()
     });
     /////////////////////
     function initializeTableTmpLineOrder(idclient, idcompany,typeVente) {
-        return $('.TableTmpVente').DataTable({
+        return $('.TableTmpDevis').DataTable({
             processing: true,
             serverSide: true,
             responsive: true,
             autoWidth: false,
             ordering: false,
             ajax: {
-                url: GetDataTmpOrderByClient,
+                url: GetDataTmpDevisByClient,
                 data: function (d) {
                     d.idclient = idclient;
                     d.idcompany = idcompany;
@@ -295,9 +279,9 @@ $(document).ready(function ()
 
     // Function to destroy and reinitialize the DataTable
     function reloadTable(idclient, idcompany,typeVente) {
-        if ($.fn.DataTable.isDataTable('.TableTmpVente')) {
-            $('.TableTmpVente').DataTable().destroy();
-            /* $('.TableTmpVente').empty(); */ // Clear table content to avoid conflicts
+        if ($.fn.DataTable.isDataTable('.TableTmpDevis')) {
+            $('.TableTmpDevis').DataTable().destroy();
+            /* $('.TableTmpDevis').empty(); */ // Clear table content to avoid conflicts
         }
         initializeTableTmpLineOrder(idclient, idcompany,typeVente);
     }
@@ -444,14 +428,14 @@ $(document).ready(function ()
         };
         $.ajax({
             type: "get",
-            url: checkQteProduct,
+            url: checkQteProductDevis,
             data: idproduct,
             dataType: "json",
             success: function (response)
             {
                 if(response.status == 200)
                 {
-                    $.get(sendDataToTmpOrder, {idproduct : data.id, idclient : $('#IdClient').val(),idcompany : IdCompanyActive.id,typeVente : $('#DropDownTypeVente').val(),idstock : data.idstock},
+                    $.get(sendDataToTmpDevis, {idproduct : data.id, idclient : $('#IdClient').val(),idcompany : IdCompanyActive.id,typeVente : $('#DropDownTypeVente').val(),idstock : data.idstock},
                         function (data, textStatus, jqXHR) {
                             if(data.status == 200)
                             {
@@ -506,9 +490,10 @@ $(document).ready(function ()
             var newIdClient = $(this).val();
             var newIdCompany = IdCompanyActive.id; // Assuming company ID does not change
             var typeVente    = null;
+
             $.ajax({
                 type: "get",
-                url: checkTableTmpHasDataNotThisClient,
+                url: checkTableTmpHasDataNotThisClientDevis,
                 data:
                 {
                     idclient : newIdClient,
@@ -573,12 +558,12 @@ $(document).ready(function ()
 
 
 
-    $(document).on('click', '.TableTmpVente tbody .trash', function(e){
+    $(document).on('click', '.TableTmpDevis tbody .trash', function(e){
         e.preventDefault();
         var id = $(this).attr('value');
         var csrf_token = $('meta[name="csrf-token"]').attr('content'); // Assuming you're using a meta tag for CSRF token
 
-        var table = $('.TableTmpVente').DataTable();
+        var table = $('.TableTmpDevis').DataTable();
         var rowCount = table.rows().count();
 
         if (rowCount > 0) {
@@ -624,7 +609,7 @@ $(document).ready(function ()
 
     function updateTotals() {
         var IdClient = $('#IdClient').val();
-        $.get(GetTotalByClientCompany, { idclient: IdClient, idcompany: IdCompanyActive.id },
+        $.get(GetTotalByClientCompanyDevis, { idclient: IdClient, idcompany: IdCompanyActive.id },
             function(data, textStatus, jqXHR) {
                 $('#TotalHT').text(data.sumTotal + ' DH');
                 $('#CalculTva').text(data.Calcul_Tva.toFixed(2) + ' DH');
@@ -644,7 +629,7 @@ $(document).ready(function ()
 
 
    // Event delegation for dynamically created elements
-   $('.TableTmpVente').on('click', 'button.minus, button.plus', function (e) {
+   $('.TableTmpDevis').on('click', 'button.minus, button.plus', function (e) {
     e.preventDefault();
 
 
@@ -784,7 +769,7 @@ $(document).ready(function ()
     updateButtonStates($quantityContainer, newValue, minValue, maxValue);
 });
 
-$('.TableTmpVente').on('input', 'input.input-box', function () {
+$('.TableTmpDevis').on('input', 'input.input-box', function () {
     var $quantityContainer = $(this).closest('.quantity');
     var newValue = parseInt($(this).val());
     var maxValue = parseInt($(this).attr('max'));
@@ -900,7 +885,7 @@ $('.TableTmpVente').on('input', 'input.input-box', function () {
     {
         e.preventDefault();
 
-        var lengthTableTmp = $('.TableTmpVente tbody tr td.dt-right').length;
+        var lengthTableTmp = $('.TableTmpDevis tbody tr td.dt-right').length;
         if (lengthTableTmp === 0)
         {
             toastr.warning("Une table panier vide ne peut pas être exploitée", 'Attention');
@@ -1042,7 +1027,7 @@ $('.TableTmpVente').on('input', 'input.input-box', function () {
                             $('.TableModePaiement thead tr').each(function() {
                                 $(this).find('input.TotalModePaiement').val(""); // Convert prix to float
                             });
-                            $('.TableTmpVente').DataTable().clear().draw();
+                            $('.TableTmpDevis').DataTable().clear().draw();
                             $('.TableStock').DataTable().clear().draw();
                             $('#TotalHT').text('0.00 DH');
                         }
@@ -1067,7 +1052,7 @@ $('.TableTmpVente').on('input', 'input.input-box', function () {
     $('#BtnSaveVenteInvocie').on('click',function(e)
     {
         e.preventDefault();
-        var lengthTableTmp = $('.TableTmpVente tbody tr td.dt-right').length;
+        var lengthTableTmp = $('.TableTmpDevis tbody tr td.dt-right').length;
         if (lengthTableTmp === 0)
         {
             toastr.warning("Une table panier vide ne peut pas être exploitée", 'Attention');
@@ -1203,7 +1188,7 @@ $('.TableTmpVente').on('input', 'input.input-box', function () {
                             $('.TableModePaiement thead tr').each(function() {
                                 $(this).find('input.TotalModePaiement').val(""); // Convert prix to float
                             });
-                            $('.TableTmpVente').DataTable().clear().draw();
+                            $('.TableTmpDevis').DataTable().clear().draw();
                             $('.TableStock').DataTable().clear().draw();
                             $('#TotalHT').text('0.00 DH');
                         }
@@ -1410,14 +1395,14 @@ $('.TableTmpVente').on('input', 'input.input-box', function () {
         };
     }
 
-    /* $(document).on('input change keydown', '.TableTmpVente tbody .inputAccessoire', debounce(function(e) {
+    /* $(document).on('input change keydown', '.TableTmpDevis tbody .inputAccessoire', debounce(function(e) {
         var $input = $(this);
 
         // Check if the key pressed is backspace (8) or delete (46)
         if ((e.type === 'keydown' && (e.keyCode === 8 || e.keyCode === 46)) || e.type === 'input' || e.type === 'change') {
             setTimeout(function()
             {
-                var id = $('.TableTmpVente').DataTable().row($input.closest('tr')).data().id;
+                var id = $('.TableTmpDevis').DataTable().row($input.closest('tr')).data().id;
                 var accessoire = $input.val().trim() === '' ? 0 : $input.val().trim();
 
                 $.ajax({
@@ -1448,7 +1433,7 @@ $('.TableTmpVente').on('input', 'input.input-box', function () {
             }, 0);
         }
     }, 300)); */
-    $(document).on('keypress', '.TableTmpVente tbody .inputAccessoire', debounce(function(e) {
+    $(document).on('keypress', '.TableTmpDevis tbody .inputAccessoire', debounce(function(e) {
         var $input = $(this);
         var newValue = $input.val().trim();
 
@@ -1459,7 +1444,7 @@ $('.TableTmpVente').on('input', 'input.input-box', function () {
             setTimeout(function()
             {
 
-                var id = $('.TableTmpVente').DataTable().row($input.closest('tr')).data().id;
+                var id = $('.TableTmpDevis').DataTable().row($input.closest('tr')).data().id;
                 var accessoire = $input.val().trim() === '' ? 0 : $input.val().trim();
                 $.ajax({
                     type: "GET",
@@ -1492,7 +1477,7 @@ $('.TableTmpVente').on('input', 'input.input-box', function () {
     }, 300));
 
 
-    $(document).on('keypress','.TableTmpVente tbody .input-box',debounce(function(e)
+    $(document).on('keypress','.TableTmpDevis tbody .input-box',debounce(function(e)
     {
         var $input = $(this);
         var newValue = $input.val().trim();
@@ -1502,7 +1487,7 @@ $('.TableTmpVente').on('input', 'input.input-box', function () {
             e.preventDefault();
             setTimeout(function()
             {
-                var id = $('.TableTmpVente').DataTable().row($input.closest('tr')).data().id;
+                var id = $('.TableTmpDevis').DataTable().row($input.closest('tr')).data().id;
                 var Qte = $input.val().trim() === '' ? 1 : $input.val().trim();
                 $.ajax({
                     type: "GET",

@@ -24,6 +24,7 @@ use App\Http\Controllers\ChequeController;
 use App\Http\Controllers\SoldecaisseController;
 use App\Http\Controllers\AvoirController;
 use App\Http\Controllers\VersementController;
+use App\Http\Controllers\DevisController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -226,6 +227,17 @@ Route::group(['middleware' => ['web','auth']], function ()
      Route::post('updateVersement'           ,[VersementController::class,'updateVersement'             ]);
      Route::post('TrashVersement'           ,[VersementController::class,'TrashVersement'               ]);
     /*********************************** End versement *****************************************************/
+
+
+    /************************************ Devis  ***********************************************************/
+    Route::get('Devis'                                  ,[DevisController::class,'index'                                 ]);
+    Route::get('GetDataTmpDevisByClient'                ,[DevisController::class,'GetDataTmpDevisByClient'               ]);
+    Route::get('GetMyDevis'                             ,[DevisController::class,'GetMyDevis'                            ]);
+    Route::get('checkTableTmpHasDataNotThisClientDevis' ,[DevisController::class,'checkTableTmpHasDataNotThisClientDevis']);
+    Route::get('GetTotalByClientCompanyDevis'           ,[DevisController::class,'GetTotalByClientCompanyDevis'          ]);
+    Route::get('checkQteProductDevis'                   ,[DevisController::class,'checkQteProductDevis'                  ]);
+    Route::get('sendDataToTmpDevis'                     ,[DevisController::class,'sendDataToTmpDevis'                    ]);
+    /************************************ End devis ********************************************************/
 
 
 

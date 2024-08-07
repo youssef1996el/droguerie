@@ -472,7 +472,7 @@
                 </table>
             </div>
         </div>
-        <br><br><br>
+        <br><br><br><br><br><br>
         <div style="display: flex; justify-content: space-between; align-items: stretch; margin-bottom: 40px;">
             <div style="float: left; width: 50%; border: 1px solid black">
                 <u class="TitleTable">Tableau solde de la caisse</u>
