@@ -442,12 +442,16 @@ class EtatController extends Controller
 
         /*******************************************************  End Tableau Encaissement Credit  ******************************************/
 
-        $TotalReglementPaye = DB::table('reglements as r')
-        ->join('paiements as p','r.id','=','p.idreglement')
-        ->join('company as c','c.id','=','p.idcompany')
-        ->where('c.status','Active')
-        ->whereBetween('r.datepaiement',[$DateStart,$DateEnd])
-        ->sum('p.total');
+        $TotalReglementPaye = DB::table('clients as c')
+        ->join('reglements as r', 'c.id', '=', 'r.idclient')
+        ->join('company as co', 'co.id', '=', 'r.idcompany')
+        ->select(DB::raw('concat(c.nom, " ", c.prenom) as client'), DB::raw('SUM(r.total) as total'))
+        ->whereNotNull('r.datepaiement')
+        ->where(DB::raw('Date(r.datepaiement)'), '!=', DB::raw('Date(r.created_at)'))
+        ->where('co.status', 'Active')
+        ->whereBetween(DB::raw('DATE(r.datepaiement)'), [$DateStart, $DateEnd])
+        ->sum('r.total');
+
 
         $SoldeCaisse  = DB::table('soldecaisse as s')
         ->join('company as c','c.id','=','s.idcompany')
