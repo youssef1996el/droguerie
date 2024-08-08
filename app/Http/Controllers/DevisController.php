@@ -13,9 +13,15 @@ use App\Models\Reglements;
 use App\Models\Stock;
 use App\Models\Setting;
 use App\Models\Product;
+use App\Models\LineDevis;
+use App\Models\Devis;
 use Illuminate\Support\Facades\Crypt;
 use DataTables;
 use Auth;
+use Carbon\Carbon;
+use PDF;
+use Dompdf\Dompdf;
+use Dompdf\Options;
 class DevisController extends Controller
 {
     public function index()
@@ -152,12 +158,12 @@ class DevisController extends Controller
     ->where('d.total', '>', 0)
     ->groupBy('r.idorder');
 
-            $orders = DB::table(DB::raw("({$subQuery1->toSql()} UNION ALL {$subQuery2->toSql()}) as t"))
+            $Devis = DB::table(DB::raw("({$subQuery1->toSql()} UNION ALL {$subQuery2->toSql()}) as t"))
             ->mergeBindings($subQuery1)
             ->mergeBindings($subQuery2)
             ->select([
                 'id',
-                DB::raw('sum(totalvente) as totalvente'),
+                DB::raw('sum(totalvente) as total'),
                 DB::raw('sum(totalpaye) as totalpaye'),
                 DB::raw('sum(totalvente - totalpaye) as reste'),
                 'client',
@@ -172,7 +178,7 @@ class DevisController extends Controller
                 ->get();
 
 
-            return DataTables::of($orders)->addIndexColumn()->addColumn('action', function ($row)
+            return DataTables::of($Devis)->addIndexColumn()->addColumn('action', function ($row)
             {
 
                 $encryptedId = Crypt::encrypt($row->id);
@@ -180,7 +186,7 @@ class DevisController extends Controller
 
                 // View button with permission check
                 if (auth()->user()->can('vente-voir')) {
-                    $btn .= '<a href="' . url('ShowOrder/' . $encryptedId) . '" class="text-light view ms-2" target="_blank" value="' . $row->id . '">
+                    $btn .= '<a href="' . url('ShowDevis/' . $encryptedId) . '" class="text-light view ms-2" target="_blank" value="' . $row->id . '">
                                 <i class="ti ti-eye fs-5 border rounded-2 bg-info p-1" title="Voir bon ou facture"></i>
                             </a>';
                 }
@@ -197,7 +203,7 @@ class DevisController extends Controller
                 }
                 // Print button with permission check
                 if (auth()->user()->can('vente-imprimer')) {
-                    $btn .= '<a href="' . url('invoices/' . $row->id) . '" class="text-light ms-2" target="_blank" value="' . $row->id . '">
+                    $btn .= '<a href="' . url('invoicesDevis/' . $row->id) . '" class="text-light ms-2" target="_blank" value="' . $row->id . '">
                                 <i class="ti ti-file-invoice fs-5 border rounded-2 bg-success p-1" title="Imprimer bon ou facture"></i>
                             </a>';
                 }
@@ -615,5 +621,381 @@ class DevisController extends Controller
 
 
         }
+    }
+
+    public function TrashTmpDevis(Request $request)
+    {
+
+        $data = $request->all();
+
+        // Ensure that we only delete if more than one row exists
+        if (TmpDevis::count() > 0) {
+            TmpDevis::where('id', $data['id'])->delete();
+            return response()->json([
+                'status' => 200,
+            ]);
+        }
+
+        return response()->json([
+            'status' => 400,
+            'message' => 'Cannot delete the last remaining item.'
+        ]);
+
+    }
+
+    public function ChangeQteTmpMinusDevis(Request $request)
+    {
+        //extract id product from tmp with idRow
+        $Product   = TmpDevis::where('id',$request->id)->select('idproduct')->first();
+        $IdProduct = $Product->idproduct;
+
+
+        if(intval($request->qte) == 1)
+        {
+            $price      = TmpDevis::where('id',$request->id)->value('price');
+            $UpDateRow  = TmpDevis::where('id',$request->id)
+            ->update([
+                'qte'    => 1,
+                'total'  => $price * 1,
+            ]);
+
+            return response()->json([
+                'status'      => 200,
+            ]);
+        }
+        $price      = TmpDevis::where('id',$request->id)->value('price');
+        $UpDateRow  = TmpDevis::where('id',$request->id)
+        ->update([
+            'qte'    => $request->qte,
+            'total'  => $price * $request->qte,
+        ]);
+
+        return response()->json([
+            'status'      => 200,
+        ]);
+    }
+
+    public function ChangeQteTmpPlusDevis(Request $request)
+    {
+        $Client = Client::where('id', $request->idclient)
+            ->select('nom', 'prenom', 'plafonnier')
+            ->first();
+
+        if (!$Client) {
+            return response()->json(['status' => 404, 'message' => 'Client not found']);
+        }
+
+        $creditClient           = $this->getClientCredit($request->idclient);
+        $totalTmpByClient       = TmpDevis::where('idclient', $request->idclient)->sum('total');
+        $Price                  = TmpDevis::where('id',$request->id)->value('price');
+        $totalCreditByClient    = $totalTmpByClient + $Price + $creditClient;
+
+        if ($Client->plafonnier > 0 && $totalCreditByClient >= $Client->plafonnier)
+        {
+
+            return response()->json([
+                'status' => 500,
+                'message' => 'Le client ' . $Client->nom . " " . $Client->prenom . ' a atteint le montant maximum de ' . $Client->plafonnier . ' dirhams'
+            ]);
+        }
+
+        $tmpLineOrder = TmpDevis::find($request->id);
+        if (!$tmpLineOrder) {
+            return response()->json(['status' => 404, 'message' => 'TmpLineOrder not found']);
+        }
+
+        $Qte_Stock = Stock::where('idproduct', $tmpLineOrder->idproduct)
+            ->where('id', $tmpLineOrder->idstock)
+            ->value('qte');
+
+        $Qte_New_Tmp = $this->calculateNewQuantity($request->qte, $tmpLineOrder->idsetting);
+
+        if ($Qte_New_Tmp > $Qte_Stock) {
+            return response()->json([
+                'status' => 422,
+                'message' => 'Maximum quantity available is: ' . $Qte_Stock
+            ]);
+        }
+
+        $price_product = $tmpLineOrder->price;
+        $tmpLineOrder->update([
+            'qte' => $request->qte,
+            'total' => $price_product * $request->qte,
+        ]);
+
+        return response()->json(['status' => 200]);
+    }
+    private function getClientCredit($clientId)
+    {
+        $Mode_Paiement = DB::table('modepaiement as m')
+            ->join('company as c', 'c.id', '=', 'm.idcompany')
+            ->where('m.name', 'crédit')
+            ->where('c.status','Active')
+            ->select('m.id')
+            ->first();
+
+        if (!$Mode_Paiement) {
+            return 0;
+        }
+
+        return Reglements::where('idclient', $clientId)
+            ->where('idmode', $Mode_Paiement->id)
+            ->sum('total');
+    }
+    private function calculateNewQuantity($quantity, $idsetting)
+    {
+        if ($idsetting) {
+            $number_kg = Setting::where('id', $idsetting)->value('convert');
+            return ($quantity * $number_kg) / $number_kg;
+        }
+        return $quantity;
+    }
+
+    public function changeAccessoireTmpDevis(Request $request)
+    {
+        $updateAccessoire = TmpDevis::where('id',$request->id)
+        ->update([
+            'accessoire'   => $request->accessoire,
+        ]);
+
+        return response()->json([
+            'status' => 200,
+        ]);
+    }
+
+    public function ChangeQteByPressDevis(Request $request)
+    {
+        $Client = Client::where('id', $request->idclient)
+            ->select('nom', 'prenom', 'plafonnier')
+            ->first();
+
+        if (!$Client) {
+            return response()->json(['status' => 404, 'message' => 'Client not found']);
+        }
+
+        $creditClient           = $this->getClientCredit($request->idclient);
+        $totalTmpByClient       = TmpDevis::where('idclient', $request->idclient)->sum('total');
+        $Price                  = TmpDevis::where('id',$request->id)->value('price');
+        $totalCreditByClient    = $totalTmpByClient + $Price + $creditClient;
+
+        if ($Client->plafonnier > 0 && $totalCreditByClient >= $Client->plafonnier)
+        {
+
+            return response()->json([
+                'status' => 500,
+                'message' => 'Le client ' . $Client->nom . " " . $Client->prenom . ' a atteint le montant maximum de ' . $Client->plafonnier . ' dirhams'
+            ]);
+        }
+
+        $tmpLineOrder = TmpDevis::find($request->id);
+        if (!$tmpLineOrder) {
+            return response()->json(['status' => 404, 'message' => 'TABLEAU PANIER PAR CLIENT pas trouvé']);
+        }
+
+        $Qte_Stock = Stock::where('idproduct', $tmpLineOrder->idproduct)
+            ->where('id', $tmpLineOrder->idstock)
+            ->value('qte');
+
+        $Qte_New_Tmp = $this->calculateNewQuantity($request->qte, $tmpLineOrder->idsetting);
+
+        if ($Qte_New_Tmp > $Qte_Stock) {
+            return response()->json([
+                'status' => 422,
+                'message' => 'Maximum quantity available is: ' . $Qte_Stock
+            ]);
+        }
+
+        $price_product = $tmpLineOrder->price;
+        $tmpLineOrder->update([
+            'qte' => $request->qte,
+            'total' => $price_product * $request->qte,
+        ]);
+
+        return response()->json(['status' => 200]);
+    }
+
+    public function StoreDevis(Request $request)
+    {
+        $data = DB::table('products as p')
+        ->join('stock as s', 's.idproduct', '=', 'p.id')
+        ->join('tmpdevis as t', 't.idproduct', '=', 'p.id')
+        ->join('company as c', 'c.id', '=', 't.idcompany')
+        ->leftJoin('setting as se', 't.idsetting', '=', 'se.id')
+        ->where('c.status', 'Active')
+        ->where('t.idclient', $request->idclient)  // Replace 1 with $request->idclient if needed
+        ->where('t.iduser', Auth::user()->id)    // Replace 1 with Auth::user()->id if needed
+        ->groupBy('t.id')
+        ->select('t.id', 't.qte', 't.price', 't.total', 'p.name', 't.idproduct', 't.idclient',
+        't.idsetting', 'se.type', 'se.convert',
+        DB::raw('CASE WHEN se.convert IS NOT NULL THEN t.qte * se.convert ELSE t.qte END AS qte_converted'),'t.idstock','t.accessoire')
+        ->get();
+        $CompanyIsActive       = Company::where('status','Active')->select('id')->first();
+        $Devis = Devis::create([
+            'total'             => $request->total,
+            'idcompany'         => $CompanyIsActive->id,
+            'iduser'            => Auth::user()->id,
+            'idclient'          => $request->idclient,
+            'type'              => $request->facture == true ? 'Facture' : 'Bon',
+        ]);
+        foreach ($data as $item)
+        {
+            $LineDevis = LineDevis::create([
+                'qte'       => $item->qte_converted,
+                'price'     => $item->price,
+                'total'     => $item->total,
+                'iddevis'   => $Devis->id,
+                'idproduct' => $item->idproduct,
+                'idsetting' => $item->idsetting,
+                'idstock'   => $item->idstock,
+                'accessoire'=> $item->accessoire,
+            ]);
+        }
+
+        $TmpDevis = TmpDevis::where('idclient',$request->idclient)->where('iduser',Auth::user()->id)->delete();
+
+        // here add notification if $item->qtestock < = $item->qte_notification
+        return response()->json([
+            'status'        => 200,
+
+        ]);
+    }
+
+    public function ShowDevis($encryptedId)
+    {
+        $id = Crypt::decrypt($encryptedId);
+
+        $DataLineDevis = DB::table('linedevis as l')
+            ->join('products as p', 'l.idproduct', '=', 'p.id')
+            ->join('devis as d', 'l.iddevis', '=', 'd.id')
+            ->leftJoin('setting as s', 'l.idsetting', '=', 's.id')
+            ->where('d.id', $id)
+            ->select('p.name',
+            DB::raw("CASE WHEN s.convert IS NOT NULL THEN CONCAT(ROUND(l.qte / s.convert), ' ', s.type) ELSE l.qte END AS qte"),
+                'l.price','l.total','l.accessoire','s.type',
+                DB::raw("CASE WHEN s.convert IS NOT NULL THEN ROUND(l.qte / s.convert) ELSE l.qte END AS qtedevision"),
+                DB::raw('IF(l.idsetting IS NOT NULL, ROUND(l.qte / s.convert), l.qte) AS QteConvertWithOutConcat,
+                        ROUND(l.accessoire / IF(l.idsetting IS NOT NULL, ROUND(l.qte / s.convert), l.qte)) AS remise'),
+                DB::raw('IF(ROUND(l.accessoire / IF(l.idsetting IS NOT NULL, ROUND(l.qte / s.convert), l.qte)) < 0,
+                            l.price - (-1 * ROUND(l.accessoire / IF(l.idsetting IS NOT NULL, ROUND(l.qte / s.convert), l.qte))),
+                            l.price + ROUND(l.accessoire / IF(l.idsetting IS NOT NULL, ROUND(l.qte / s.convert), l.qte))
+                        ) AS price_new'),
+                DB::raw('IF(
+                    ROUND(l.accessoire / IF(l.idsetting IS NOT NULL, ROUND(l.qte / s.convert), l.qte)) < 0,
+                    l.price - (-1 * ROUND(l.accessoire / IF(l.idsetting IS NOT NULL, ROUND(l.qte / s.convert), l.qte))),
+                    l.price + ROUND(l.accessoire / IF(l.idsetting IS NOT NULL, ROUND(l.qte / s.convert), l.qte))
+                ) * IF(l.idsetting IS NOT NULL, ROUND(l.qte / s.convert), l.qte) AS totalnew'))
+            ->get();
+
+
+
+
+        $CompanyIsActive       = Company::where('status','Active')->select('title','id')->first();
+        $client                = DB::table('clients as c')
+                                ->join('devis as d','d.idclient','=','c.id')
+                                ->where('d.id',$id)
+                                ->select('c.*')
+                                ->first();
+        $Tva                  = DB::table('tva as t')
+                                ->join('company as c','c.id','=','t.idcompany')
+                                ->where('c.status','=','Active')
+                                ->select('t.name')
+                                ->first();
+        // is facutre or not
+        $CheckFacutreOrBon    = Devis::where('id',$id)->select('type')->first();
+        return view('Devis.lineDevis')
+        ->with('DataLineDevis',$DataLineDevis)
+        ->with('CompanyIsActive',$CompanyIsActive)
+        ->with('client',$client)
+        ->with('id',$id)
+        ->with('Tva',$Tva)
+        ->with('CheckFacutreOrBon',$CheckFacutreOrBon)
+
+        ;
+    }
+
+    public function invoicesDevis($id)
+    {
+        $invoice = Devis::findOrFail($id);
+        // extract client from order
+        $IdClient = Devis::where('id',$id)->select('idclient')->first();
+        $Client   = Client::where('id',$IdClient->idclient)->first();
+
+
+
+        // extract line order from id order
+
+
+        $DataLine = DB::table('linedevis as l')
+            ->join('products as p', 'l.idproduct', '=', 'p.id')
+            ->join('devis as d', 'l.iddevis', '=', 'd.id')
+            ->leftJoin('setting as s', 'l.idsetting', '=', 's.id')
+            ->where('d.id', $id)
+            ->select(
+                'p.name',
+               DB::raw("CASE
+            WHEN s.convert IS NOT NULL THEN CONCAT(ROUND(l.qte / s.convert), ' ', s.type)
+            ELSE l.qte
+        END AS qte"),
+                'l.price',
+                'l.total',
+                DB::raw("CASE WHEN s.convert IS NOT NULL THEN ROUND(l.qte / s.convert) ELSE l.qte END AS qtedevision"),
+                'l.accessoire',
+                's.type',
+                DB::raw('IF(l.idsetting IS NOT NULL, ROUND(l.qte / s.convert), l.qte) AS QteConvertWithOutConcat,
+                        ROUND(l.accessoire / IF(l.idsetting IS NOT NULL, ROUND(l.qte / s.convert), l.qte)) AS remise'),
+                DB::raw('IF(ROUND(l.accessoire / IF(l.idsetting IS NOT NULL, ROUND(l.qte / s.convert), l.qte)) < 0,
+                            l.price - (-1 * ROUND(l.accessoire / IF(l.idsetting IS NOT NULL, ROUND(l.qte / s.convert), l.qte))),
+                            l.price + ROUND(l.accessoire / IF(l.idsetting IS NOT NULL, ROUND(l.qte / s.convert), l.qte))
+                        ) AS price_new'),
+                DB::raw('IF(
+                    ROUND(l.accessoire / IF(l.idsetting IS NOT NULL, ROUND(l.qte / s.convert), l.qte)) < 0,
+                    l.price - (-1 * ROUND(l.accessoire / IF(l.idsetting IS NOT NULL, ROUND(l.qte / s.convert), l.qte))),
+                    l.price + ROUND(l.accessoire / IF(l.idsetting IS NOT NULL, ROUND(l.qte / s.convert), l.qte))
+                ) * IF(l.idsetting IS NOT NULL, ROUND(l.qte / s.convert), l.qte) AS totalnew')
+            )
+            ->get();
+
+
+        $Devis    = Devis::findOrFail($id);
+        // check is facture or bon
+
+        $id = $Devis->id;
+        $formattedId = str_pad($id, 4, '0', STR_PAD_LEFT);
+        $Tva                  = DB::table('tva as t')
+        ->join('company as c','c.id','=','t.idcompany')
+        ->where('c.status','=','Active')
+        ->select('t.name')
+        ->first();
+
+
+        $imagePath = public_path('images/R.png');
+        $imageData = base64_encode(file_get_contents($imagePath));
+        $Info = DB::table('infos as f')->join('company as c', 'c.id', '=', 'f.idcompany')->where('c.status', '=', 'Active')->select('f.*')->first();
+        $pdf = app('dompdf.wrapper');
+        $context = stream_context_create([
+            'ssl'  => [
+                'verify_peer'  => FALSE,
+                'verify_peer_name' => FALSE,
+                'allow_self_signed' => TRUE,
+            ]
+        ]);
+        $pdf = PDF::setOptions(['isHTML5ParserEnabled' => true, 'isRemoteEnabled' => true]);
+        $pdf->getDomPDF()->setHttpContext($context);
+        $pdf->loadView('Devis.PrintDevis',
+        compact('Client', 'DataLine', 'Devis',  'Info', 'Tva', 'formattedId',  'imageData'));
+        $pdf->setPaper('A4', 'landscape');
+        return $pdf->download('Devis.pdf');
+
+
+
+
+
+
+
+
+
+
+
+
     }
 }

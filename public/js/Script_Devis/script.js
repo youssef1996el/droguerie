@@ -62,10 +62,10 @@ $(document).ready(function ()
                         className: "dt-right"
                     },
                     {
-                        data: 'idfacture',
-                        name: 'idfacture',
+                        data: 'type',
+                        name: 'type',
                         render: function (data, type, row) {
-                            var html = row.idfacture ? '<span class="badge bg-success-subtle text-success">Facture</span>' : '<span class="badge bg-danger-subtle text-danger">Bon</span>';
+                            var html = row.type == 'Facture' ? '<span class="badge bg-success-subtle text-success">Facture</span>' : '<span class="badge bg-danger-subtle text-danger">Bon</span>';
                             return html;
                         },
 
@@ -569,7 +569,7 @@ $(document).ready(function ()
         if (rowCount > 0) {
             $.ajax({
                 type: "post",
-                url: TrashTmpOrder,
+                url: TrashTmpDevis,
                 data: {
                     'id': id,
                     '_token': csrf_token
@@ -619,8 +619,8 @@ $(document).ready(function ()
                 originalTotalHt = parseFloat($('#TotalHT').text().replace(' DH', ''));
                 tvaCalcul       = tvaFromDataBase;
                 originalTotalTTC = parseFloat($('#TotalTTC').text().replace(' DH', ''));
-                $('#Reste_Total_HT').text(data.sumTotal + ' DH');
-                $('#Reste_Total_TTC').text(data.TotalTTC.toFixed(2) + ' DH');
+
+
 
             },
             "json"
@@ -649,7 +649,7 @@ $(document).ready(function ()
 
         $.ajax({
             type: "get",
-            url: ChangeQteTmpMinus,
+            url: ChangeQteTmpMinusDevis,
             data:
             {
                 id: idRow, qte: newValue,type : 'minus',
@@ -708,7 +708,7 @@ $(document).ready(function ()
         var newIdCompany = IdCompanyActive.id; // Assuming company ID does not change
         $.ajax({
             type: "get",
-            url : ChangeQteTmpPlus,
+            url : ChangeQteTmpPlusDevis,
             data:
             {
                 id: idRow, qte: newValue,type : 'plus',idclient : newIdClient,
@@ -794,94 +794,12 @@ $('.TableTmpDevis').on('input', 'input.input-box', function () {
     }
 
 
-    $('.buttonAddModePaiement').on('click', function() {
-
-        // Check all .TotalModePaiement inputs for emptiness
-        var allInputsValid = true;
-        $('.TotalModePaiement').each(function() {
-            if ($(this).val().trim() === '') {
-                allInputsValid = false;
-                return false; // Exit the loop early if any input is empty
-            }
-        });
-
-        // If any input is empty, show alert and focus on the first empty input
-        if (!allInputsValid) {
-
-            toastr.warning("Veuillez saisir un montant valide pour le paiement", 'Attention');
-            $('.TotalModePaiement').filter(function() {
-                return $(this).val().trim() === '';
-            }).first().focus();
-            return false;
-        }
-        // Clone the template row
-        var newRowHtml = `<tr>
-                            <td>
-                                <select name="mode_paiement" class="form-select mode_paiement">
-                                    <!-- Options will be dynamically populated here -->
-                                </select>
-                            </td>
-                            <td>
-                                <input type="number" class="form-control TotalModePaiement" placeholder="Saisir montant paiement">
-                            </td>
-                            <td>
-                                <button type="button" class="btn btn-sm btn-primary btnRemoveModePaiement">−</button>
-                            </td>
-                        </tr>`;
-
-        // Append the new row to the tbody
-        $('.TableModePaiement thead').append(newRowHtml);
-
-        // Populate options for the new row's select dropdown
-        var selectOptions = '';
-        $.each(ModePaiement, function(index, value) {
-            selectOptions += '<option value="' + value.id + '">' + value.name + '</option>';
-        });
-        $('.TableModePaiement thead').find('tr:last-child select[name="mode_paiement"]').html(selectOptions);
 
 
-    });
-
-    $(document).on('click','.TableModePaiement .btnRemoveModePaiement',function()
-    {
-        $(this).closest('tr').remove();
-    });
-    $(document).on('input','.TableModePaiement .TotalModePaiement',function()
-    {
-        var TotalEntre = [];
-        $('.TableModePaiement .TotalModePaiement').each(function() {
-            var totalThisRow = parseFloat($(this).val()) || 0; // Parse the value as a float, defaulting to 0 if invalid
-            TotalEntre.push(totalThisRow);
-        });
-
-        var sumEntre = TotalEntre.reduce((accumulator, currentValue) => accumulator + currentValue, 0);
-        var TotalHT = parseFloat($('#TotalHT').text()) || 0;
-        var ResteTotalHT = TotalHT - sumEntre;
-        if(ResteTotalHT < 0)
-        {
-            ResteTotalHT = ResteTotalHT.toFixed(2);
 
 
-            $('#Reste_Total_HT').text(0.00 + " DH");
-        }
-        else
-        {
-            ResteTotalHT = ResteTotalHT.toFixed(2);
 
-
-            $('#Reste_Total_HT').text(ResteTotalHT + " DH");
-        }
-
-
-        var TotalTTC = parseFloat($('#TotalTTC').text()) || 0;
-        var ResteTotalTTC = TotalTTC - sumEntre;
-        ResteTotalTTC = ResteTotalTTC.toFixed(2);
-        $('#Reste_Total_TTC').text(ResteTotalTTC + " DH");
-
-
-    });
-
-    $('#BtnSaveVente').on('click',function(e)
+    $('#BtnSaveDevis').on('click',function(e)
     {
         e.preventDefault();
 
@@ -893,54 +811,6 @@ $('.TableTmpDevis').on('input', 'input.input-box', function () {
         }
         else
         {
-            // Check all .TotalModePaiement inputs for emptiness
-            var allInputsValid = true;
-            $('.TotalModePaiement').each(function() {
-                if ($(this).val().trim() === '') {
-                    allInputsValid = false;
-                    return false; // Exit the loop early if any input is empty
-                }
-            });
-
-            // If any input is empty, show alert and focus on the first empty input
-            if (!allInputsValid) {
-
-                toastr.warning("Veuillez saisir un montant valide pour le paiement", 'Attention');
-                $('.TotalModePaiement').filter(function() {
-                    return $(this).val().trim() === '';
-                }).first().focus();
-                return false;
-            }
-            let modePaiementTable = [];
-
-            $('.TableModePaiement thead tr').each(function() {
-                let mode = $(this).find('select[name="mode_paiement"]').val();
-                let prix = parseFloat($(this).find('input.TotalModePaiement').val()); // Convert prix to float
-
-                // Initialize the mode in modePaiementTable if it doesn't exist
-                if (!modePaiementTable[mode]) {
-                    modePaiementTable[mode] = {
-                        'mode': mode,
-                        'totalPrix': 0 // Initialize totalPrix for this mode
-                    };
-                }
-
-                // Add prix to the totalPrix for this mode
-                modePaiementTable[mode].totalPrix += prix;
-            });
-
-            // Convert modePaiementTable to an array of values
-            let modePaiementArray = Object.values(modePaiementTable);
-
-            let totalPrixPaiement = 0;
-
-            // Iterate through modePaiementArray to calculate totalPrixPaiement
-            for (let i = 0; i < modePaiementArray.length; i++) {
-                // Access each mode's totalPrix from modePaiementArray
-                totalPrixPaiement += modePaiementArray[i].totalPrix;
-            }
-
-
 
             let TotalHtText = $('#TotalHT').text();
             // Remove the " DH" from the string
@@ -949,107 +819,57 @@ $('.TableTmpDevis').on('input', 'input.input-box', function () {
             // Convert the remaining string to a float
             let TotalHtFloat = parseFloat(numericPart);
 
+            let data = {
+                'idclient'          : $('#IdClient').val(),
+                '_token'            : csrf_token,
+                'total'             : TotalHtFloat,
 
-            if(TotalHtFloat < totalPrixPaiement)
-            {
-                toastr.warning("le total HT est inférieur au prix payé", 'Attention');
-                modePaiementTable = []; // Reset the array to empty
-                return false;
-            }
-            else if(TotalHtFloat > totalPrixPaiement)
-            {
-                toastr.warning("le total HT est supérieur au prix payé", 'Attention');
-                modePaiementTable = []; // Reset the array to empty
-                return false;
-            }
-            if(TotalHtFloat == totalPrixPaiement)
-            {
-
-                let displayStatus = $('.DivCheque').css('display');
-                let contentCheque = displayStatus === 'block';
-
-                let data = {
-                    'idclient'          : $('#IdClient').val(),
-                    'ModePaiement'      : modePaiementArray,
-                    '_token'            : csrf_token,
-                    'totalPrixPaiement' : totalPrixPaiement
-                };
-
-                if (contentCheque)
+            };
+            $('.preloader').show();
+            $.ajax({
+                type        : "post",
+                url         : StoreDevis,
+                data        : data,
+                dataType    : "json",
+                success: function (response)
                 {
-                    Object.assign(data, {
-                        'numero'        : $('.numero').val(),
-                        'datecheque'    : $('.datecheque').val(),
-                        'datepromise'   : $('.datepromise').val(),
-                        'montant'       : $('.montant').val(),
-                        'type'          : $('.type').val(),
-                        'bank'          : $('.bank').val(),
-                        'name'          : $('.name').val(),
-                    });
-                }
-                var date1Val = $('.datecheque').val();
-                var date2Val = $('.datepromise').val();
-
-                if (date1Val !== '' && date2Val !== '')
-                {
-                    var date1 = new Date(date1Val);
-                    var date2 = new Date(date2Val);
-
-                    if (date2 <= date1)
+                    $('.preloader').hide();
+                    if(response.status == 200)
                     {
-                        toastr.error('La date promise doit être supérieure à la date chèque.','Erreur');
-                        $('.datepromise').val('');
-                        return false;
-                    }
-                }
+                        toastr.success("L'opération s'est terminée avec succès", 'Success');
 
-                $('.preloader').show();
-                $.ajax({
-                    type        : "post",
-                    url         : StoreOrder,
-                    data        : data,
-                    dataType    : "json",
-                    success: function (response)
+                        $('.TableDevis').DataTable().ajax.reload();
+                        $('#AddDevis').modal("hide");
+                        var newIdClient = $('#IdClient').val();
+                        var newIdCompany = IdCompanyActive.id;
+                        var typeVente    = null;
+                        reloadTable(newIdClient, newIdCompany,typeVente);
+                        updateTotals();
+
+
+                        $('.TableTmpDevis').DataTable().clear().draw();
+                        $('.TableStock').DataTable().clear().draw();
+                        $('#TotalHT').text('0.00 DH');
+                    }
+                    else if(response.status == 442)
                     {
+                        toastr.error("Le montant dans TABLEAU INFORMATION CHEQUE ne correspond pas au montant dans Tableau du mode paiement", 'Erreur');
                         $('.preloader').hide();
-                        if(response.status == 200)
-                        {
-                            toastr.success("L'opération s'est terminée avec succès", 'Success');
-                            modePaiementTable = []; // Reset the array to empty
-                            $('.TableVente').DataTable().ajax.reload();
-                            $('#AddOrder').modal("hide");
-                            var newIdClient = $('#IdClient').val();
-                            var newIdCompany = IdCompanyActive.id;
-                            var typeVente    = null;
-                            reloadTable(newIdClient, newIdCompany,typeVente);
-                            updateTotals();
-
-                            $('.TableModePaiement thead tr').each(function() {
-                                $(this).find('input.TotalModePaiement').val(""); // Convert prix to float
-                            });
-                            $('.TableTmpDevis').DataTable().clear().draw();
-                            $('.TableStock').DataTable().clear().draw();
-                            $('#TotalHT').text('0.00 DH');
-                        }
-                        else if(response.status == 442)
-                        {
-                            toastr.error("Le montant dans TABLEAU INFORMATION CHEQUE ne correspond pas au montant dans Tableau du mode paiement", 'Erreur');
-                            $('.preloader').hide();
-                        }
-                    },
-                    error: function (xhr, status, error) {
-                        // Hide preloader on error
-                        $('.preloader').hide();
-
-                        toastr.error('Failed to process request: ' + error, 'Error');
                     }
-                });
-            }
+                },
+                error: function (xhr, status, error) {
+                    // Hide preloader on error
+                    $('.preloader').hide();
+
+                    toastr.error('Failed to process request: ' + error, 'Error');
+                }
+            });
+
         }
     });
 
 
-    $('#BtnSaveVenteInvocie').on('click',function(e)
+    $('#BtnSaveDevisInvocie').on('click',function(e)
     {
         e.preventDefault();
         var lengthTableTmp = $('.TableTmpDevis tbody tr td.dt-right').length;
@@ -1060,151 +880,63 @@ $('.TableTmpDevis').on('input', 'input.input-box', function () {
         }
         else
         {
-            // Check all .TotalModePaiement inputs for emptiness
-            var allInputsValid = true;
-            $('.TotalModePaiement').each(function() {
-                if ($(this).val().trim() === '') {
-                    allInputsValid = false;
-                    return false; // Exit the loop early if any input is empty
-                }
-            });
 
-            // If any input is empty, show alert and focus on the first empty input
-            if (!allInputsValid) {
-
-                toastr.warning("Veuillez saisir un montant valide pour le paiement", 'Attention');
-                $('.TotalModePaiement').filter(function() {
-                    return $(this).val().trim() === '';
-                }).first().focus();
-                return false;
-            }
-            let modePaiementTable = [];
-            $('.TableModePaiement thead tr').each(function() {
-                let mode = $(this).find('select[name="mode_paiement"]').val();
-                let prix = parseFloat($(this).find('input.TotalModePaiement').val()); // Convert prix to float
-
-                // Initialize the mode in modePaiementTable if it doesn't exist
-                if (!modePaiementTable[mode]) {
-                    modePaiementTable[mode] = {
-                        'mode': mode,
-                        'totalPrix': 0 // Initialize totalPrix for this mode
-                    };
-                }
-
-                // Add prix to the totalPrix for this mode
-                modePaiementTable[mode].totalPrix += prix;
-            });
-
-            // Convert modePaiementTable to an array of values
-            let modePaiementArray = Object.values(modePaiementTable);
-
-            let totalPrixPaiement = 0;
-            // Iterate through modePaiementArray to calculate totalPrixPaiement
-            for (let i = 0; i < modePaiementArray.length; i++)
-            {
-                // Access each mode's totalPrix from modePaiementArray
-                totalPrixPaiement += modePaiementArray[i].totalPrix;
-            }
             let TotalTTCText = $('#TotalTTC').text();
              // Remove the " DH" from the string
             let numericPart = TotalTTCText.replace(' DH', '');
              // Convert the remaining string to a float
             let TotalTTCFloat = parseFloat(numericPart);
-            if(TotalTTCFloat < totalPrixPaiement)
-            {
-                toastr.warning("le total TTC est inférieur au prix payé", 'Attention');
-                modePaiementTable = []; // Reset the array to empty
-                return false;
-            }
-            else if(TotalTTCFloat > totalPrixPaiement)
-            {
-                toastr.warning("le total TTC est supérieur au prix payé", 'Attention');
-                modePaiementTable = []; // Reset the array to empty
-                return false;
-            }
-            if(TotalTTCFloat == totalPrixPaiement)
-            {
-                let displayStatus = $('.DivCheque').css('display');
-                let contentCheque = displayStatus === 'block';
 
-                let data = {
-                    'idclient'          : $('#IdClient').val(),
-                    'ModePaiement'      : modePaiementArray,
-                    '_token'            : csrf_token,
-                    'totalPrixPaiement' : totalPrixPaiement,
-                    'isFacture'         : 'isFacture',
-                };
 
-                if (contentCheque) {
-                    Object.assign(data, {
-                        'numero'        : $('.numero').val(),
-                        'datecheque'    : $('.datecheque').val(),
-                        'datepromise'   : $('.datepromise').val(),
-                        'montant'       : $('.montant').val(),
-                        'type'          : $('.type').val(),
-                        'bank'          : $('.bank').val(),
-                        'name'          : $('.name').val(),
-                    });
-                }
-                var date1Val = $('.datecheque').val();
-                var date2Val = $('.datepromise').val();
 
-                if (date1Val !== '' && date2Val !== '')
+
+            let data = {
+                'idclient'          : $('#IdClient').val(),
+                '_token'            : csrf_token,
+                'total'             : TotalTTCFloat,
+                'facture'           : 'isFacture',
+            };
+
+
+
+            $('.preloader').show();
+            $.ajax({
+                type        : "post",
+                url         : StoreDevis,
+                data        : data,
+                dataType    : "json",
+                success: function (response)
                 {
-                    var date1 = new Date(date1Val);
-                    var date2 = new Date(date2Val);
-
-                    if (date2 <= date1)
+                    $('.preloader').hide();
+                    if(response.status == 200)
                     {
-                        toastr.error('La date promise doit être supérieure à la date chèque.','Erreur');
-                        $('.datepromise').val('');
-                        return false;
+                        toastr.success("L'opération s'est terminée avec succès", 'Success');
+
+                        $('.TableDevis').DataTable().ajax.reload();
+                        $('#AddDevis').modal("hide");
+                        var newIdClient = $('#IdClient').val();
+                        var newIdCompany = IdCompanyActive.id;
+                        var typeVente    = null;
+                        reloadTable(newIdClient, newIdCompany,typeVente);
+                        updateTotals();
+
+                        $('.TableTmpDevis').DataTable().clear().draw();
+                        $('.TableStock').DataTable().clear().draw();
+                        $('#TotalHT').text('0.00 DH');
                     }
+                    else if(response.status == 442)
+                    {
+                        toastr.error("Le montant dans TABLEAU INFORMATION CHEQUE ne correspond pas au montant dans Tableau du mode paiement", 'Erreur');
+                        $('.preloader').hide();
+                    }
+                },
+                error: function (xhr, status, error) {
+                    // Hide preloader on error
+                    $('.preloader').hide();
+                    toastr.error('Failed to process request: ' + error, 'Error');
                 }
+            });
 
-                $('.preloader').show();
-                $.ajax({
-                    type        : "post",
-                    url         : StoreOrder,
-                    data        : data,
-                    dataType    : "json",
-                    success: function (response)
-                    {
-                        $('.preloader').hide();
-                        if(response.status == 200)
-                        {
-                            toastr.success("L'opération s'est terminée avec succès", 'Success');
-                            modePaiementTable = []; // Reset the array to empty
-                            $('.TableVente').DataTable().ajax.reload();
-                            $('#AddOrder').modal("hide");
-                            var newIdClient = $('#IdClient').val();
-                            var newIdCompany = IdCompanyActive.id;
-                            var typeVente    = null;
-                            reloadTable(newIdClient, newIdCompany,typeVente);
-                            updateTotals();
-                            /* if ($.fn.dataTable.isDataTable('.TableStock')) {
-                                $('.TableStock').DataTable().destroy();
-                            } */
-                            $('.TableModePaiement thead tr').each(function() {
-                                $(this).find('input.TotalModePaiement').val(""); // Convert prix to float
-                            });
-                            $('.TableTmpDevis').DataTable().clear().draw();
-                            $('.TableStock').DataTable().clear().draw();
-                            $('#TotalHT').text('0.00 DH');
-                        }
-                        else if(response.status == 442)
-                        {
-                            toastr.error("Le montant dans TABLEAU INFORMATION CHEQUE ne correspond pas au montant dans Tableau du mode paiement", 'Erreur');
-                            $('.preloader').hide();
-                        }
-                    },
-                    error: function (xhr, status, error) {
-                        // Hide preloader on error
-                        $('.preloader').hide();
-                        toastr.error('Failed to process request: ' + error, 'Error');
-                    }
-                });
-            }
         }
     });
 
@@ -1369,24 +1101,7 @@ $('.TableTmpDevis').on('input', 'input.input-box', function () {
             $('#TotalTTC').text(New_Total_TTC + ' DH');
         }
     });
-    $(document).on('change','.mode_paiement',function(e)
-    {
-        e.preventDefault();
-        let modeArray = [];
 
-        $('.TableModePaiement thead tr').each(function() {
-            let mode = $(this).find('select[name="mode_paiement"] option:selected').text();
-            if (mode) {
-                modeArray.push(mode);
-            }
-        });
-        console.log(modeArray);
-        if (modeArray.includes('chèque')) {
-            $('.DivCheque').css('display', 'block');
-        } else {
-            $('.DivCheque').css('display', 'none');
-        }
-    });
     function debounce(func, timeout = 300) {
         let timer;
         return function(...args) {
@@ -1395,44 +1110,7 @@ $('.TableTmpDevis').on('input', 'input.input-box', function () {
         };
     }
 
-    /* $(document).on('input change keydown', '.TableTmpDevis tbody .inputAccessoire', debounce(function(e) {
-        var $input = $(this);
 
-        // Check if the key pressed is backspace (8) or delete (46)
-        if ((e.type === 'keydown' && (e.keyCode === 8 || e.keyCode === 46)) || e.type === 'input' || e.type === 'change') {
-            setTimeout(function()
-            {
-                var id = $('.TableTmpDevis').DataTable().row($input.closest('tr')).data().id;
-                var accessoire = $input.val().trim() === '' ? 0 : $input.val().trim();
-
-                $.ajax({
-                    type: "GET",
-                    url: changeAccessoireTmp,
-                    data: {
-                        id: id,
-                        accessoire: accessoire
-                    },
-                    dataType: "json",
-                    success: function(response)
-                    {
-                        if(response.status == 200)
-                        {
-                            var newIdClient = $('#IdClient').val();
-                            var newIdCompany = IdCompanyActive.id; // Assuming company ID does not change
-                            var typeVente = null;
-                            // Destroy the existing DataTable
-                            reloadTable(newIdClient, newIdCompany,typeVente);
-                            updateTotals();
-                        }
-                    },
-                    error: function(xhr, status, error)
-                    {
-                        // Handle error
-                    }
-                });
-            }, 0);
-        }
-    }, 300)); */
     $(document).on('keypress', '.TableTmpDevis tbody .inputAccessoire', debounce(function(e) {
         var $input = $(this);
         var newValue = $input.val().trim();
@@ -1448,7 +1126,7 @@ $('.TableTmpDevis').on('input', 'input.input-box', function () {
                 var accessoire = $input.val().trim() === '' ? 0 : $input.val().trim();
                 $.ajax({
                     type: "GET",
-                    url: changeAccessoireTmp,
+                    url: changeAccessoireTmpDevis,
                     data: {
                         id: id,
                         accessoire: accessoire
@@ -1491,7 +1169,7 @@ $('.TableTmpDevis').on('input', 'input.input-box', function () {
                 var Qte = $input.val().trim() === '' ? 1 : $input.val().trim();
                 $.ajax({
                     type: "GET",
-                    url: ChangeQteByPress,
+                    url: ChangeQteByPressDevis,
                     data:
                     {
                         id: id,

@@ -237,6 +237,14 @@ Route::group(['middleware' => ['web','auth']], function ()
     Route::get('GetTotalByClientCompanyDevis'           ,[DevisController::class,'GetTotalByClientCompanyDevis'          ]);
     Route::get('checkQteProductDevis'                   ,[DevisController::class,'checkQteProductDevis'                  ]);
     Route::get('sendDataToTmpDevis'                     ,[DevisController::class,'sendDataToTmpDevis'                    ]);
+    Route::get('ChangeQteTmpMinusDevis'                 ,[DevisController::class,'ChangeQteTmpMinusDevis'                ]);
+    Route::get('ChangeQteTmpPlusDevis'                  ,[DevisController::class,'ChangeQteTmpPlusDevis'                 ]);
+    Route::get('changeAccessoireTmpDevis'               ,[DevisController::class,'changeAccessoireTmpDevis'              ]);
+    Route::get('ChangeQteByPressDevis'                  ,[DevisController::class,'ChangeQteByPressDevis'                 ]);
+    Route::post('TrashTmpDevis'                         ,[DevisController::class,'trashTmpDevis'                         ]);
+    Route::post('StoreDevis'                            ,[DevisController::class,'StoreDevis'                            ]);
+    Route::get('ShowDevis/{id}'                         ,[DevisController::class,'ShowDevis'                             ]);
+    Route::get('invoicesDevis/{id}'                     ,[DevisController::class,'invoicesDevis'                         ]);
     /************************************ End devis ********************************************************/
 
 

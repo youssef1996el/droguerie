@@ -716,6 +716,7 @@ class OrderController extends Controller
         $Mode_Paiement = DB::table('modepaiement as m')
             ->join('company as c', 'c.id', '=', 'm.idcompany')
             ->where('m.name', 'crédit')
+            ->where('c.status','Active')
             ->select('m.id')
             ->first();
 
@@ -1354,17 +1355,7 @@ class OrderController extends Controller
 
     public function getUniteVenteByProduct(Request $request)
     {
-        /* ->where('p.name','like',"%{$request->name}%") */
-       /*  $products = DB::table('products as p')
-            ->join('categorys as c', 'p.idcategory', '=', 'c.id')
-            ->join('setting as s', 'c.id', '=', 's.idcategory')
-            ->join('company as co','co.id', '=', 's.idcompany')
 
-            ->where('p.name','=',$request->name)
-            ->where('co.status','=','Active')
-            ->select('s.type','s.id')
-            ->groupBy('s.id')
-            ->get(); */
         $products = DB::table('products as p')
             ->join('categorys as c', 'p.idcategory', '=', 'c.id')
             ->join('setting as s', 'c.id', '=', 's.idcategory')

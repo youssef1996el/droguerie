@@ -10,22 +10,22 @@
     var GetDataTmpDevisByClient         = "{{url('GetDataTmpDevisByClient')}}";
     var IdCompanyActiveExtren           = @Json($CompanyIsActive);
     var checkQteProductDevis                 = "{{url('checkQteProductDevis')}}";
-    var TrashTmpOrder                   = "{{url('TrashTmpOrder')}}";
+    var TrashTmpDevis                   = "{{url('TrashTmpDevis')}}";
     var ChangeQuantityTmp               = "{{url('ChangeQuantityTmp')}}";
 
-    var StoreOrder                      = "{{url('StoreOrder')}}";
+    var StoreDevis                      = "{{url('StoreDevis')}}";
     var GetMyDevis                      = "{{url('GetMyDevis')}}";
     var ShowOrder                       = "{{url('ShowOrder')}}";
-    var ChangeQteTmpPlus                = "{{url('ChangeQteTmpPlus')}}";
-    var ChangeQteTmpMinus               = "{{url('ChangeQteTmpMinus')}}";
+    var ChangeQteTmpPlusDevis                = "{{url('ChangeQteTmpPlusDevis')}}";
+    var ChangeQteTmpMinusDevis               = "{{url('ChangeQteTmpMinusDevis')}}";
     var StoreClient                     = "{{url('StoreClient')}}";
     var getClientByCompany              = "{{url('getClientByCompany')}}";
     var getUniteVenteByProduct          = "{{url('getUniteVenteByProduct')}}";
     var tvaFromDataBase                 = @Json($tva);
     var checkTableTmpHasDataNotThisClientDevis = "{{url('checkTableTmpHasDataNotThisClientDevis')}}";
     var StoreRemark                     = "{{url('StoreRemark')}}";
-    var changeAccessoireTmp             = "{{url('changeAccessoireTmp')}}";
-    var ChangeQteByPress                = "{{url('ChangeQteByPress')}}";
+    var changeAccessoireTmpDevis             = "{{url('changeAccessoireTmpDevis')}}";
+    var ChangeQteByPressDevis                = "{{url('ChangeQteByPressDevis')}}";
     var TrashDevis                      = "{{url('TrashDevis')}}";
 </script>
 <style>
@@ -119,7 +119,7 @@
     .tableInforPrice th, .tableInforPrice td {
         border: 1px solid #17a2b8; /* Use Bootstrap info color for borders */
     }
-    .TableVente thead th
+    .TableDevis thead th
     {
         white-space: nowrap;
         font-size: 12px;
@@ -293,23 +293,7 @@
                                             </table>
                                         </div>
                                     </div>
-                                    <div class="card card-body border rounded-2 p-2">
-                                        <h5 class="card-title border p-2 bg-light rounded-2 d-flex justify-content-between align-items-center"> Tableau du mode paiement</h5>
 
-                                        <div class="table-responsive">
-                                            <div class="row bg-light p-2">
-                                                <div class="col-sm-12 col-md-12 col-xl-6">
-                                                    <label for="" class="fs-2 text-black">Le reste Total HT :</label>
-                                                    <span id="Reste_Total_HT" class="bg-danger text-black fs-2 border rounded-2 p-2">0.00</span>
-                                                </div>
-                                                <div class="col-sm-12 col-md-12 col-xl-6">
-                                                    <label for="" class="fs-2 text-black">Le reste Total TTC :</label>
-                                                    <span id="Reste_Total_TTC" class="bg-danger text-black fs-2 border rounded-2 p-2">0.00</span>
-                                                </div>
-                                            </div>
-
-                                        </div>
-                                    </div>
 
                                     <div class="card card-body border rounded-2 p-2 CardRemark" style="display: none">
                                         <h5 class="card-title border p-2 bg-light rounded-2 text-center text-uppercase fst-italic">Remarque client</h5>
@@ -398,8 +382,8 @@
                 </div>
                 <div class="modal-footer">
                     <div class="d-flex gap-6 m-0">
-                        <button  class="btn btn-success" id="BtnSaveVente">Vente</button>
-                        <button  class="btn btn-success" id="BtnSaveVenteInvocie">Vente avec facture</button>
+                        <button  class="btn btn-success" id="BtnSaveDevis">Devis</button>
+                        <button  class="btn btn-success" id="BtnSaveDevisInvocie">Devis avec facture</button>
                         <button class="btn bg-danger-subtle text-danger" data-bs-dismiss="modal"> fermer</button>
                     </div>
                 </div>
