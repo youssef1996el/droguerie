@@ -987,15 +987,24 @@ class DevisController extends Controller
         return $pdf->download('Devis.pdf');
 
 
+    }
 
-
-
-
-
-
-
-
-
-
+    public function TrashDevis(Request $request)
+    {
+        $LineDevis = LineDevis::where('iddevis',$request->id)->delete();
+        $Devis     = Devis::where('id',$request->id)->delete();
+        if($Devis)
+        {
+            return response()->json([
+                'status'      => 200,
+            ]);
+        }
+        else
+        {
+            return response()->json([
+                'status'    => 400,
+                'message'   => 'Contact support',
+            ]);
+        }
     }
 }

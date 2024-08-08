@@ -245,6 +245,7 @@ Route::group(['middleware' => ['web','auth']], function ()
     Route::post('StoreDevis'                            ,[DevisController::class,'StoreDevis'                            ]);
     Route::get('ShowDevis/{id}'                         ,[DevisController::class,'ShowDevis'                             ]);
     Route::get('invoicesDevis/{id}'                     ,[DevisController::class,'invoicesDevis'                         ]);
+    Route::post('TrashDevis'                            ,[DevisController::class,'TrashDevis'                            ]);
     /************************************ End devis ********************************************************/
 
 
