@@ -135,6 +135,12 @@ class PermissionTableSeeder extends Seeder
             'Versement-modifier',
             'Versement-supprimer',
 
+            'Devis',
+            'Devis-ajoute',
+            'Devis-voir',
+            'Devis-supprimer',
+            'Devis-imprimer',
+
 
 
         ];

@@ -185,7 +185,7 @@ class DevisController extends Controller
                 $btn = '<div class="action-btn d-flex">';
 
                 // View button with permission check
-                if (auth()->user()->can('vente-voir')) {
+                if (auth()->user()->can('Devis-voir')) {
                     $btn .= '<a href="' . url('ShowDevis/' . $encryptedId) . '" class="text-light view ms-2" target="_blank" value="' . $row->id . '">
                                 <i class="ti ti-eye fs-5 border rounded-2 bg-info p-1" title="Voir bon ou facture"></i>
                             </a>';
@@ -202,7 +202,7 @@ class DevisController extends Controller
                             </a>';
                 }
                 // Print button with permission check
-                if (auth()->user()->can('vente-imprimer')) {
+                if (auth()->user()->can('Devis-imprimer')) {
                     $btn .= '<a href="' . url('invoicesDevis/' . $row->id) . '" class="text-light ms-2" target="_blank" value="' . $row->id . '">
                                 <i class="ti ti-file-invoice fs-5 border rounded-2 bg-success p-1" title="Imprimer bon ou facture"></i>
                             </a>';

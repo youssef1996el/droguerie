@@ -155,11 +155,11 @@
         <div class="card card-body">
             <div class="row">
                 <div class="col-md-4 col-xl-3">
-                    {{-- @can('vente-ajoute') --}}
+                    @can('Devis-ajoute')
                         <a href="#" id="BtnShowModalAddCompany" class="btn btn-primary d-flex align-items-center" data-bs-toggle="modal" data-bs-target="#AddDevis">
                             <i class="ti ti-file-dollar text-white me-1 fs-5"></i> Ajouter le devis
                         </a>
-                    {{-- @endcan --}}
+                    @endcan
 
                 </div>
             </div>
