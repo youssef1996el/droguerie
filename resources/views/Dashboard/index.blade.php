@@ -5,8 +5,8 @@
 <script>
     var groupedByYear = @Json($groupedByYear);
     var weeklyCounts  = @Json($weeklyCounts);
-    var totals        = @Json($totals);
-    var labels        = @Json($labels);
+
+    var ChartCredit   = "{{url('ChartCredit')}}";
 
 </script>
     <div class="container-fluid">
@@ -104,6 +104,33 @@
           <div class="col-sm-12 col-md-12 col-xl-12">
             <div class="card">
                 <div class="card-body">
+                    <div class="row g-3 align-items-center">
+                        <div class="col-sm-12 col-md-12 col-xl-4">
+                            <label for="selectYear" class="form-label">Année:</label>
+                            <select id="selectYear" class="form-select"></select>
+                        </div>
+                        <div class="col-sm-12 col-md-12 col-xl-4">
+                            <label for="selectMonth" class="form-label">Mois:</label>
+                            <select id="selectMonth" class="form-select">
+                                <option value="01">Janvier</option>
+                                <option value="02">Février</option>
+                                <option value="03">Mars</option>
+                                <option value="04">Avril</option>
+                                <option value="05">Mai</option>
+                                <option value="06">Juin</option>
+                                <option value="07">Juillet</option>
+                                <option value="08">Août</option>
+                                <option value="09">Septembre</option>
+                                <option value="10">Octobre</option>
+                                <option value="11">Novembre</option>
+                                <option value="12">Décembre</option>
+                            </select>
+                        </div>
+                        <div class="col-sm-12 col-md-12 col-xl-4 ">
+                            <button class="btn btn-primary w-100 mt-4" id="BtnSearchChartCredit">Recherche</button>
+                        </div>
+                    </div>
+
                     <h5 class="card-title fw-semibold"></h5>
                     <div id="line-adwords" class=""></div>
 

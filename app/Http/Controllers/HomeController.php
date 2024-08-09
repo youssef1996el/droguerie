@@ -10,6 +10,7 @@ use App\Models\Company;
 use App\Models\Paiements;
 use App\Models\Client;
 use App\Models\Order;
+use App\Models\Reglements;
 
 class HomeController extends Controller
 {
@@ -272,32 +273,7 @@ class HomeController extends Controller
         $weeklyCounts[] = $clientCount->count ;
 
     }
-        // extract credit by date chart
-        // 1 extract id credit bycompany
-        $IdCredit = DB::table('modepaiement as m')
-        ->join('company as c','c.id','=','m.idcompany')
-        ->where('c.status','=','Active')
-        ->where('m.name','=','crédit')
-        ->value('m.id');
-        $Data_Credit_By_Date =  DB::table('clients as c')
-        ->join('reglements as r', 'c.id', '=', 'r.idclient')
-        ->join('company as co', 'c.idcompany', '=', 'co.id')
-        ->select(
-            DB::raw('SUM(r.total) AS total_credit'),
-            DB::raw("DATE_FORMAT(r.created_at, '%d/%m/%Y') AS formatted_date")
-        )
-        ->where('r.idmode', 2)
-        ->groupBy(DB::raw("DATE_FORMAT(r.created_at, '%d/%m/%Y')"))
-        ->orderBy('r.created_at', 'asc')
-        ->get();
 
-        $labels = [];
-        $totals = [];
-
-        foreach ($Data_Credit_By_Date as $result) {
-            $labels[] = $result->formatted_date;
-            $totals[] = $result->total_credit;
-        }
 
         // Return the weekly counts as a JSON response
 
@@ -315,9 +291,52 @@ class HomeController extends Controller
             ->with('TotalOrderStartApp'                 ,$TotalOrderStartApp)
             ->with('orders'                             ,$orders)
             ->with('weeklyCounts'                       ,$weeklyCounts)
-            ->with('groupedByYear'                      ,$groupedByYear)
-            ->with('labels'                             ,$labels)
-            ->with('totals'                             ,$totals);
+            ->with('groupedByYear'                      ,$groupedByYear);
+    }
+
+    public function ChartCredit(Request $request)
+    {
+        $Year     = $request->Year;
+        $Month    = $request->Month;
+
+        $IdCredit = DB::table('modepaiement as m')
+        ->join('company as c','c.id','=','m.idcompany')
+        ->where('c.status','=','Active')
+        ->where('m.name','=','crédit')
+        ->value('m.id');
+        $Data_Credit_By_Date =  DB::table('clients as c')
+        ->join('reglements as r', 'c.id', '=', 'r.idclient')
+        ->join('company as co', 'c.idcompany', '=', 'co.id')
+        ->select(
+            DB::raw('SUM(r.total) AS total_credit'),
+            DB::raw("DATE_FORMAT(r.created_at, '%d/%m/%Y') AS formatted_date")
+        )
+        ->where('r.idmode', $IdCredit)
+        ->whereYear('r.created_at', $Year)
+        ->whereMonth('r.created_at', $Month)
+        ->groupBy(DB::raw("DATE_FORMAT(r.created_at, '%d/%m/%Y')"))
+        ->orderBy('r.created_at', 'asc')
+        ->get();
+
+        $labels = [];
+        $totals = [];
+
+        foreach ($Data_Credit_By_Date as $result)
+        {
+            $labels[] = $result->formatted_date;
+            $totals[] = $result->total_credit;
+        }
+        $years = Reglements::select(DB::raw('YEAR(created_at) as year'))
+        ->distinct()
+        ->orderBy('year')
+        ->pluck('year');
+
+        return response()->json([
+            'status'  => 200,
+            'labels'  => $labels,
+            'totals'  => $totals,
+            'years'  => $years,
+        ]);
     }
 
     public function cleanup()

@@ -51,6 +51,7 @@ Route::group(['middleware' => ['web','auth']], function ()
 
     Route::get('Dashboard'            ,[HomeController::class,'index'                         ]);
     Route::get('cleanup'              ,[HomeController::class,'cleanup'                       ]);
+    Route::get('ChartCredit'          ,[HomeController::class,'ChartCredit'                   ]);
     /******************************* Client      ***********************************************/
     Route::get('Client'              ,[ClientController::class,'index'                        ]);
     Route::get('FicheClient'         ,[ClientController::class,'getFicheClient'               ]);
