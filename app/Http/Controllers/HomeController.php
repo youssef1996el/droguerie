@@ -288,7 +288,7 @@ class HomeController extends Controller
         )
         ->where('r.idmode', 2)
         ->groupBy(DB::raw("DATE_FORMAT(r.created_at, '%d/%m/%Y')"))
-        ->orderBy('r.created_at', 'desc')
+        ->orderBy('r.created_at', 'asc')
         ->get();
 
         $labels = [];
