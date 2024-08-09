@@ -34,4 +34,67 @@ $(document).ready(function ()
         });
     });
 
+    var optionsLine = {
+        chart: {
+            height: 328,
+            type: 'line',
+            zoom: {
+                enabled: false
+            },
+            dropShadow: {
+                enabled: true,
+                top: 3,
+                left: 2,
+                blur: 4,
+                opacity: 1,
+            }
+        },
+        stroke: {
+            curve: 'smooth',
+            width: 2
+        },
+        series: [{
+            name: "Total Credit",
+            data: totals // Injecting the PHP array into JavaScript
+        }],
+        title: {
+            text: 'Crédit total par jour',
+            align: 'left',
+            offsetY: 25,
+            offsetX: 20
+        },
+        subtitle: {
+            text: '',
+            offsetY: 55,
+            offsetX: 20
+        },
+        markers: {
+            size: 6,
+            strokeWidth: 0,
+            hover: {
+                size: 9
+            }
+        },
+        grid: {
+            show: true,
+            padding: {
+                bottom: 0
+            }
+        },
+        labels: labels, // Injecting the PHP array into JavaScript
+        xaxis: {
+            tooltip: {
+                enabled: false
+            }
+        },
+        legend: {
+            position: 'top',
+            horizontalAlign: 'right',
+            offsetY: -20
+        }
+    };
+
+    var chartLine = new ApexCharts(document.querySelector('#line-adwords'), optionsLine);
+    chartLine.render();
+
 });

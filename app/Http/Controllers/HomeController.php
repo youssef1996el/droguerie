@@ -272,7 +272,32 @@ class HomeController extends Controller
         $weeklyCounts[] = $clientCount->count ;
 
     }
+        // extract credit by date chart
+        // 1 extract id credit bycompany
+        $IdCredit = DB::table('modepaiement as m')
+        ->join('company as c','c.id','=','m.idcompany')
+        ->where('c.status','=','Active')
+        ->where('m.name','=','crédit')
+        ->value('m.id');
+        $Data_Credit_By_Date =  DB::table('clients as c')
+        ->join('reglements as r', 'c.id', '=', 'r.idclient')
+        ->join('company as co', 'c.idcompany', '=', 'co.id')
+        ->select(
+            DB::raw('SUM(r.total) AS total_credit'),
+            DB::raw("DATE_FORMAT(r.created_at, '%d/%m/%Y') AS formatted_date")
+        )
+        ->where('r.idmode', 2)
+        ->groupBy(DB::raw("DATE_FORMAT(r.created_at, '%d/%m/%Y')"))
+        ->orderBy('r.created_at', 'desc')
+        ->get();
 
+        $labels = [];
+        $totals = [];
+
+        foreach ($Data_Credit_By_Date as $result) {
+            $labels[] = $result->formatted_date;
+            $totals[] = $result->total_credit;
+        }
 
         // Return the weekly counts as a JSON response
 
@@ -290,7 +315,9 @@ class HomeController extends Controller
             ->with('TotalOrderStartApp'                 ,$TotalOrderStartApp)
             ->with('orders'                             ,$orders)
             ->with('weeklyCounts'                       ,$weeklyCounts)
-            ->with('groupedByYear'                      ,$groupedByYear);
+            ->with('groupedByYear'                      ,$groupedByYear)
+            ->with('labels'                             ,$labels)
+            ->with('totals'                             ,$totals);
     }
 
     public function cleanup()

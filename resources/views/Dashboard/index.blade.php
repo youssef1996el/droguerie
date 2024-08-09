@@ -1,9 +1,12 @@
 @extends('Dashboard.app')
 @section('content')
 <script src="{{asset('js/Script_index/script.js')}}"></script>
+<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
 <script>
     var groupedByYear = @Json($groupedByYear);
     var weeklyCounts  = @Json($weeklyCounts);
+    var totals        = @Json($totals);
+    var labels        = @Json($labels);
 
 </script>
     <div class="container-fluid">
@@ -98,114 +101,72 @@
               </div>
             </div>
           </div>
-          <div class="col-lg-12">{{-- col-lg-5 --}}
-            <!-- -------------------------------------------- -->
-            <!-- Your Performance -->
-            <!-- -------------------------------------------- -->
+          <div class="col-sm-12 col-md-12 col-xl-12">
             <div class="card">
-              <div class="card-body">
-                <h5 class="card-title fw-semibold">Votre performance</h5>
-               {{--  <p class="card-subtitle mb-0">Last check on 25 february</p> --}}
+                <div class="card-body">
+                    <h5 class="card-title fw-semibold"></h5>
+                    <div id="line-adwords" class=""></div>
 
-                <div class="row mt-4">
-                    <div class="col-md-6">{{-- col-md-6 --}}
-                        <div class="vstack gap-9 mt-2">
-                            <div class="hstack align-items-center gap-3">
-                                <div class="d-flex align-items-center justify-content-center round-48 rounded bg-primary-subtle flex-shrink-0">
-                                    <iconify-icon icon="solar:shop-2-linear" class="fs-7 text-primary"></iconify-icon>
-                                </div>
-                                <div>
-                                    <h6 class="mb-0 ">{{$CalcuLNumberBon}} Bons</h6>
-                                </div>
 
+                </div>
+            </div>
+          </div>
+            <div class="col-lg-12">{{-- col-lg-5 --}}
+
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title fw-semibold">Votre performance</h5>
+                        <div class="row mt-4">
+                            <div class="col-md-6">{{-- col-md-6 --}}
+                                <div class="vstack gap-9 mt-2">
+                                    <div class="hstack align-items-center gap-3">
+                                        <div class="d-flex align-items-center justify-content-center round-48 rounded bg-primary-subtle flex-shrink-0">
+                                            <iconify-icon icon="solar:shop-2-linear" class="fs-7 text-primary"></iconify-icon>
+                                        </div>
+                                        <div>
+                                            <h6 class="mb-0 ">{{$CalcuLNumberBon}} Bons</h6>
+                                        </div>
+
+                                    </div>
+                                    <div class="hstack align-items-center gap-3">
+                                        <div class="d-flex align-items-center justify-content-center round-48 rounded bg-danger-subtle">
+                                            <iconify-icon icon="solar:filters-outline" class="fs-7 text-danger"></iconify-icon>
+                                        </div>
+                                        <div>
+                                            <h6 class="mb-0">{{$CalcuLNumberFacture}} Factures</h6>
+                                        </div>
+                                    </div>
+                                    <div class="hstack align-items-center gap-3">
+                                        <div class="d-flex align-items-center justify-content-center round-48 rounded bg-secondary-subtle">
+                                            <iconify-icon icon="solar:pills-3-linear" class="fs-7 text-secondary"></iconify-icon>
+                                        </div>
+                                        <div>
+                                            <h6 class="mb-0">{{$CalcuLNumberBon + $CalcuLNumberFacture}} Commandes</h6>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="hstack align-items-center gap-3">
-                                <div class="d-flex align-items-center justify-content-center round-48 rounded bg-danger-subtle">
-                                    <iconify-icon icon="solar:filters-outline" class="fs-7 text-danger"></iconify-icon>
-                                </div>
-                                <div>
-                                    <h6 class="mb-0">{{$CalcuLNumberFacture}} Factures</h6>
-                                </div>
-                            </div>
-                            <div class="hstack align-items-center gap-3">
-                                <div class="d-flex align-items-center justify-content-center round-48 rounded bg-secondary-subtle">
-                                    <iconify-icon icon="solar:pills-3-linear" class="fs-7 text-secondary"></iconify-icon>
-                                </div>
-                                <div>
-                                    <h6 class="mb-0">{{$CalcuLNumberBon + $CalcuLNumberFacture}} Commandes</h6>
+                            <div class="col-md-6">
+                                <div class="text-center">
+                                    <div id="your-preformance"></div>
+                                    <h2 class="fs-8">{{$TotalOrderStartApp}}</h2>
+                                    <p class="mb-0 fs-2">
+                                        Total des opérations depuis le démarrage du système
+                                    </p>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="text-center">
-                            <div id="your-preformance"></div>
-                            <h2 class="fs-8">{{$TotalOrderStartApp}}</h2>
-                            <p class="mb-0 fs-2">
-                                Total des opérations depuis le démarrage du système
-                            </p>
-                        </div>
+
                     </div>
                 </div>
+               {{--  <p class="card-subtitle mb-0">Last check on 25 february</p> --}}
+
+
 
               </div>
             </div>
           </div>
-          {{-- <div class="col-lg-7">
-            <div class="row">
-              <div class="col-md-6">
-                <!-- -------------------------------------------- -->
-                <!-- Customers -->
-                <!-- -------------------------------------------- -->
-                <div class="card">
-                  <div class="card-body">
-                    <div class="d-flex align-items-start justify-content-between">
-                      <div>
-                        <h5 class="card-title fw-semibold">Customers</h5>
-                        <p class="card-subtitle mb-0">Last 7 days</p>
-                      </div>
-                      <span class="fs-11 text-success fw-semibold lh-lg">+26.5%</span>
-                    </div>
-                    <div class="py-4 my-1">
-                      <div id="customers-area"></div>
-                    </div>
-                    <div class="d-flex flex-column align-items-center gap-2 w-100 mt-3">
-                      <div class="d-flex align-items-center gap-2 w-100">
-                        <span class="d-block flex-shrink-0 round-8 bg-primary rounded-circle"></span>
-                        <h6 class="fs-3 fw-normal text-muted mb-0">April 07 - April 14</h6>
-                        <h6 class="fs-3 fw-normal mb-0 ms-auto text-muted">6,380</h6>
-                      </div>
-                      <div class="d-flex align-items-center gap-2 w-100">
-                        <span class="d-block flex-shrink-0 round-8 bg-light rounded-circle"></span>
-                        <h6 class="fs-3 fw-normal text-muted mb-0">Last Week</h6>
-                        <h6 class="fs-3 fw-normal mb-0 ms-auto text-muted">4,298</h6>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div class="col-md-6">
-                <!-- -------------------------------------------- -->
-                <!-- Sales Overview -->
-                <!-- -------------------------------------------- -->
-                <div class="card">
-                  <div class="card-body">
-                    <h5 class="card-title fw-semibold">Sales Overview</h5>
-                    <p class="card-subtitle mb-1">Last 7 days</p>
 
-                    <div class="position-relative labels-chart">
-                      <span class="fs-11 label-1">0%</span>
-                      <span class="fs-11 label-2">25%</span>
-                      <span class="fs-11 label-3">50%</span>
-                      <span class="fs-11 label-4">75%</span>
-                      <div id="sales-overview"></div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-          </div> --}}
 
           <div class="col-lg-12">
             <!-- -------------------------------------------- -->
