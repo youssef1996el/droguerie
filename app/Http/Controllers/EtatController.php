@@ -395,13 +395,20 @@ class EtatController extends Controller
             ->whereBetween(DB::raw('DATE(p.created_at)'), [$DateStart, $DateEnd])
             ->groupBy('p.idmode')
             ->get(); */
-        $VenteSample = DB::table('paiements as p')
+
+            $IdEspece    = DB::table('modepaiement as m')
+            ->join('company as c','c.id','=','m.idcompany')
+            ->where('c.status','Active')
+            ->where('m.name','=','espèce')
+            ->value('m.id');
+            $VenteSample = DB::table('paiements as p')
             ->join('modepaiement as m', 'p.idmode', '=', 'm.id')
             ->join('reglements as r', 'r.id', '=', 'p.idreglement')
             ->join('company as c', 'p.idcompany', '=', 'c.id')
             ->select(DB::raw('UPPER(m.name) as name'), DB::raw('SUM(p.total) as totalpaye'))
             ->where('c.status', 'Active')
             ->whereNull('r.datepaiement')
+            ->where('r.idmode',$IdEspece)
             ->whereBetween(DB::raw('DATE(p.created_at)'), [$DateStart, $DateEnd])
             ->groupBy('p.idmode');
 
@@ -412,6 +419,7 @@ class EtatController extends Controller
             ->select(DB::raw('UPPER(m.name) as name'), DB::raw('SUM(r.total) as totalpaye'))
             ->where('c.status', 'Active')
             ->whereRaw('r.datepaiement = DATE(r.created_at)')
+            ->where('r.idmode',$IdEspece)
             ->whereBetween(DB::raw('DATE(r.created_at)'), [$DateStart, $DateEnd])
             ->groupBy('r.idmode');
 
