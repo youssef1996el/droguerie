@@ -67,78 +67,76 @@
 
             </div>
           </div>
-          <div class="col-lg-7">
+            <div class="col-lg-7">
             <!-- -------------------------------------------- -->
             <!-- Revenue Forecast -->
             <!-- -------------------------------------------- -->
-            <div class="card">
-              <div class="card-body">
-                <div class="d-md-flex align-items-center justify-content-between mb-4">
-                  <div class="hstack align-items-center gap-3">
-                    <span class="d-flex align-items-center justify-content-center round-48 bg-primary-subtle rounded flex-shrink-0">
-                      <iconify-icon icon="solar:layers-linear" class="fs-7 text-primary"></iconify-icon>
-                    </span>
-                    <div>
-                      <h5 class="card-title">Prévisions de revenus</h5>
-                      <p class="card-subtitle mb-0">Aperçu des bénéfices</p>
-                    </div>
-                  </div>
+                <div class="card">
+                    <div class="card-body">
+                        <div class="d-md-flex align-items-center justify-content-between mb-4">
+                            <div class="hstack align-items-center gap-3">
+                                <span class="d-flex align-items-center justify-content-center round-48 bg-primary-subtle rounded flex-shrink-0">
+                                <iconify-icon icon="solar:layers-linear" class="fs-7 text-primary"></iconify-icon>
+                                </span>
+                                <div>
+                                    <h5 class="card-title">Prévisions de revenus</h5>
+                                    <p class="card-subtitle mb-0">Aperçu des bénéfices</p>
+                                </div>
+                            </div>
 
-                  <div class="hstack gap-9 mt-4 mt-md-0">
-                    @foreach ($groupedByYear as $key => $value)
-                        <div class="d-flex align-items-center gap-2">
-                            <span class="d-block flex-shrink-0 round-8  rounded-circle"></span>
-                            <span class="text-nowrap text-muted border border-light rounded-circle p-2 bg-light">{{$key}}</span>
-                        </div>
-                    @endforeach
+                            <div class="hstack gap-9 mt-4 mt-md-0">
+                                @foreach ($groupedByYear as $key => $value)
+                                    <div class="d-flex align-items-center gap-2">
+                                        <span class="d-block flex-shrink-0 round-8  rounded-circle"></span>
+                                        <span class="text-nowrap text-muted border border-light rounded-circle p-2 bg-light">{{$key}}</span>
+                                    </div>
+                                @endforeach
 
 
-                  </div>
-                </div>
-                <div style="height: 285px;" class="me-n7">
-                  <div id="revenue-forecast"></div>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="col-sm-12 col-md-12 col-xl-12">
-            <div class="card">
-                <div class="card-body">
-                    <div class="row g-3 align-items-center">
-                        <div class="col-sm-12 col-md-12 col-xl-4">
-                            <label for="selectYear" class="form-label">Année:</label>
-                            <select id="selectYear" class="form-select"></select>
+                            </div>
                         </div>
-                        <div class="col-sm-12 col-md-12 col-xl-4">
-                            <label for="selectMonth" class="form-label">Mois:</label>
-                            <select id="selectMonth" class="form-select">
-                                <option value="01">Janvier</option>
-                                <option value="02">Février</option>
-                                <option value="03">Mars</option>
-                                <option value="04">Avril</option>
-                                <option value="05">Mai</option>
-                                <option value="06">Juin</option>
-                                <option value="07">Juillet</option>
-                                <option value="08">Août</option>
-                                <option value="09">Septembre</option>
-                                <option value="10">Octobre</option>
-                                <option value="11">Novembre</option>
-                                <option value="12">Décembre</option>
-                            </select>
-                        </div>
-                        <div class="col-sm-12 col-md-12 col-xl-4 ">
-                            <button class="btn btn-primary w-100 mt-4" id="BtnSearchChartCredit">Recherche</button>
+                        <div style="height: 285px;" class="me-n7">
+                            <div id="revenue-forecast"></div>
                         </div>
                     </div>
-
-                    <h5 class="card-title fw-semibold"></h5>
-                    <div id="line-adwords" class=""></div>
-
-
                 </div>
             </div>
-          </div>
-            <div class="col-lg-12">{{-- col-lg-5 --}}
+            <div class="col-sm-12 col-md-12 col-xl-12">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row g-3 align-items-center">
+                            <div class="col-sm-12 col-md-12 col-xl-4">
+                                <label for="selectYear" class="form-label">Année:</label>
+                                <select id="selectYear" class="form-select"></select>
+                            </div>
+                            <div class="col-sm-12 col-md-12 col-xl-4">
+                                <label for="selectMonth" class="form-label">Mois:</label>
+                                <select id="selectMonth" class="form-select">
+                                    <option value="01">Janvier</option>
+                                    <option value="02">Février</option>
+                                    <option value="03">Mars</option>
+                                    <option value="04">Avril</option>
+                                    <option value="05">Mai</option>
+                                    <option value="06">Juin</option>
+                                    <option value="07">Juillet</option>
+                                    <option value="08">Août</option>
+                                    <option value="09">Septembre</option>
+                                    <option value="10">Octobre</option>
+                                    <option value="11">Novembre</option>
+                                    <option value="12">Décembre</option>
+                                </select>
+                            </div>
+                            <div class="col-sm-12 col-md-12 col-xl-4 ">
+                                <button class="btn btn-primary w-100 mt-4" id="BtnSearchChartCredit">Recherche</button>
+                            </div>
+                        </div>
+
+                        <h5 class="card-title fw-semibold"></h5>
+                        <div id="line-adwords" class=""></div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-12 col-md-12 col-xl-12">{{-- col-lg-5 --}}
 
                 <div class="card">
                     <div class="card-body">
