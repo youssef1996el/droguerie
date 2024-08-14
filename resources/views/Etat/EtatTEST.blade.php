@@ -512,7 +512,8 @@
                     <table style="width: 100%; border-collapse: collapse; margin-top: 20px;">
                         <tr style="background-color: rgb(195, 255, 190);">
                             <th style="border: 1px solid #ccc; padding: 8px;">Reste</th>
-                            <th style="border: 1px solid #ccc; padding: 8px; text-align: right;">{{ number_format($reste, 2, ".", "") }} DH</th>
+                            {{-- <th style="border: 1px solid #ccc; padding: 8px; text-align: right;">{{ number_format($reste, 2, ".", "") }} DH</th> --}}
+                            <th style="border: 1px solid #ccc; padding: 8px; text-align: right;">{{ number_format($Reste, 2, ".", "") }} DH</th>
                         </tr>
                     </table>
                 </div>
@@ -526,7 +527,8 @@
                     <table style="width: 100%; border-collapse: collapse; margin-top: 20px;">
                         <tr style="background-color: rgb(195, 255, 190);">
                             <th style="border: 1px solid #ccc; padding: 8px;">Reste</th>
-                            <th style="border: 1px solid #ccc; padding: 8px; text-align: right;">{{ number_format($reste, 2, ".", "") }} DH</th>
+                            {{-- <th style="border: 1px solid #ccc; padding: 8px; text-align: right;">{{ number_format($reste, 2, ".", "") }} DH</th> --}}
+                            <th style="border: 1px solid #ccc; padding: 8px; text-align: right;">{{ number_format($Reste, 2, ".", "") }} DH</th>
                         </tr>
                     </table>
                 </div>

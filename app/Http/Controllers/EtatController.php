@@ -484,7 +484,12 @@ class EtatController extends Controller
 
         $reste =  ( $TotalByModePaiement->sum('totalpaye') + $TotalReglementPaye +  $SoldeCaisse ) - ($Charge->sum('total') + $Versement->sum('total') + $Paiement_Employee->sum('total'));
 
-
+        $TotalPaiement = DB::select("select sum(p.total) as total from paiements p ,company c where c.id = p.idcompany and c.status = 'Active' and date(p.created_at) between  ? and ? and p.idmode = ? ;",
+        [$DateStart,$DateEnd,$IdEspece]);
+        $SoldeDepart   = DB::select('select sum(s.total) as solde from soldecaisse s ,company c where s.idcompany = c.id and c.status = "Active" and date(s.created_at) between ? and ?',[$DateStart,$DateEnd]);
+        $Charge   = DB::select('select sum(c.total)as charge from charge c, company co where c.idcompany = co.id and c.status = "Active"  and date(c.created_at) between ? and ? ',[$DateStart,$DateEnd]);
+        $Versement = DB::select('select sum(v.total) as versement from versement v , company c where v.idcompany = c.id and c.status = "Active" and date(v.created_at) between ? and ? ',[$DateStart,$DateEnd]);
+        $Reste  =($TotalPaiement[0]->total + $SoldeDepart[0]->solde)  - ($Charge[0]->charge + $Versement[0]->versement);
     // Load view and render HTML
     $html = view('Etat.EtatTEST', compact(
         'CompanyIsActive',
@@ -504,7 +509,8 @@ class EtatController extends Controller
         'SoldeCaisse',
         'reste',
         'Tableau_enccaissement_Credit',
-        'Paiement_Employee'
+        'Paiement_Employee',
+        'Reste'
 
 
 
