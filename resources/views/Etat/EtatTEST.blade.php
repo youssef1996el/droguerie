@@ -353,7 +353,7 @@
                 </tr>
                 <tr>
                     <th>Total Payé</th>
-                    <th style="text-align: right">{{ number_format($TotalPayeByClient[$client] ?? '0.00', 2, ".", "") }} DH</th>
+                    <th style="text-align: right">{{ number_format($TotalPayeByClient[$client] ?? '0.00', 2, ".", "") }} DH</th> 
                 </tr>
                 <tr>
                     <th>Total Credit</th>
