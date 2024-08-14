@@ -413,7 +413,7 @@ class EtatController extends Controller
             ->select(DB::raw('UPPER(m.name) as name'), DB::raw('SUM(p.total) as totalpaye'))
             ->where('c.status', 'Active')
             ->whereNull('r.datepaiement')
-            ->where('r.idmode',$IdEspece)
+            /* ->where('r.idmode',$IdEspece) */
             ->whereBetween(DB::raw('DATE(p.created_at)'), [$DateStart, $DateEnd])
             ->groupBy('p.idmode');
 
@@ -424,7 +424,7 @@ class EtatController extends Controller
             ->select(DB::raw('UPPER(m.name) as name'), DB::raw('SUM(r.total) as totalpaye'))
             ->where('c.status', 'Active')
             ->whereRaw('r.datepaiement = DATE(r.created_at)')
-            ->where('r.idmode',$IdEspece)
+            /* ->where('r.idmode',$IdEspece) */
             ->whereBetween(DB::raw('DATE(r.created_at)'), [$DateStart, $DateEnd])
             ->groupBy('r.idmode');
 
