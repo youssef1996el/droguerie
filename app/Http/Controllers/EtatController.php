@@ -489,7 +489,8 @@ class EtatController extends Controller
         $SoldeDepart   = DB::select('select sum(s.total) as solde from soldecaisse s ,company c where s.idcompany = c.id and c.status = "Active" and date(s.created_at) between ? and ?',[$DateStart,$DateEnd]);
         $ChargeReste   = DB::select('select sum(c.total)as charge from charge c, company co where c.idcompany = co.id and co.status = "Active"  and date(c.created_at) between ? and ? ',[$DateStart,$DateEnd]);
         $VersementReste = DB::select('select sum(v.total) as versement from versement v , company c where v.idcompany = c.id and c.status = "Active" and date(v.created_at) between ? and ? ',[$DateStart,$DateEnd]);
-        $Reste  =($TotalPaiement[0]->total + $SoldeDepart[0]->solde)  - ($ChargeReste[0]->charge + $VersementReste[0]->versement);
+        $Reglement_Personnel = DB::select("select sum(r.total) as reglement_personnel from reglementspersonnels r , personnels p , company c where r.idpersonnel=p.id and p.idcompany = c.id and c.status = 'Active' and date(r.created_at) between ? and ?",[$DateStart,$DateEnd]);
+        $Reste  =($TotalPaiement[0]->total + $SoldeDepart[0]->solde)  - ($ChargeReste[0]->charge + $VersementReste[0]->versement + $Reglement_Personnel[0]->reglement_personnel);
     // Load view and render HTML
     $html = view('Etat.EtatTEST', compact(
         'CompanyIsActive',
