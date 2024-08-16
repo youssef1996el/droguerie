@@ -440,13 +440,15 @@
                             $TotalEncaissement_Credit += $item->total;
                         @endphp
                         <tr>
+                            <th style="border: 1px solid #ccc; padding: 8px; text-align: right;">{{ $item->name}} </th>
                             <th style="border: 1px solid #ccc; padding: 8px;">{{ $item->client }}</th>
                             <th style="border: 1px solid #ccc; padding: 8px; text-align: right;">{{ number_format($item->total, 2, ".", "") }} DH</th>
+                            
                         </tr>
                     @endforeach
                     <tr style="background-color: rgb(195, 255, 190);">
-                        <th style="border: 1px solid #ccc; padding: 8px;">TOTAL</th>
-                        <th style="border: 1px solid #ccc; padding: 8px; text-align: right;">{{ number_format($TotalEncaissement_Credit, 2, ".", "") }} DH</th>
+                        <th colspan="2" style="border: 1px solid #ccc; padding: 8px;">TOTAL</th>
+                        <th  style="border: 1px solid #ccc; padding: 8px; text-align: right;">{{ number_format($TotalEncaissement_Credit, 2, ".", "") }} DH</th>
                     </tr>
                 </table>
             </div>

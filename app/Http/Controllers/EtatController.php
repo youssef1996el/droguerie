@@ -443,10 +443,11 @@ class EtatController extends Controller
 
         $Tableau_enccaissement_Credit = DB::table('clients as c')
         ->join('reglements as r', 'c.id', '=', 'r.idclient')
+        ->join('modepaiement as m', 'r.idmode', '=', 'm.id')
         ->join('company as co', 'co.id', '=', 'r.idcompany')
-        ->select(DB::raw('concat(c.nom, " ", c.prenom) as client'), DB::raw('SUM(r.total) as total'))
+        ->select(DB::raw('concat(c.nom, " ", c.prenom) as client'), DB::raw('SUM(r.total) as total'), 'm.name')
         ->whereNotNull('r.datepaiement')
-        ->where(DB::raw('Date(r.datepaiement)'), '!=', DB::raw('Date(r.created_at)'))
+        ->where(DB::raw('DATE(r.datepaiement)'), '!=', DB::raw('DATE(r.created_at)'))
         ->where('co.status', 'Active')
         ->whereBetween(DB::raw('DATE(r.datepaiement)'), [$DateStart, $DateEnd])
         ->groupBy(DB::raw('concat(c.nom, " ", c.prenom)'))
