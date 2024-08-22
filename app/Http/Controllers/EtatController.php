@@ -316,8 +316,9 @@ class EtatController extends Controller
         FROM clients c JOIN orders o ON c.id = o.idclient
         JOIN lineorder l ON o.id = l.idorder
         JOIN products p ON l.idproduct = p.id
+        JOIN company co ON c.idcompany = co.id
         LEFT JOIN setting s ON l.idsetting = s.id
-        WHERE DATE(o.created_at) BETWEEN ? AND ?',[$request->startDate,$request->endDate]);
+        WHERE DATE(o.created_at) BETWEEN ? AND ? and co.status = "Active"',[$request->startDate,$request->endDate]);
                                    // dd($DataByClient);
 
         $DataByClient = collect($DataByClient)->groupBy('client')->toArray();
@@ -334,7 +335,8 @@ class EtatController extends Controller
         $DataByClientCredit = DB::select('SELECT r.total AS credit_total, CONCAT(c.nom, " ", c.prenom) AS client
                     FROM reglements r
                     JOIN clients c ON c.id = r.idclient
-                    WHERE DATE(r.created_at) BETWEEN ? AND ? AND r.idmode = ?',[$request->startDate,$request->endDate,$IdsCredit]);
+                    JOIN company co ON co.id = c.idcompany
+                    WHERE DATE(r.created_at) BETWEEN ? AND ? AND r.idmode = ? and co.status = "Active"',[$request->startDate,$request->endDate,$IdsCredit]);
 
         $DataByClientPaye  = DB::select('select p.total as totalpaye,CONCAT(c.nom, " ", c.prenom) AS client from reglements r,paiements p,clients c
                                     where r.id = p.idreglement and c.id = r.idclient  and date(p.created_at) BETWEEN ? AND ? and r.datepaiement is null
