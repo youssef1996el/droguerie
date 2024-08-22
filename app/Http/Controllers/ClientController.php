@@ -170,30 +170,14 @@ class ClientController extends Controller
         $id = Crypt::decrypt($encryptedId);
         $CompanyIsActive       = Company::where('status','Active')->select('title')->first();
         $Client                = Client::where('id',$id)->first();
-        // order client
-        /* $orders = Order::select(
-            'orders.id',DB::raw('orders.total AS totalvente'),
-            DB::raw('SUM(reglements.total) AS totalpaye'),DB::raw('(orders.total - SUM(reglements.total)) AS reste'),
-            DB::raw('CONCAT(clients.nom, " ", clients.prenom) AS client'),'company.title AS company','users.name AS user','orders.idfacture',
-            DB::raw('DATE_FORMAT(orders.created_at, "%Y-%m-%d") as created_at_formatted')
-
-        )->join('reglements', 'reglements.idorder', '=', 'orders.id')
-        ->join('paiements', 'paiements.idreglement', '=', 'reglements.id')
-        ->join('modepaiement', 'modepaiement.id', '=', 'paiements.idmode')
-        ->join('clients', 'clients.id', '=', 'orders.idclient')
-        ->join('company', 'company.id', '=', 'orders.idcompany')
-        ->join('users', 'users.id', '=', 'orders.iduser')
-        ->leftJoin('factures', 'factures.id', '=', 'orders.idfacture')
-        ->where('company.status','=','Active')
-        ->where('orders.idclient','=',$id)
-        ->groupBy('orders.id')
-        ->get(); */
+        
         $IdCredit = DB::table('modepaiement as m')
                 ->join('company as c','c.id','=','m.idcompany')
                 ->where('c.status','Active')
                 ->where('m.name','crédit')
                 ->select('m.id')
                 ->first();
+                
         $orders = DB::select('select id, client,  IF(totalvente = 0, "Solde de départ", concat(totalvente," ","DH")) AS totalvente,
                                 IF(totalvente = 0 , (select sum(total) from reglements where idclient = ? and idmode !=?  ) , sum(totalpaye) ) as totalpaye ,
                                 IF(totalvente = 0 , (select sum(total) from reglements where idclient = ? and idmode = ?  ) , totalvente - sum(totalpaye) ) as reste ,
@@ -215,10 +199,11 @@ class ClientController extends Controller
                                     group by r.idorder) as t group by id;
                             ',[$id,$IdCredit->id ,$id,$IdCredit->id   ,$id,$id]);
 
-
+                            
 
         $has_Solde = false;
         $Solde_Client = Reglements::where('idclient',$id)->count();
+        
         if($Solde_Client > 0)
         {
             $has_Solde = true;
@@ -344,6 +329,7 @@ class ClientController extends Controller
 
         $product = null;
         $check_product      = Product::where('name',$name_product)->count();
+        
         if($check_product == 0)
         {
             // create product
@@ -357,7 +343,8 @@ class ClientController extends Controller
         else
         {
             // create product
-            $product  = Product::where('name', $name_product)->where('idcompany' , $CompanyActive->id,)->first();
+            $product  = Product::where('name', $name_product)->first();
+            
         }
         $BonEntre = null;
         $check_BonEntre = BonEntre::where('numero_bon','Bon-Solde-Depart')->where('idcompany',$CompanyActive->id)->count();
@@ -382,6 +369,7 @@ class ClientController extends Controller
         }
         $Stock = null;
         $check_Stock = Stock::where('idbonentre',$BonEntre->id)->where('idcompany',$CompanyActive->id)->count();
+       
         if($check_Stock == 0)
         {
             // create stock
