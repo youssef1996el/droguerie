@@ -10,13 +10,14 @@ use DataTables;
 use App\Models\Order;
 use App\Models\ModePaiement;
 use App\Models\Reglements;
+use App\Models\Cheques;
 use Carbon\Carbon;
 use App\Models\Paiements;
 use Auth;
 class RecouverementController extends Controller
 {
     public function index()
-    {
+    { 
 
         $CountCompany          = Company::count();
         if($CountCompany == 0)
@@ -208,6 +209,21 @@ class RecouverementController extends Controller
         try
         {
 
+            $hasCheque = false;
+            foreach($request['ModePaiement'] as $item)
+            {
+                $ModePaiement = ModePaiement::where('id',$item['mode'])->select('name')->get();
+                foreach($ModePaiement as $item1)
+                {
+                    if($item1->name === "chèque")
+                    {
+                        $hasCheque = true;
+                    }
+                }
+            }
+            
+           
+    
             foreach ($request['ModePaiement'] as $item)
             {
                 // extract id mode paiement credit
@@ -274,6 +290,21 @@ class RecouverementController extends Controller
                         'idcompany'  => $Reglements->idcompany,
                         'iduser'     => Auth::user()->id,
                     ]);
+
+                    if($hasCheque)
+                    {
+                        // insert cheque
+                        $Cheques = Cheques::create([
+                            'numero'                 => $request->numero,
+                            'datecheque'             => $request->datecheque,
+                            'datepromise'            => $request->datepromise,
+                            'montant'                => $request->montant,
+                            'type'                   => $request->type,
+                            'name'                   => $request->name,
+                            'bank'                   => $request->bank,
+                            'idorder'                => $item['idorder'],
+                        ]);
+                    }
 
 
                 }

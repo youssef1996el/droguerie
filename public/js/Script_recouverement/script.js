@@ -13,7 +13,7 @@ $(document).ready(function () {
             responsive: true,
             autoWidth: false,
             ordering: false,
-            ajax: {
+            ajax: { 
                 url: GetRecouvementClient,
                 data: function (d) {
                     d.idclient = idclient;
@@ -359,12 +359,68 @@ $(document).ready(function () {
                 if(modePaiementTable.length > 0)
                 {
                     let DataPaiement = Object.values(modePaiementTable);
+                    let displayStatus = $('.DivCheque').css('display');
+                    let contentCheque = displayStatus === 'block';
+                    
                     var data =
                     {
 
                         'ModePaiement'  : DataPaiement,
                         '_token'        : csrf_token,
                     };
+                    if (contentCheque)
+                    {
+                        let isValid = true;
+
+                        // Check if all required fields are filled
+                        $('.numero, .datecheque, .datepromise, .montant, .type, .bank, .name').each(function() {
+                            if ($(this).val().trim() === '') {
+                                isValid = false;
+
+                                // Check if error message already exists
+                                if (!$(this).prev('span.error-message').length) {
+                                    $(this).before($('<span>').addClass('error-message').css('color', 'red').text("Ceci est obligatoire : "));
+                                }
+
+                                $(this).addClass('error'); // Add an error class for styling if needed
+                            } else {
+                                // Remove the error message if the field is filled
+                                $(this).prev('span.error-message').remove();
+                                $(this).removeClass('error');
+                            }
+                        });
+
+                        if (!isValid) {
+                            alert('Please fill in all required fields.'); // Display an error message
+                            return; // Prevent further execution
+                        }
+
+                        // Add values to data object if valid
+                        Object.assign(data, {
+                            'numero': $('.numero').val(),
+                            'datecheque': $('.datecheque').val(),
+                            'datepromise': $('.datepromise').val(),
+                            'montant': $('.montant').val(),
+                            'type': $('.type').val(),
+                            'bank': $('.bank').val(),
+                            'name': $('.name').val(),
+                        });
+                    }
+                    var date1Val = $('.datecheque').val();
+                    var date2Val = $('.datepromise').val();
+    
+                    if (date1Val !== '' && date2Val !== '')
+                    {
+                        var date1 = new Date(date1Val);
+                        var date2 = new Date(date2Val);
+    
+                        if (date2 <= date1)
+                        {
+                            toastr.error('La date promise doit être supérieure à la date chèque.','Erreur');
+                            $('.datepromise').val('');
+                            return false;
+                        }
+                    }
                     $.ajax({
                         type            : "post",
                         url             : StoreRecouvement,
@@ -377,6 +433,7 @@ $(document).ready(function () {
                                 toastr.success("L'opération s'est terminée avec succès", 'Success');
                                 $('.TableRecouverement').DataTable().ajax.reload();
                                 clearTableRecouverementSelected();
+                                $('.DivCheque').css('display','none');
                             }
                         }
                         ,
@@ -391,6 +448,26 @@ $(document).ready(function () {
 
 
             }
+        }
+    });
+
+
+    $(document).on('change','.modePaiement',function(e)
+    {
+        e.preventDefault();
+        let modeArray = [];
+
+        $('.TableRecouverementSelected tbody tr').each(function() {
+            let mode = $(this).find('select[name="mode_paiement"] option:selected').text();
+            if (mode) {
+                modeArray.push(mode);
+            }
+        });
+        console.log(modeArray);
+        if (modeArray.includes('chèque')) {
+            $('.DivCheque').css('display', 'block');
+        } else {
+            $('.DivCheque').css('display', 'none');
         }
     });
 

@@ -8,7 +8,7 @@
     var ModePaiement                = @Json($ModePaiement);
     var csrf_token                  = "{{csrf_token()}}";
     var StoreRecouvement            = "{{url('StoreRecouvement')}}";
-</script>
+</script> 
 <div class="container-fluid">
     <div class="card card-body py-3">
         <div class="row align-items-center">
@@ -95,6 +95,55 @@
                 </tbody>
             </table>
         </div>
+    </div>
+    <div class="row DivCheque" style="display: none">
+        <div class="col-sm-12 col-md-12 col-xl-12">
+            <div class="card card-body border rounded-2 p-2">
+                <h5 class="card-title border p-2 bg-light rounded-2 text-center text-uppercase fst-italic">Tableau information cheque</h5>
+                <div class="table-responsive">
+                    <table class="table table-bordered table-striped">
+                        <thead class="fs-2 text-nowrap">
+                            <tr>
+                                <th class="col-xxl-2">Numéro</th>
+                                <th class="col-xxl-2" style="text-align: center">Date Cheque</th>
+                                <th class="col-xxl-2" style="text-align: center">Date Promise</th>
+                                <th class="col-xxl-2" style="text-align: center">Total</th>
+                                <th class="col-xxl-2" style="text-align: center">Type</th>
+                                <th class="col-xxl-2" style="text-align: center">Nom complet</th>
+                                <th class="col-xxl-2" style="text-align: center">Banque</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="col-xxl-2">
+                                    <input type="number" class="form-control numero">
+                                </td>
+                                <td class="col-xxl-2">
+                                    <input type="date" class="form-control datecheque">
+                                </td>
+                                <td class="col-xxl-2">
+                                    <input type="date" class="form-control datepromise">
+                                </td>
+                                <td class="col-xxl-2">
+                                    <input type="number" class="form-control montant"  min="1">
+                                </td>
+                                <td class="col-xxl-2">
+                                    <input type="text" class="form-control type" >
+                                </td>
+                                <td class="col-xxl-2">
+                                    <input type="text" class="form-control  name" >
+                                </td>
+                                <td class="col-xxl-2">
+                                    <input type="text" class="form-control bank" >
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                </div>
+            </div>
+        </div>
+
     </div>
     @can('recouverement-payé')
         <button class="btn btn-success" id="Encaissement">Encaissement</button>
