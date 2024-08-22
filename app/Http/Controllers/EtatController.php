@@ -338,8 +338,8 @@ class EtatController extends Controller
                     JOIN company co ON co.id = c.idcompany
                     WHERE DATE(r.created_at) BETWEEN ? AND ? AND r.idmode = ? and co.status = "Active"',[$request->startDate,$request->endDate,$IdsCredit]);
 
-        $DataByClientPaye  = DB::select('select p.total as totalpaye,CONCAT(c.nom, " ", c.prenom) AS client from reglements r,paiements p,clients c
-                                    where r.id = p.idreglement and c.id = r.idclient  and date(p.created_at) BETWEEN ? AND ? and r.datepaiement is null
+        $DataByClientPaye  = DB::select('select p.total as totalpaye,CONCAT(c.nom, " ", c.prenom) AS client from reglements r,paiements p,clients c,company as co
+                                    where r.id = p.idreglement and c.id = r.idclient and c.idcompany = co.id  and date(p.created_at) BETWEEN ? AND ? and r.datepaiement is null  and co.status = "Active"
                                      union all
 
                                      select p.total as totalpaye,concat(c.nom," ",c.prenom) as client from company co ,clients c,reglements r,paiements p where co.id = c.idcompany and c.id = r.idclient and r.id = p.idreglement and co.status = "Active" 
