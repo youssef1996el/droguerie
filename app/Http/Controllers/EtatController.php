@@ -483,6 +483,16 @@ class EtatController extends Controller
         ->whereBetween(DB::raw('DATE(r.created_at)'),[$DateStart,$DateEnd])
         ->get();
 
+        $Renevus = DB::table('getmoney as g')
+        ->join('company as c','c.id','=','g.idcompany')
+        ->where('c.status','=','Active')
+        ->whereBetween(DB::raw('DATE(g.created_at)'), [$DateStart, $DateEnd])
+        ->groupBy('g.friend')
+        ->select('g.friend','g.total')
+        ->get();
+
+
+
 
 
         $reste =  ( $TotalByModePaiement->sum('totalpaye') + $TotalReglementPaye +  $SoldeCaisse ) - ($Charge->sum('total') + $Versement->sum('total') + $Paiement_Employee->sum('total'));
@@ -493,8 +503,10 @@ class EtatController extends Controller
         $ChargeReste   = DB::select('select sum(c.total)as charge from charge c, company co where c.idcompany = co.id and co.status = "Active"  and date(c.created_at) between ? and ? ',[$DateStart,$DateEnd]);
         $VersementReste = DB::select('select sum(v.total) as versement from versement v , company c where v.idcompany = c.id and c.status = "Active" and date(v.created_at) between ? and ? ',[$DateStart,$DateEnd]);
         $Reglement_Personnel = DB::select("select sum(r.total) as reglement_personnel from reglementspersonnels r , personnels p , company c where r.idpersonnel=p.id and p.idcompany = c.id and c.status = 'Active' and date(r.created_at) between ? and ?",[$DateStart,$DateEnd]);
-        $Reste  =($TotalPaiement[0]->total + $SoldeDepart[0]->solde)  - ($ChargeReste[0]->charge + $VersementReste[0]->versement + $Reglement_Personnel[0]->reglement_personnel);
+        $getMoney            = DB::select("select sum(g.total) as getmoney from getmoney g, company c , users u where g.idcompany =c.id and g.iduser = u.id and c.status = 'Active'and date(g.created_at) between ? and ?",[$DateStart,$DateEnd]);
+        $Reste  =($TotalPaiement[0]->total + $SoldeDepart[0]->solde + $getMoney[0]->getmoney)  - ($ChargeReste[0]->charge + $VersementReste[0]->versement + $Reglement_Personnel[0]->reglement_personnel);
     // Load view and render HTML
+    /* dd((float) $TotalPaiement[0]->total ); */
     $html = view('Etat.EtatTEST', compact(
         'CompanyIsActive',
         'DataByClient',
@@ -514,7 +526,8 @@ class EtatController extends Controller
         'reste',
         'Tableau_enccaissement_Credit',
         'Paiement_Employee',
-        'Reste'
+        'Reste',
+        'Renevus'
 
 
 

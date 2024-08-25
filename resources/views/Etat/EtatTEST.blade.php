@@ -521,6 +521,29 @@
                 </div>
             @endif
         </div>
+        <br><br><br><br><br><br><br><br><br><br><br><br>
+            <div style="margin-left: 55%; width: 45%; border: 1px solid black">
+                <u class="TitleTable">Tableau Revenus</u>
+                <table style="width: 100%; border-collapse: collapse; margin-top: 20px;">
+                    @php
+                        $TotalRevenus = 0;
+                    @endphp
+                    @foreach ($Renevus as $item)
+                        @php
+                            $TotalRevenus += $item->total;
+                        @endphp
+                        <tr>
+                            <th style="border: 1px solid #ccc; padding: 8px;">{{ $item->friend }}</th>
+                            <th style="border: 1px solid #ccc; padding: 8px; text-align: right;">{{ number_format($item->total, 2, ".", "") }} DH</th>
+                        </tr>
+                    @endforeach
+                    <tr style="background-color: rgb(195, 255, 190);">
+                        <th style="border: 1px solid #ccc; padding: 8px;">TOTAL</th>
+                        <th style="border: 1px solid #ccc; padding: 8px; text-align: right;">{{ number_format($TotalRevenus, 2, ".", "") }} DH</th>
+                    </tr>
+                </table>
+            </div>
+        </div>
 
         @if (count($Paiement_Employee) > 0)
             <div style="display: flex; justify-content: space-between; align-items: stretch;">

@@ -141,6 +141,12 @@ class PermissionTableSeeder extends Seeder
             'Devis-supprimer',
             'Devis-imprimer',
 
+            'Renenus',
+            'Renenus-ajouter',
+            'Renenus-modifier',
+            'Renenus-supprimer',
+
+
 
 
         ];

@@ -25,6 +25,7 @@ use App\Http\Controllers\SoldecaisseController;
 use App\Http\Controllers\AvoirController;
 use App\Http\Controllers\VersementController;
 use App\Http\Controllers\DevisController;
+use App\Http\Controllers\GetMoneyController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -248,6 +249,14 @@ Route::group(['middleware' => ['web','auth']], function ()
     Route::get('invoicesDevis/{id}'                     ,[DevisController::class,'invoicesDevis'                         ]);
     Route::post('TrashDevis'                            ,[DevisController::class,'TrashDevis'                            ]);
     /************************************ End devis ********************************************************/
+
+
+    /************************************ revenus ***********************************************************/
+    Route::get('revenus'                                ,[GetMoneyController::class,'index'                   ]);
+    Route::post('StoreRevenus'                          ,[GetMoneyController::class,'StoreRevenus'            ]);
+     Route::post('updateRevenus'                        ,[GetMoneyController::class,'updateRevenus'           ]);
+     Route::post('TrashRevenus'                         ,[GetMoneyController::class,'TrashRevenus'            ]);
+    /************************************ revenus ***********************************************************/
 
 
 
