@@ -46,6 +46,14 @@ return array(
          * Symbol, ZapfDingbats.
          */
         "font_dir" => storage_path('fonts'), // advised by dompdf (https://github.com/dompdf/dompdf/pull/782)
+        'font_family' => [
+            'Amiri' => [
+                'normal' => 'Amiri-Regular.ttf',
+                'bold' => 'Amiri-Bold.ttf',
+                'italic' => 'Amiri-Italic.ttf',
+                'bold_italic' => 'Amiri-BoldItalic.ttf',
+            ],
+        ],
 
         /**
          * The location of the DOMPDF font cache directory

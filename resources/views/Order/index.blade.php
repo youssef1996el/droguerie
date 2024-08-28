@@ -26,6 +26,7 @@
     var changeAccessoireTmp             = "{{url('changeAccessoireTmp')}}";
     var ChangeQteByPress                = "{{url('ChangeQteByPress')}}";
     var TrashOrder                      = "{{url('TrashOrder')}}";
+    var verifiPaiement                  = "{{url('verifiPaiement')}}";
 </script>
 <style>
     @keyframes slideDown
@@ -242,6 +243,343 @@
             </table>
         </div>
     </div>
+    
+    
+      
+    <style>
+       :root {
+  /* Animation Timing Function */
+  --primary-timing-func: cubic-bezier(0.86, 0, 0.07, 1);
+  /* Button Variables */
+  --button-radius: 30px; 
+  --button-inner-ring-radius: 120px;
+  --button-outer-ring-radius: 100px;
+  --button-gradient: 135deg, rgba(244,87,116,1) 0%, rgba(229,69,139,1) 100%;
+  --main-background-color: #edc1c2;
+  /* Menu Variables */
+  --menu-radius: calc(var(--button-radius) - 2px);
+  --menu-height: 173px;
+  --menu-width: 270px;
+  --menu-border-radius: 10px;
+  --menu-bg-color: #e0deff;
+  --menu-timing-function: var(--primary-timing-func);
+  --menu-icon-size: 30px;
+/*   Close Icon */
+  --close-icon-timing-function: var(--primary-timing-func);
+}
+
+*{
+  box-sizing: border-box;
+}
+
+
+
+svg{
+  fill: #FFFFFF;
+}
+
+
+.sticky-menu-container{
+  /* position: fixed; */
+  right: calc(var(--button-radius));
+  bottom: calc(var(--button-radius));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 18px;
+  margin-bottom: 5px;
+}
+
+.sticky-menu-container .outer-button{
+  position: absolute;
+  height: var(--button-radius, 70px);
+  width: var(--button-radius, 70px);
+  border-radius: 50%;
+  background: rgb(244,87,116);
+  background: -moz-linear-gradient(var(--button-gradient));
+  background: -webkit-linear-gradient(var(--button-gradient));
+  background: linear-gradient(var(--button-gradient));
+  /* display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 10px 10px 18px 5px rgba(0,0,0,0.2); */
+  cursor: pointer;
+  padding-left: 2px;
+    padding-top: 2px;
+}
+.sticky-menu-container .outer-button .icon-container{
+  height: inherit;
+  width: inherit;
+  border-radius: inherit;
+  display: inherit;
+  align-items: inherit;
+  justify-content: inherit;
+  overflow: hidden;
+  position: relative;
+  cursor: inherit;
+}
+.sticky-menu-container .outer-button .close-icon{
+  transform: scale(0) rotate(-270deg);
+  opacity: 0;
+  height: 25px;
+  width: 25px;
+  position: absolute;
+  fill: #FFFFFF;
+}
+
+.sticky-menu-container .outer-button .arrow-icon{
+  height: 25px;
+  width: 25px;
+  position: absolute;
+  fill: #FFFFFF;
+}
+
+.sticky-menu-container .outer-button .arrow-icon.hiding-spot{
+transform: translateX(calc(var(--button-radius) / -2)) translateY(calc(var(--button-radius) / 2));
+  opacity: 0;
+}
+
+.sticky-menu-container .outer-button .close-icon.show{
+  animation-duration: 1000ms;
+  animation-name: close-in;
+  animation-fill-mode: forwards;
+  animation-timing-function: var(--close-icon-timing-function); 
+}
+
+.sticky-menu-container .outer-button .close-icon.hide{
+  animation-duration: 1000ms;
+  animation-name: close-out;
+  animation-timing-function: var(--close-icon-timing-function); 
+}
+
+.sticky-menu-container .outer-button .arrow-icon.show{
+  opacity: 0;
+  animation-duration: 1000ms;
+  animation-name: arrow-in;
+  animation-fill-mode: forwards;
+  animation-timing-function: var(--close-icon-timing-function); 
+/*   animation-delay: 250ms; */
+}
+
+.sticky-menu-container .outer-button .arrow-icon.hide{
+  animation-duration: 1000ms;
+  animation-name: arrow-out;
+  animation-fill-mode: forwards;
+  animation-timing-function: var(--close-icon-timing-function); 
+}
+
+.sticky-menu-container .outer-button::after, sticky-menu-container.outer-button::before{
+  position: absolute;
+  display: inline-block;
+  content: "";
+  height: var(--button-inner-ring-radius);
+  width: var(--button-inner-ring-radius);
+  border-radius: 50%;
+  background-color:transparent;
+  border: 0px solid rgba(255,255,255,0.5);
+  opcacity: 0;
+  cursor: pointer;
+}
+
+.sticky-menu-container .outer-button.clicked::after{
+  animation-duration: 500ms;
+  animation-name: touch-click-inner;
+  animation-iteration-count: 1;
+  animation-fill-mode: forwards;
+}
+
+.sticky-menu-container .outer-button::before{
+  height: var(--button-outer-ring-radius);
+  width: var(--button-outer-ring-radius);
+}
+
+.sticky-menu-container .outer-button.clicked::before{
+  animation-name: touch-click-outer;
+  animation-duration: 500ms;
+  animation-iteration-count: 1;
+  animation-delay: 250ms;
+}
+
+.sticky-menu-container .inner-menu{
+  position: absolute;
+  height: var(--menu-height);
+  width: var(--menu-width);
+  border-radius: var(--menu-border-radius);
+  background-color: var(--menu-bg-color); 
+/*   transform: translate(calc(-50% + var(--button-radius) / 2), calc(-55% - var(--button-radius) / 2)); */
+  /* transform: translateX(-91px) translateY(-169px); */
+  transform: translateX(-154px) translateY(-4px);
+  transition: all 1000ms cubic-bezier(0.86, 0, 0.07, 1);
+/*   transition-delay: 500ms; */
+  padding: 30px;
+  overflow: hidden;
+  box-shadow: 10px 10px 18px 5px rgba(0,0,0,0.4);
+}
+
+.sticky-menu-container .inner-menu > ul{
+  height: 100%;
+
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  align-content: space-between;
+  margin: 0;
+  padding: 0;
+}
+
+.sticky-menu-container .inner-menu > .menu-list > .menu-item{
+  color: #FFFFFF;
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  width: 100%;
+  display: flex;
+  align-items: center;
+}
+.sticky-menu-container .inner-menu > .menu-list > .menu-item :hover{
+    background-color: #f3c29a;
+    color: white;
+    transform: scale(1.05);
+    transition: background-color 2s ease, color 2s ease, transform 0.3s ease;
+}
+
+.sticky-menu-container .inner-menu > .menu-list > .menu-item{
+  overflow: hidden;
+}
+
+.sticky-menu-container .inner-menu > .menu-list > .menu-item > .item-icon{
+  margin-right: 20px; 
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sticky-menu-container .inner-menu > .menu-list > .menu-item > .item-icon > svg{
+  height: var(--menu-icon-size);
+  width: var(--menu-icon-size);
+}
+
+.sticky-menu-container .inner-menu.closed{
+  height: var(--menu-radius);
+  width: var(--menu-radius);
+  border-radius: 50%;
+  padding:0;
+  transform: unset;
+}
+
+.sticky-menu-container .inner-menu > .menu-list > .menu-item > .item-text{
+  opacity: 0;  
+}
+
+.sticky-menu-container .inner-menu > .menu-list > .menu-item > .item-text.text-in{
+  animation-duration: 1500ms;
+  animation-name: text-in;
+  animation-fill-mode: forwards;
+  animation-timing-function: var(--close-icon-timing-function);
+}
+
+.sticky-menu-container .inner-menu > .menu-list > .menu-item.text-hides{
+  animation-duration: 200ms;
+  animation-name: text-hides;
+  animation-fill-mode: forwards;
+  animation-timing-function: var(--close-icon-timing-function);
+}
+
+@keyframes touch-click-inner {
+  50%{ 
+      transform: scale(0.375);
+      border-width: 30px;
+      opacity: 1;
+  }
+  100%{ 
+      transform: scale(1);
+      border-width: 1px;
+      opacity: 0;
+  }
+}
+
+@keyframes touch-click-outer {
+  0%{
+    border-width: 10px;
+    opacity: 0;
+  }
+  50%{
+    opacity: 0.2;
+  }
+  100%{ 
+      transform: scale(1.1);
+      opacity: 0;
+  }
+}
+
+@keyframes close-in{
+  0%{
+    transform: transform: scale(0) rotate(270deg);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1.1) rotate(0deg);
+    opacity: 1;
+  }
+}
+
+@keyframes close-out{
+  0%{
+    transform: scale(1.1) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(0) rotate(270deg);
+    opacity: 0;
+  }
+}
+
+@keyframes arrow-out{
+  0%{
+    transform: translateX(0) translateY(0);
+  }
+  100%{
+    transform: translateX(calc(var(--button-radius) / 1.5)) translateY(calc(var(--button-radius) / -1.5));
+  }
+}
+
+@keyframes arrow-in{
+  0%{
+    transform: translateX(calc( -1 * var(--button-radius))) translateY(calc(var(--button-radius)));
+    opacity: 0;
+  }
+  100%{
+    transform: translateX(0) translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes text-in{
+  0%{
+    opcaity: 1;
+    transform: translateY(50px);
+  }
+  100%{
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes text-hides{
+  0%{
+    opacity: 1;
+  }
+  100%{
+    opacity: 0;
+  }
+}
+
+/* 
+https://www.instagram.com/p/ByuNUGkAVHk/ 
+*/
+
+
+    </style>
+    
 
     <div class="modal fade" id="AddOrder" tabindex="-1" role="dialog" aria-labelledby="addContactModalTitle" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-fullscreen" role="document">
@@ -587,6 +925,38 @@
                         <button class="btn bg-danger-subtle text-danger" data-bs-dismiss="modal"> fermer</button>
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade " id="ModalVerifiPaiement" tabindex="-1" role="dialog" aria-labelledby="addContactModalTitle" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered " role="document">
+            <div class="modal-content ">
+                <div class="modal-header d-flex align-items-center">
+                    <h5 class="modal-title card-title border p-2 bg-white rounded-2 w-100 text-center">- Vérifiez la méthode de paiement</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="add-contact-box">
+                        <div class="add-contact-content">
+                            <div class="row ">
+                                <table class="table table-striped table-bordered TableVerifiPaiement ">
+                                    <thead>
+                                        <tr>
+                                            <th>Mode Paiement</th>
+                                            <th>Montant Payé</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                
+                                </table>
+                            </div>
+                            
+                            
+                        </div>
+                    </div>
+                </div>
+                
             </div>
         </div>
     </div>

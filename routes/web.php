@@ -107,6 +107,7 @@ Route::group(['middleware' => ['web','auth']], function ()
     Route::get('changeAccessoireTmp',[OrderController::class,'changeAccessoireTmp'              ]);
     Route::get('ChangeQteByPress'   ,[OrderController::class,'changeQteByPress'                 ]);
     Route::post('TrashOrder'         ,[OrderController::class,'TrashOrder'                      ]);
+    Route::get('verifiPaiement'      ,[OrderController::class,'verifiPaiement'                  ]);
     /******************************** End Order ************************************************/
 
 

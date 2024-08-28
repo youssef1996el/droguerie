@@ -33,6 +33,8 @@ $(document).ready(function ()
     });
     $(function ()
     {
+        var isAnimating = false; // Define this variable at a scope accessible to your event handlers
+        
         initializeDataTable('.TableVente', GetMyVente);
         function initializeDataTable(selector, url)
         {
@@ -181,6 +183,121 @@ $(document).ready(function ()
 
 
             });
+            $(document).on('click', '.sticky-menu-container .outer-button', function (e) {
+                if (isAnimating) return;
+            
+                var $this = $(this);
+                var $row = $this.closest('tr');
+                var $menu = $row.find(".sticky-menu-container .inner-menu");
+                var $closeIcon = $row.find(".sticky-menu-container .outer-button .close-icon");
+                var $arrowIcon = $row.find(".sticky-menu-container .outer-button .arrow-icon");
+                var $menuItems = $row.find(".sticky-menu-container .inner-menu > .menu-list > .menu-item");
+                var $itemTexts = $row.find(".sticky-menu-container .inner-menu > .menu-list > .menu-item > .item-text");
+                var isOpen = !$menu.hasClass("closed"); // Toggle based on current state
+            
+                // Close any other open menus
+                $('.sticky-menu-container .inner-menu').not($menu).each(function () {
+                    if (!$(this).hasClass("closed")) {
+                        $(this).addClass("closed");
+            
+                        var $otherMenu = $(this);
+                        var $otherRow = $otherMenu.closest('tr');
+                        var $otherCloseIcon = $otherRow.find(".sticky-menu-container .outer-button .close-icon");
+                        var $otherArrowIcon = $otherRow.find(".sticky-menu-container .outer-button .arrow-icon");
+                        var $otherMenuItems = $otherMenu.find(".sticky-menu-container .inner-menu > .menu-list > .menu-item");
+                        var $otherItemTexts = $otherMenu.find(".sticky-menu-container .inner-menu > .menu-list > .menu-item > .item-text");
+            
+                        $otherCloseIcon.removeClass("show").addClass("hide");
+                        $otherArrowIcon.removeClass("hide").addClass("show");
+            
+                        $otherMenuItems.each(function () {
+                            $(this).addClass("text-hides");
+                        });
+            
+                        $otherItemTexts.each(function () {
+                            $(this).removeClass("text-in");
+                        });
+                    }
+                });
+            
+                $this.addClass("clicked");
+                $menu.toggleClass("closed");
+            
+                if (isOpen) {
+                    $closeIcon.removeClass("show").addClass("hide");
+                    $arrowIcon.removeClass("hide").addClass("show");
+            
+                    $menuItems.each(function () {
+                        $(this).addClass("text-hides");
+                    });
+            
+                    $itemTexts.each(function (index) {
+                        setTimeout(() => {
+                            $(this).removeClass("text-in");
+                        }, 0);
+                    });
+            
+                } else {
+                    $closeIcon.removeClass("hide").addClass("show");
+                    $arrowIcon.removeClass("show").addClass("hide");
+            
+                    $menuItems.each(function () {
+                        $(this).removeClass("text-hides");
+                    });
+            
+                    $itemTexts.each(function (index) {
+                        setTimeout(() => {
+                            $(this).addClass("text-in");
+                        }, index * 150);
+                    });
+                }
+            });
+            
+            // Handle animation events for the sticky menu button
+            $(document).on('animationstart', '.sticky-menu-container .outer-button', function () {
+                isAnimating = true;
+            });
+            
+            $(document).on('animationend', '.sticky-menu-container .outer-button', function () {
+                isAnimating = false;
+                $(this).removeClass("clicked");
+            });
+            
+
+            $(selector + ' tbody').on('click', '.sticky-menu-container .verifiPiement', function(e)
+            {
+                e.preventDefault();
+                var idorder = $(this).attr('value');
+                $.ajax({
+                    type    : "get",
+                    url     : verifiPaiement,
+                    data    :
+                    {
+                        idorder : idorder,
+                    },
+                    dataType: "json",
+                    success: function (response) 
+                    {
+                        if(response.status == 200)
+                        {
+                            $('#ModalVerifiPaiement').modal("show");
+                            $('.TableVerifiPaiement tbody').empty(); // Clear the tbody before appending
+
+                            $.each(response.data, function (index, value) { 
+                                $('.TableVerifiPaiement tbody').append('<tr>\
+                                    <td>' + value.name + '</td>\
+                                    <td>' + value.total + '</td>\
+                                </tr>');
+                            });
+                            
+                        }   
+                    }
+                });
+            });
+
+
+
+            
 
 
         }

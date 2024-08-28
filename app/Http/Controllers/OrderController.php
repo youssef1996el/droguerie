@@ -1051,15 +1051,38 @@ class OrderController extends Controller
                     $btn .= '<a href="#" class="text-light ms-2 Trash" value="' . $row->id . '">
                                 <i class="ti ti-shopping-cart-off fs-5 border rounded-2 bg-danger p-1" title="Annuler vente"></i>
                             </a>';
-                }
+                } 
                 // Print button with permission check
                 if (auth()->user()->can('vente-imprimer')) {
                     $btn .= '<a href="' . url('invoices/' . $row->id) . '" class="text-light ms-2" target="_blank" value="' . $row->id . '">
                                 <i class="ti ti-file-invoice fs-5 border rounded-2 bg-success p-1" title="Imprimer bon ou facture"></i>
                             </a>';
                 }
-
-
+                $btn .= '<div class="sticky-menu-container">
+                            <div class="inner-menu closed ">
+                                <ul class="menu-list w-100">
+                                    <li class="menu-item  border border-white rounded-2 bg-white">
+                                        <a href="#" class="item-text fs-2 py-2 text-dark text-center verifiPiement" value="'.$row->id.'">- Vérifiez la méthode de paiement</a>
+                                    </li>
+                                    <!--
+                                    <li class="menu-item   border border-white rounded-2 bg-white">
+                                        <a href="#" class="item-text fs-2 py-2 text-dark text-center" value="'.$row->id.'">- Change la méthode de paiement</a>
+                                    </li> -->
+                                </ul>
+                            </div>
+                            <div class="outer-button">
+                                <div class="icon-container">
+                                    <svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 92 92" enable-background="new 0 0 92 92" xml:space="preserve" class="close-icon">
+                                        <path id="XMLID_732_" d="M70.7,64.3c1.8,1.8,1.8,4.6,0,6.4c-0.9,0.9-2,1.3-3.2,1.3c-1.2,0-2.3-0.4-3.2-1.3L46,52.4L27.7,70.7
+                                            c-0.9,0.9-2,1.3-3.2,1.3s-2.3-0.4-3.2-1.3c-1.8-1.8-1.8-4.6,0-6.4L39.6,46L21.3,27.7c-1.8-1.8-1.8-4.6,0-6.4c1.8-1.8,4.6-1.8,6.4,0
+                                            L46,39.6l18.3-18.3c1.8-1.8,4.6-1.8,6.4,0c1.8,1.8,1.8,4.6,0,6.4L52.4,46L70.7,64.3z"/>
+                                    </svg>
+                                    <svg xmlns="http://www.w3.org/2000/svg" id="Layer_1" viewBox="0 0 64 64" width="64" height="64" class="arrow-icon">
+                                        <path d="M32 12c1.1 0 2 .9 2 2v16h16c1.1 0 2 .9 2 2s-.9 2-2 2H34v16c0 1.1-.9 2-2 2s-2-.9-2-2V34H14c-1.1 0-2-.9-2-2s.9-2 2-2h16V14c0-1.1.9-2 2-2z"/>
+                                    </svg>
+                                </div>
+                            </div>
+                        </div>';
                 $btn .= '</div>';
                 return $btn;
             })->rawColumns(['action'])->make(true);
@@ -1069,7 +1092,7 @@ class OrderController extends Controller
 
     public function viewInvoice($id)
     {
-        $invoice = Order::findOrFail($id);
+        /* $invoice = Order::findOrFail($id);
         // extract client from order
         $IdClient = Order::where('id',$id)->select('idclient')->first();
         $Client   = Client::where('id',$IdClient->idclient)->first();
@@ -1096,7 +1119,7 @@ class OrderController extends Controller
             ->where('o.id', $id)
             ->select(
                 'p.name',
-               /*  DB::raw("CASE WHEN s.convert IS NOT NULL THEN CONCAT(l.qte / s.convert, ' ', s.type) ELSE l.qte END AS qte"), */
+               
                DB::raw("CASE
             WHEN s.convert IS NOT NULL THEN CONCAT(ROUND(l.qte / s.convert), ' ', s.type)
             ELSE l.qte
@@ -1159,57 +1182,125 @@ class OrderController extends Controller
             return $pdf->download('Facture.pdf');
         } else {
             return $pdf->download('Bon.pdf');
+        } */
+        $invoice = Order::findOrFail($id);
+        // extract client from order
+        $IdClient = Order::where('id',$id)->select('idclient')->first();
+        $Client   = Client::where('id',$IdClient->idclient)->first();
+
+        // extract id mode credit by company and extract credit this order
+        $IdCredit = DB::table('modepaiement as m')
+        ->join('company as c','c.id','=','m.idcompany')
+        ->where('c.status','=','Active')
+        ->where('m.name','=','crédit')
+        ->value('m.id');
+        // now extract credit
+        $Credit = DB::table('reglements as r')
+        ->where('idorder','=',$id)
+        ->where('idmode','=',$IdCredit)
+        ->value('total');
+
+        // extract line order from id order
+
+
+        $DataLine = DB::table('lineorder as l')
+            ->join('products as p', 'l.idproduct', '=', 'p.id')
+            ->join('orders as o', 'l.idorder', '=', 'o.id')
+            ->leftJoin('setting as s', 'l.idsetting', '=', 's.id')
+            ->where('o.id', $id)
+            ->select(
+                'p.name',
+               
+               DB::raw("CASE
+            WHEN s.convert IS NOT NULL THEN CONCAT(ROUND(l.qte / s.convert), ' ', s.type)
+            ELSE l.qte
+        END AS qte"),
+                'l.price',
+                'l.total',
+                DB::raw("CASE WHEN s.convert IS NOT NULL THEN ROUND(l.qte / s.convert) ELSE l.qte END AS qtedevision"),
+                'l.accessoire',
+                's.type',
+                DB::raw('IF(l.idsetting IS NOT NULL, ROUND(l.qte / s.convert), l.qte) AS QteConvertWithOutConcat,
+                        ROUND(l.accessoire / IF(l.idsetting IS NOT NULL, ROUND(l.qte / s.convert), l.qte)) AS remise'),
+                DB::raw('IF(ROUND(l.accessoire / IF(l.idsetting IS NOT NULL, ROUND(l.qte / s.convert), l.qte)) < 0,
+                            l.price - (-1 * ROUND(l.accessoire / IF(l.idsetting IS NOT NULL, ROUND(l.qte / s.convert), l.qte))),
+                            l.price + ROUND(l.accessoire / IF(l.idsetting IS NOT NULL, ROUND(l.qte / s.convert), l.qte))
+                        ) AS price_new'),
+                DB::raw('IF(
+                    ROUND(l.accessoire / IF(l.idsetting IS NOT NULL, ROUND(l.qte / s.convert), l.qte)) < 0,
+                    l.price - (-1 * ROUND(l.accessoire / IF(l.idsetting IS NOT NULL, ROUND(l.qte / s.convert), l.qte))),
+                    l.price + ROUND(l.accessoire / IF(l.idsetting IS NOT NULL, ROUND(l.qte / s.convert), l.qte))
+                ) * IF(l.idsetting IS NOT NULL, ROUND(l.qte / s.convert), l.qte) AS totalnew')
+            )
+            ->get();
+
+        // extract order
+        $order    = Order::findOrFail($id);
+        // check is facture or bon
+        $typeOrder = false;
+        $id = null;
+        if(!is_null($order->idfacture))
+        {
+            $typeOrder = true;
+            $id = $order->idfacture;
         }
-
-       /*  $pdf            = PDF::loadView('Order.FactureOrBon',
-        compact('Client','DataLine','order','typeOrder','Info','Tva','formattedId','Credit','imageData'))
-        ->setOptions([
-            'defaultFnt' => 'Amiri',
-            'isRemoteEnabled' => true,
-
-            ])->setPaper('a4'); */
-
-
-
-
-       /*  $options = new Options();
-        $options->set('chroot', [__DIR__.'/Librairie', __DIR__.'/PICS', __DIR__.'/PHOTOS']);
-        $options->set('isRemoteEnabled', true);
-        $options->set('isHtml5ParserEnabled', true);
-        $options->set('isPhpEnabled', false);
-
-        $pdf = new Dompdf($options);
-
-
-        $data = [
-            'Client' => $Client,
-            'DataLine' => $DataLine,
-            'order' => $order,
-            'typeOrder' => $typeOrder,
-            'Info' => $Info,
-            'Tva' => $Tva,
-            'formattedId' => $formattedId,
-            'Credit' => $Credit,
-            'imageData' => $imageData,
+        $id = $order->id;
+        $formattedId = str_pad($id, 4, '0', STR_PAD_LEFT);
+        $Tva                  = DB::table('tva as t')
+        ->join('company as c','c.id','=','t.idcompany')
+        ->where('c.status','=','Active')
+        ->select('t.name')
+        ->first();
+        $imagePath = public_path('images/R.png');
+        $imageData = base64_encode(file_get_contents($imagePath));
+        $Info = DB::table('infos as f')->join('company as c', 'c.id', '=', 'f.idcompany')->where('c.status', '=', 'Active')->select('f.*')->first();
+        $pdf = app('dompdf.wrapper');
+        $context = stream_context_create([
+            'ssl'  => [
+                'verify_peer'  => FALSE,
+                'verify_peer_name' => FALSE,
+                'allow_self_signed' => TRUE,
+            ]
+        ]);
+        $Info = DB::table('infos as f')->join('company as c', 'c.id', '=', 'f.idcompany')->where('c.status', '=', 'Active')->select('f.*')->first();
+    
+        // توليد HTML باستخدام القالب وتمرر البيانات
+        $html = view('Order.FactureOrBon', [
+            'Client'        => $Client,
+            'DataLine'      => $DataLine,
+            'order'         => $order,
+            'typeOrder'     => $typeOrder,
+            'Tva'           => $Tva,
+            'formattedId'   => $formattedId,
+            'Credit'        => $Credit,
+            'Info'          => $Info,
+            'imageData'     => $imageData,
+        ])->toArabicHTML();
+    
+        // تحميل HTML إلى PDF
+        $pdf = Pdf::loadHTML($html)->output();
+    
+        // تحديد رؤوس الاستجابة
+        $headers = [
+            "Content-type" => "application/pdf",
         ];
+    
+        // إرجاع PDF كملف لتحميله
+        if (!is_null($order->idfacture)) {
+            return response()->streamDownload(
+                fn() => print($pdf),
+                "Facture.pdf",
+                $headers
+            );
+        } else {
+            return response()->streamDownload(
+                fn() => print($pdf),
+                "Bon.pdf",
+                $headers
+            );
+        } 
 
-
-        $html = view('Order.FactureOrBon', $data)->render();
-
-
-        $pdf->loadHtml($html);
-
-
-        $pdf->setPaper('A4', 'portrait');
-
-
-        $pdf->render();
-
-
-        file_put_contents('Bon.pdf', $pdf->output());
-
-
-        $pdf->stream('dompdf', ['Attachment' => 0]); */
+       
 
 
 
@@ -1546,5 +1637,19 @@ class OrderController extends Controller
             ]);
         }
 
+    }
+
+    public function verifiPaiement(Request $request)
+    {
+        $InfoModePaiementORder = DB::table('orders as o')
+        ->join('reglements as r', 'o.id', '=', 'r.idorder')
+        ->join('modepaiement as m', 'r.idmode', '=', 'm.id')
+        ->where('o.id', $request->idorder)
+        ->select('r.total', 'm.name')
+        ->get();
+        return response()->json([
+            'status'   => 200,
+            'data'     => $InfoModePaiementORder
+        ]);
     }
 }
