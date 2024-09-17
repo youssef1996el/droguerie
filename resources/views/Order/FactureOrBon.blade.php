@@ -464,6 +464,39 @@
                 @endif
             </table>
         </div>
+        <div class="table-responsive">
+            <table class="custom-table" id="tableDetail" style="width: 50%; float: right;">
+                <tr>
+                    <td class="text-end"><strong>Total HT:</strong></td>
+                    <td style="text-align: right">{{ number_format($SumTotalHT * 20, 2, ",", " ") }} Real</td>
+                </tr>
+                <tr>
+                    <td class="text-end"><strong>Total Payé :</strong></td>
+                    <td style="text-align: right">{{number_format(($SumTotalHT - $Credit) * (20) ,2,","," ")}} Real</td>
+                </tr>
+                @if ($Credit)
+                    <tr>
+                        <td class="text-end"><strong>Crédit Restant:</strong></td>
+                        <td style="text-align: right">{{ number_format($Credit * 20, 2, ",", " ") }} Real</td>
+                    </tr>
+                @endif
+                @if ($typeOrder)
+                    @php
+                        $taxRate = floatval(rtrim($Tva->name, '%')) / 100;
+                        $taxAmount = $SumTotalHT * $taxRate;
+                        $totalIncludingTax = $SumTotalHT * (1 + $taxRate);
+                    @endphp
+                    <tr>
+                        <td class="text-end"><strong>TVA {{ $Tva->name }}:</strong></td>
+                        <td style="text-align: right">{{ number_format($taxAmount * 20, 2, ",", " ") }} Real</td>
+                    </tr>
+                    <tr>
+                        <td class="text-end"><strong>Total TTC:</strong></td>
+                        <td style="text-align: right">{{ number_format($totalIncludingTax * 20, 2, ",", " ") }} Real</td>
+                    </tr>
+                @endif
+            </table>
+        </div>
         <footer>
             <div class="invoice-footer">
                 <span class="text-uppercase" style="padding: 8px;display: flex;justify-content: center;align-content: center">
