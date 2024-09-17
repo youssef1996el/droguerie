@@ -370,4 +370,36 @@ class HomeController extends Controller
 
 
     }
+    public function DisplayCreditBydate(Request $request)
+    {
+        $IdCredit = DB::table('modepaiement as m')
+        ->join('company as c','c.id','=','m.idcompany')
+        ->where('c.status','=','Active')
+        ->where('m.name','=','crédit')
+        ->value('m.id');
+        
+        $date = Carbon::createFromFormat('d/m/Y', $request->date)->format('Y-m-d');
+        
+        $Data_Info_Credit_by_date = DB::table('clients as c')
+        ->join('orders as o', 'c.id', '=', 'o.idclient')
+        ->join('reglements as r', function($join) {
+            $join->on('o.id', '=', 'r.idorder')
+                 ->on('r.idclient', '=', 'c.id');
+        })
+        ->whereDate('r.created_at', $date)
+        ->where('r.idmode', $IdCredit)
+        ->select(
+            DB::raw('concat(c.nom, " ", c.prenom) as client'),
+            'o.total as montant_vente',
+            'r.total',
+            DB::raw('o.total - r.total as montant_paye'),
+            'o.id'
+        )
+        ->get();
+        
+        return response()->json([
+            'status'   => 200,
+            'data'     => $Data_Info_Credit_by_date,
+        ]);
+    }
 }

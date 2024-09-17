@@ -87,6 +87,55 @@ $(document).ready(function ()
                                 left: 2,
                                 blur: 4,
                                 opacity: 1,
+                            },
+                            events: {
+                                click: function(event, chartContext, config) {
+                                    // Log the corresponding label when the chart is clicked
+                                    
+                                    var dateCredit = response.labels[config.dataPointIndex];
+                                    $.get(DisplayCreditBydate, {date : dateCredit},
+                                        function (data, textStatus, jqXHR) 
+                                        {
+                                            
+
+                                            if(data.status == 200) {
+                                                var total_montant_vente = 0;
+                                                var total_montant_paye = 0;
+                                                var total_montant_credit = 0;
+                                            
+                                                $('#ModalDisplayCreditBydate').modal("show");
+                                                $('#TableDisplayCreditByDate tbody').empty();
+                                                $('#TableDisplayCreditByDate tfoot').empty();
+                                            
+                                                $.each(data.data, function (index, value) { 
+                                                    total_montant_vente += parseFloat(value.montant_vente) || 0;
+                                                    total_montant_paye += parseFloat(value.montant_paye) || 0;
+                                                    total_montant_credit += parseFloat(value.total) || 0;
+
+                                            
+                                                    $('#TableDisplayCreditByDate tbody').append('<tr>\
+                                                        <td>' + value.client + '</td>\
+                                                        <td>' + value.montant_vente + '</td>\
+                                                        <td>' + value.montant_paye + '</td>\
+                                                        <td>' + value.total + '</td>\
+                                                    </tr>');
+                                                });
+                                            
+                                                // Adding a short delay before appending the tfoot
+                                                setTimeout(function() {
+                                                    $('#TableDisplayCreditByDate tfoot').append('<tr>\
+                                                        <td><strong>Totaux</strong></td>\
+                                                        <td style="background-color="red"">' + total_montant_vente.toFixed(2) + '</td>\
+                                                        <td style="background-color="red"">' + total_montant_paye.toFixed(2) + '</td>\
+                                                        <td style="background-color="red"">' + total_montant_credit.toFixed(2) + '</td>\
+                                                    </tr>');
+                                                }, 100);
+                                            }
+                                            
+                                        },
+                                        "json"
+                                    );
+                                }
                             }
                         },
                         stroke: {

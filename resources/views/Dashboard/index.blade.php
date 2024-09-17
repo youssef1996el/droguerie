@@ -7,6 +7,7 @@
     var weeklyCounts  = @Json($weeklyCounts);
 
     var ChartCredit   = "{{url('ChartCredit')}}";
+    var DisplayCreditBydate = "{{url('DisplayCreditBydate')}}";
 
 </script>
     <div class="container-fluid">
@@ -249,6 +250,42 @@
                         </table>
                     </div>
 
+                </div>
+            </div>
+        </div>
+        <div class="modal fade " id="ModalDisplayCreditBydate" tabindex="-1" role="dialog" aria-labelledby="addContactModalTitle" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+                <div class="modal-content ">
+                    <div class="modal-header d-flex align-items-center">
+                        <h5 class="modal-title card-title border p-2 bg-white rounded-2 w-100 text-center">Tableau d'affichage des crédits par date</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="add-contact-box">
+                            <div class="add-contact-content">
+                                <div class="row">
+                                    <table class="table table-striped table-bordered" id="TableDisplayCreditByDate">
+                                        <thead>
+                                            <tr>
+                                                <th>Client</th>
+                                                <th>Montant vente</th>
+                                                <th>Montant payé</th>
+                                                <th>Montant crédit</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody></tbody>
+                                        <tfoot></tfoot>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <div class="d-flex gap-6 m-0">
+                            
+                            <button class="btn bg-danger-subtle text-danger" data-bs-dismiss="modal"> fermer</button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

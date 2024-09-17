@@ -505,7 +505,8 @@ class EtatController extends Controller
         $Reglement_Personnel = DB::select("select sum(r.total) as reglement_personnel from reglementspersonnels r , personnels p , company c where r.idpersonnel=p.id and p.idcompany = c.id and c.status = 'Active' and date(r.created_at) between ? and ?",[$DateStart,$DateEnd]);
         $getMoney            = DB::select("select sum(g.total) as getmoney from getmoney g, company c , users u where g.idcompany =c.id and g.iduser = u.id and c.status = 'Active'and date(g.created_at) between ? and ?",[$DateStart,$DateEnd]);
         $Reste  =($TotalPaiement[0]->total + $SoldeDepart[0]->solde + $getMoney[0]->getmoney)  - ($ChargeReste[0]->charge + $VersementReste[0]->versement + $Reglement_Personnel[0]->reglement_personnel);
-    // Load view and render HTML
+        
+        // Load view and render HTML
     /* dd($VersementReste[0]->versement); */
     /* dd( ((float) $TotalPaiement[0]->total + $SoldeDepart[0]->solde + $getMoney[0]->getmoney ) - ($ChargeReste[0]->charge + $VersementReste[0]->versement)); */
     $html = view('Etat.EtatTEST', compact(

@@ -459,7 +459,7 @@
                     @php
                         $TotalVersement = 0;
                     @endphp
-                    @foreach ($Versement as $item)
+                    @foreach ($Versement as $item) 
                         @php
                             $TotalVersement += $item->total;
                         @endphp
