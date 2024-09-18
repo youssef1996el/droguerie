@@ -32,6 +32,13 @@
         .dateEdite {
             float: right;
         }
+        .tableEncaisseCredit
+        {
+            width: 100%; 
+            border-collapse: collapse; 
+            margin-top: 20px;
+            font-family: 'DejaVu Sans', 'Roboto', 'Montserrat', 'Open Sans', sans-serif;
+        }
         .signature {
             width: 28%;
             padding-bottom: 10%;
@@ -445,7 +452,7 @@
         <div style="display: flex; justify-content: space-between; align-items: stretch; margin-bottom: 40px;">
             <div style="float: left; width: 50%; border: 1px solid black">
                 <u class="TitleTable">Tableau ENCAISSEMENT CRÉDIT</u>
-                <table style="width: 100%; border-collapse: collapse; margin-top: 20px;font-family: 'DejaVu Sans', 'Roboto', 'Montserrat', 'Open Sans', sans-serif;" > 
+                <table class="tableEncaisseCredit" > 
                     @php
                         $TotalEncaissement_Credit = 0;
                     @endphp
