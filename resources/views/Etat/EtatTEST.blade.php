@@ -2,11 +2,25 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
+    <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="{{asset('css/dashboard/styles.css')}}">
     <style>
-
+        * {
+            font-family: DejaVu Sans !important;
+        }
+        @page {
+            size: a4;
+            margin: 0;
+            padding: 0;
+        }
+        .invoice-container table {
+            direction: ltr;
+            width: 100%;
+            text-align: right;
+            border: 1px solid;
+            font-family: 'DejaVu Sans', 'Roboto', 'Montserrat', 'Open Sans', sans-serif;
+        }
         .footer-content {
             width: 100%;
             display: flex;

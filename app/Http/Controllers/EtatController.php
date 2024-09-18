@@ -506,10 +506,42 @@ class EtatController extends Controller
         $getMoney            = DB::select("select sum(g.total) as getmoney from getmoney g, company c , users u where g.idcompany =c.id and g.iduser = u.id and c.status = 'Active'and date(g.created_at) between ? and ?",[$DateStart,$DateEnd]);
         $Reste  =($TotalPaiement[0]->total + $SoldeDepart[0]->solde + $getMoney[0]->getmoney)  - ($ChargeReste[0]->charge + $VersementReste[0]->versement + $Reglement_Personnel[0]->reglement_personnel);
         
-        // Load view and render HTML
-    /* dd($VersementReste[0]->versement); */
-    /* dd( ((float) $TotalPaiement[0]->total + $SoldeDepart[0]->solde + $getMoney[0]->getmoney ) - ($ChargeReste[0]->charge + $VersementReste[0]->versement)); */
-    $html = view('Etat.EtatTEST', compact(
+        
+    $html = view('Etat.EtatTEST', [
+        'CompanyIsActive'     => $CompanyIsActive,
+        'DataByClient'        => $DataByClient,
+        'TotalByClient'       => $TotalByClient,
+        'LastRowByClient'     => $LastRowByClient,
+        'TotalCreditByClient' => $TotalCreditByClient,
+        'GrandTotal'          => $GrandTotal,
+        'GrandTotalCredit'    => $GrandTotalCredit,
+        'DateStart'           => $DateStart,
+        'DateEnd'             => $DateEnd,
+        'Charge'              => $Charge,
+        'Versement'           => $Versement,
+        'TotalByModePaiement' => $TotalByModePaiement,
+        'TotalPayeByClient'   => $TotalPayeByClient,
+        'TotalReglementPaye'  => $TotalReglementPaye,
+        'SoldeCaisse'         => $SoldeCaisse,
+        'reste'               => $reste,
+        'Tableau_enccaissement_Credit' => $Tableau_enccaissement_Credit,
+        'Paiement_Employee'   => $Paiement_Employee,
+        'Reste'               => $Reste,
+        'Renevus'             => $Renevus
+    ])->toArabicHTML();
+    set_time_limit(300);
+    $pdf = Pdf::loadHTML($html)->output();
+    
+    // تحديد رؤوس الاستجابة
+    $headers = [
+        "Content-type" => "application/pdf",
+    ];
+    return response()->streamDownload(
+        fn() => print($pdf),
+        "Report.pdf",
+        $headers
+    );
+   /*  $html = view('Etat.EtatTEST', compact(
         'CompanyIsActive',
         'DataByClient',
         'TotalByClient',
@@ -545,7 +577,7 @@ class EtatController extends Controller
     $pdf->render();
 
     // Stream PDF to browser (inline view), 'D' to force download
-    return $pdf->stream('Report.pdf', ['Attachment' => 1]);
+    return $pdf->stream('Report.pdf', ['Attachment' => 1]); */
 
 
 

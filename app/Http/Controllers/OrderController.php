@@ -1284,6 +1284,7 @@ class OrderController extends Controller
         $headers = [
             "Content-type" => "application/pdf",
         ];
+        
     
         // إرجاع PDF كملف لتحميله
         if (!is_null($order->idfacture)) {
