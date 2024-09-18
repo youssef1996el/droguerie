@@ -529,6 +529,7 @@ class EtatController extends Controller
         'Reste'               => $Reste,
         'Renevus'             => $Renevus
     ])->toArabicHTML();
+    /* dd($Tableau_enccaissement_Credit); */
     set_time_limit(300);
     $pdf = Pdf::loadHTML($html)->output();
     
