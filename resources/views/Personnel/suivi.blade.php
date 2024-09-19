@@ -61,6 +61,7 @@
                         <th>Téléphone</th>
                         <th>Total</th>
                         <th>Date</th>
+                        <th>Action</th>
                     </tr>
                 </thead>
                 @if (isset($id))
@@ -159,7 +160,8 @@
                             }
                         },
                         { data: 'datereglement', name: 'datereglement' },
-                    ],
+                        { data: 'action', name: 'action', orderable: false, searchable: false },
+                    ], 
                     language: {
                         "sInfo": "Affichage de l'élément _START_ à _END_ sur _TOTAL_ éléments",
                         "sInfoEmpty": "Affichage de l'élément 0 à 0 sur 0 élément",
@@ -189,6 +191,54 @@
                             }
                         }
                     }
+                });
+                $(selector + ' tbody').on('click', '.Trash', function(e)
+                {
+                    e.preventDefault();
+                    var idreglement = $(this).attr('value');
+                    swal({
+                    title: "es-tu sûr de supprimer cette regelemnt",
+                    text: "Une fois supprimée, vous ne pourrez plus récupérer cette vente !",
+                    icon: "warning",
+                    buttons: true,
+                    dangerMode: true,
+                  })
+                  .then((willDelete) => {
+                    if (willDelete)
+                    {
+                        
+                        
+                        $.ajax({
+                            type: "get",
+                            url: "{{url('deletereglementpersonnel')}}",
+                            data: 
+                            {
+                                id : idreglement,
+                            },
+                            dataType: "json",
+                            success: function (response) 
+                            {
+                                if(response.status == 200)
+                                {
+                                    swal("Votre reglement a été supprimée !", {
+                                        icon: "success",
+                                    });
+                                    location.reload();
+                                }  
+                                else if(response.status ==400)
+                                {
+                                    swal("Oops !", 'please contact support', "error");
+                                } 
+                            }
+                        });
+
+                    }
+                    else
+                    {
+                        swal("Votre reglemnt est sécurisée !");
+                    }
+                });
+                    
                 });
 
                 return table;

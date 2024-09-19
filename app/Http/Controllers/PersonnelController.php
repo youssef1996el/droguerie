@@ -11,9 +11,10 @@ use Illuminate\Support\Facades\Validator;
 use Auth;
 use DB;
 use Illuminate\Support\Facades\Crypt;
+use Carbon\Carbon;
 class PersonnelController extends Controller
 {
-    public function index()
+    public function index() 
     {
         // check Company is create
         $CountCompany          = Company::count();
@@ -198,11 +199,42 @@ class PersonnelController extends Controller
             $dataLine              = DB::table('personnels as p')
             ->join('reglementspersonnels as r','r.idpersonnel','=','p.id')
             ->where('p.id',$request->IdPersonnel)
-            ->select('p.*','r.total',DB::raw('date(r.created_at) as datereglement'))
+            ->select('p.*','r.total',DB::raw('date(r.created_at) as datereglement'),'r.created_at as created_With_Time_Zone','r.id as idreglementpersonnel')
             ->get();
+            return DataTables::of($dataLine)->addIndexColumn()->addColumn('action', function ($row)
+            {
+                $today = Carbon::today();
+                $createdOrder = Carbon::parse($row->created_With_Time_Zone);
+                $btn = '<div class="action-btn d-flex">';
+                /* if ($createdOrder->isSameDay($today)) 
+                { */
+                    $btn .= '<a href="#" class="text-light ms-2 Trash" value="' . $row->idreglementpersonnel . '">
+                                <i class="ti ti-shopping-cart-off fs-5 border rounded-2 bg-danger p-1" title="Annuler regelement"></i>
+                            </a>';
+                            
+               /*  }  */
+                $btn .= '</div>';
+                return $btn;
+            })->rawColumns(['action'])->make(true);
+            //return DataTables::of($dataLine)->addIndexColumn()->rawColumns([])->make(true);
 
-            return DataTables::of($dataLine)->addIndexColumn()->rawColumns([])->make(true);
-
+        }
+    }
+    public function deletereglementpersonnel(Request $request)
+    {
+        
+        $ReglementPersonnel = ReglementPersonnel::where('id',$request->id)->delete();
+        if($ReglementPersonnel)
+        {
+            return response()->json([
+                'status'   => 200,
+            ]);
+        }
+        else
+        {
+            return response()->json([
+                'status'   => 404,
+            ]);
         }
     }
 

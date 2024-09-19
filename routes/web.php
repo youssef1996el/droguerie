@@ -188,6 +188,7 @@ Route::group(['middleware' => ['web','auth']], function ()
     Route::get('SuiviPersonnel'      ,[PersonnelController::class,'SuiviPersonnelWithoutID'            ]);
     Route::get('getFichePersonnelByPersonnel',[PersonnelController::class,'getFichePersonnelByPersonnel']);
     Route::post('StorePaiementPersonnel',[PersonnelController::class,'StorePaiementPersonnel'           ]);
+    Route::get('deletereglementpersonnel',[PersonnelController::class,'deletereglementpersonnel'        ]);
     /******************************** End Personnel *****************************************************/
 
 
