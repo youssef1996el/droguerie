@@ -15,9 +15,9 @@
                                 </a>
                             </li>
                             <li class="breadcrumb-item" aria-current="page">
-                               {{--  @if(!$has_Solde) --}}
+                                @if(!$has_Solde)
                                     <a href="#" class="badge fw-medium fs-2 bg-success text-white text-uppercase" data-bs-toggle="modal" data-bs-target="#Modam_Solde_Depart">solde de départ</a>
-                               {{--  @endif --}}
+                                @endif
 
                                 <span class="badge fw-medium fs-2 bg-primary-subtle text-primary">
                                     Voir client
