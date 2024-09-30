@@ -1064,10 +1064,14 @@ class OrderController extends Controller
                                     <li class="menu-item  border border-white rounded-2 bg-white">
                                         <a href="#" class="item-text fs-2 py-2 text-dark text-center verifiPiement" value="'.$row->id.'">- Vérifiez la méthode de paiement</a>
                                     </li>
-                                    <!--
-                                    <li class="menu-item   border border-white rounded-2 bg-white">
-                                        <a href="#" class="item-text fs-2 py-2 text-dark text-center" value="'.$row->id.'">- Change la méthode de paiement</a>
-                                    </li> -->
+
+                                    <li class="menu-item  border border-white rounded-2 bg-white mt-2">
+                                        <a href="#" class="item-text fs-2 py-2 text-dark text-center ChangePaiementOrder" value="'.$row->id.'">- Change mode de paiement</a>
+                                    </li>
+                                    
+                                    <li class="menu-item   border border-white rounded-2 bg-white mt-2">
+                                        <a href="#" class="item-text fs-2 py-2 text-dark text-center ChangeLaDateVente" value="'.$row->id.'">- Change la date vente</a>
+                                    </li>
                                 </ul>
                             </div>
                             <div class="outer-button">
@@ -1088,6 +1092,172 @@ class OrderController extends Controller
             })->rawColumns(['action'])->make(true);
 
         }
+    }
+    public function GetOrderAndPaiement($id)
+    {
+        
+        $subQuery1 = DB::table('orders as o')
+            ->select([
+                'o.id',
+                'o.total as totalvente',
+                DB::raw('0 as totalpaye'),
+                DB::raw('concat(c.nom, " ", c.prenom) as client'),
+                'u.name as user', // alias user
+                'co.title as company',
+                'o.idfacture',
+                DB::raw('DATE_FORMAT(o.created_at, "%Y-%m-%d") as created_at_formatted'),'o.created_at as created_With_Time_Zone'
+            ])
+            ->join('clients as c', 'o.idclient', '=', 'c.id')
+            ->join('users as u', 'o.iduser', '=', 'u.id')
+            ->join('company as co', 'o.idcompany', '=', 'co.id')
+            ->where('co.status', 'Active')
+            ->where('o.total', '>', 0)
+            ->where('o.id',$id)
+            ->groupBy('o.id');
+
+            $subQuery2 = DB::table('orders as o')
+                ->select([
+                    'o.id',
+                    DB::raw('0 as totalvente'),
+                    DB::raw('sum(p.total) as totalpaye'),
+                    DB::raw('concat(c.nom, " ", c.prenom) as client'),
+                    'u.name as user', // alias user
+                    'co.title as company',
+                    'o.idfacture',
+                    DB::raw('DATE_FORMAT(o.created_at, "%Y-%m-%d") as created_at_formatted'),'o.created_at as created_With_Time_Zone'
+
+                ])
+                ->join('clients as c', 'o.idclient', '=', 'c.id')
+                ->join('users as u', 'o.iduser', '=', 'u.id')
+                ->join('company as co', 'o.idcompany', '=', 'co.id')
+                ->join('reglements as r', 'o.id', '=', 'r.idorder')
+                ->join('paiements as p', 'r.id', '=', 'p.idreglement')
+                ->where('co.status', 'Active')
+                ->where('o.total', '>', 0)
+                ->where('o.id',$id)
+                ->groupBy('r.idorder');
+
+            $orders = DB::table(DB::raw("({$subQuery1->toSql()} UNION ALL {$subQuery2->toSql()}) as t"))
+            ->mergeBindings($subQuery1)
+            ->mergeBindings($subQuery2)
+            ->select([
+                'id',
+                DB::raw('sum(totalvente) as totalvente'),
+                DB::raw('sum(totalpaye) as totalpaye'),
+                DB::raw('sum(totalvente - totalpaye) as reste'),
+                'client',
+                'user', // matching alias
+                'company',
+                'idfacture',
+                'created_at_formatted',
+                'created_With_Time_Zone'
+            ])
+                ->groupBy('id')
+                ->orderBy('id', 'desc')
+                ->get();
+
+        return DataTables::of($orders)->addIndexColumn()->addColumn('action', function ($row)
+        {
+        })->rawColumns(['action'])->make(true);
+    }
+    public function TableReglementByOrder($id)
+    {
+        $Reglement = DB::table('reglements as r')
+        ->join('modepaiement as m', 'r.idmode', '=', 'm.id')
+        ->where('r.idorder', $id)
+        ->select('r.idorder', 'r.id','r.total', DB::raw('DATE(r.created_at) as created_at'), 'm.name') // Selecting specific columns
+        ->get();
+        return DataTables::of($Reglement)->addIndexColumn()->addColumn('action', function ($row)
+        {
+        })->rawColumns(['action'])->make(true);
+
+    
+    }
+    public function TablePaiementByOrder($id)
+    {
+        $Paiement = DB::table('reglements as r')
+        ->join('modepaiement as m', 'r.idmode', '=', 'm.id')
+        ->join('paiements as p', 'r.id', '=', 'p.idreglement')
+        ->where('r.idorder', $id)
+        ->select('r.id', 'p.total', 'm.name', DB::raw('DATE(p.created_at) as created_at'))
+        ->get();
+        return DataTables::of($Paiement)->addIndexColumn()->addColumn('action', function ($row)
+        {
+        })->rawColumns(['action'])->make(true);
+    }
+    public function ChangeLaDateVente(Request $request)
+    {
+        try 
+        {
+            // Extract the date part up to the first timezone (e.g., 'GMT+0100')
+            $dateString = substr($request->dateNew, 0, strpos($request->dateNew, 'GMT') + 9); // Up to 'GMT+0100'
+
+            // Parse the cleaned date string and format it
+            $formattedDate = Carbon::parse($dateString)->format('Y-m-d');
+            
+            // Concatenate with the current time or any desired time
+            $formattedDateTime = Carbon::parse($formattedDate . ' ' . Carbon::now()->format('H:i:s'));
+
+            // update orders 
+            $UpdateOrder = Order::where('id',$request->idorder)->update([
+                'created_at'       => $formattedDateTime,
+                'updated_at'       => $formattedDateTime,
+            ]);
+
+            // Check if the order was updated
+            if (!$UpdateOrder) {
+                return response()->json([
+                    'status' => 404,
+                    'message' => 'Commande non trouvée ou mise à jour échouée'
+                ]);
+            }
+            // update reglement
+            $UpdateReglement   = Reglements::where('idorder',$request->idorder)->update([
+                'created_at'       => $formattedDateTime,
+                'updated_at'       => $formattedDateTime,
+            ]);
+
+            // Check if the reglement was updated
+            if (!$UpdateReglement) {
+                return response()->json([
+                    'status' => 404,
+                    'message' => 'Règlement non trouvé ou mise à jour échouée'
+                ]);
+            }
+
+            // check reglement has paiement 
+            $Reglement = Reglements::where('idorder',$request->idorder)->get(); 
+            foreach($Reglement as $item)
+            {
+                $checkReglementHasPaiement = Paiements::where('idreglement',$item->id)->count();
+                if($checkReglementHasPaiement > 0)
+                {
+                    $UpdatePaiement = Paiements::where('idreglement',$item->id)->update([
+                        'created_at'       => $formattedDateTime,
+                        'updated_at'       => $formattedDateTime,
+                    ]);
+
+                    // Check if paiement update was successful
+                    if (!$UpdatePaiement) {
+                        return response()->json([
+                            'status' => 404,
+                            'message' => 'La mise à jour du paiement a échoué'
+                        ]);
+                    }
+                }
+            }
+            return response()->json([
+                'status' => 200,
+                'message'=> 'Date de commande mise à jour avec succès'
+            ]);
+        } catch (\Exception $e) {
+            // Catch any errors and return a 404 status with the error message
+            return response()->json([
+                'status' => 404,
+                'message' => 'Une erreur s\'est produite: ' . $e->getMessage(),
+            ]);
+        }
+        
     }
 
     public function viewInvoice($id)

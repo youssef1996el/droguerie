@@ -109,6 +109,10 @@ Route::group(['middleware' => ['web','auth']], function ()
     Route::get('ChangeQteByPress'   ,[OrderController::class,'changeQteByPress'                 ]);
     Route::post('TrashOrder'         ,[OrderController::class,'TrashOrder'                      ]);
     Route::get('verifiPaiement'      ,[OrderController::class,'verifiPaiement'                  ]);
+    Route::get('ChangeLaDateVente'   ,[OrderController::class,'ChangeLaDateVente'               ]);
+    Route::get('GetOrderAndPaiement/{id}' ,[OrderController::class,'GetOrderAndPaiement'        ]);
+    Route::get('TableReglementByOrder/{id}',[OrderController::class,'TableReglementByOrder'     ]);
+    Route::get('TablePaiementByOrder/{id}',[OrderController::class,'TablePaiementByOrder'       ]);
     /******************************** End Order ************************************************/
 
 

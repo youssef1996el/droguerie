@@ -294,14 +294,495 @@ $(document).ready(function ()
                     }
                 });
             });
+            $(selector + ' tbody').on('click', '.sticky-menu-container .ChangeLaDateVente', function (e) {
+                e.preventDefault();
+                
+                // Retrieve order ID
+                var idorder = $(this).attr('value');
+                
+                // Show the modal
+                $('#ModalChnageLaDateVente').modal("show");
+            
+                // Retrieve the data of the clicked row
+                var data = tableVente.row($(this).closest('tr')).data();
+            
+                // Set the order ID to the save button
+                $('#BtnSaveChangeLaDateVente').attr('data-value', idorder);
+                var urlWithId = GetOrderAndPaiement + '/' + idorder;
+                var urlWithIdRegelemnt = TableReglementByOrder + '/' + idorder;
+                var urlWithIdPaiement = TablePaiementByOrder + '/' + idorder;
+               
 
+                // Initialize DataTable if not already initialized
+                initializeDataTableOrder('.TableVenteChnageDate', urlWithId);
 
+                // inititialize Databale Reglement 
+                initializeDataTableReglementOrder('.TableReglementChnageDate',urlWithIdRegelemnt);
+
+                initializeDataTablePaiementOrder('.TablePaiementChnageDate', urlWithIdPaiement);
+            });
+            $(selector + ' tbody').on('click','.sticky-menu-container .ChangePaiementOrder',function(e)
+            {
+                e.preventDefault();
+                var idorder = $(this).attr('value');
+                $.ajax({
+                    type    : "get",
+                    url     : verifiPaiement,
+                    data    :
+                    {
+                        idorder : idorder,
+                    },
+                    dataType: "json",
+                    success: function (response) 
+                    {
+                        if(response.status == 200)
+                        {
+                            $('#ModalChangeModePaiement').modal("show"); 
+                            $('.TableChangePaiement tbody').empty(); // Clear the tbody before appending
+
+                            $.each(response.data, function (index, value) { 
+                                $('.TableChangePaiement tbody').append('<tr>\
+                                    <td>' + value.name + '</td>\
+                                    <td>' + value.total + '</td>\
+                                </tr>');
+                            });
+                            
+                        }   
+                    }
+                });
+                
+            });
+            
+            function initializeDataTableOrder(selector, url) {
+                if ($.fn.DataTable.isDataTable(selector)) {
+                    // Destroy the table if it already exists to avoid duplication
+                    $(selector).DataTable().destroy();
+                }
+            
+                var tableVenteChangeDate = $(selector).DataTable({
+                    processing: true,
+                    ordering: false,
+                    serverSide: true,
+                    ajax: {
+                        url: url,
+                        dataSrc: function (json) {
+                            // Hide pagination if there are no records
+                            if (json.data.length === 0) {
+                                $('.paging_full_numbers').css('display', 'none');
+                            }
+                            return json.data;
+                        }
+                    },
+                    columns: [
+                        { data: 'client', name: 'client' },
+                        {
+                            data: 'totalvente',
+                            name: 'totalvente',
+                            render: function (data) {
+                                return data + ' DH';
+                            },
+                            className: "dt-right"
+                        },
+                        {
+                            data: 'totalpaye',
+                            name: 'totalpaye',
+                            render: function (data) {
+                                return data + ' DH';
+                            },
+                            className: "dt-right"
+                        },
+                        {
+                            data: 'reste',
+                            name: 'reste',
+                            render: function (data) {
+                                return data + ' DH';
+                            },
+                            className: "dt-right"
+                        },
+                        
+                        { data: 'company', name: 'company' },
+                        { data: 'created_at_formatted', name: 'created_at_formatted' },
+                        {
+                            data: null,  // Custom column for input type date
+                            name: 'date_input',
+                            render: function (data, type, row) {
+                                return '<input type="date" class="form-control" name="date_input" value="">';
+                            },
+                            orderable: false,
+                            searchable: false
+                        }
+                    ],
+                    
+                    language: {
+                        "sInfo": "Affichage de l'élément _START_ à _END_ sur _TOTAL_ éléments",
+                        "sInfoEmpty": "Affichage de l'élément 0 à 0 sur 0 élément",
+                        "sInfoFiltered": "(filtré à partir de _MAX_ éléments au total)",
+                        "sLengthMenu": "Afficher _MENU_ éléments",
+                        "sLoadingRecords": "Chargement...",
+                        "sProcessing": "Traitement...",
+                        "sSearch": "Rechercher :",
+                        "sZeroRecords": "Aucun élément correspondant trouvé",
+                        "oPaginate": {
+                            "sFirst": "Premier",
+                            "sLast": "Dernier",
+                            "sNext": "Suivant",
+                            "sPrevious": "Précédent"
+                        },
+                        "select": {
+                            "rows": {
+                                "_": "%d lignes sélectionnées",
+                                "0": "Aucune ligne sélectionnée",
+                                "1": "1 ligne sélectionnée"
+                            }
+                        }
+                    }
+                });
+            }
+            function initializeDataTableReglementOrder(selector, url)
+            {
+                if ($.fn.DataTable.isDataTable(selector)) {
+                    // Destroy the table if it already exists to avoid duplication
+                    $(selector).DataTable().destroy();
+                }
+                var tableReglementByOrder = $(selector).DataTable({
+                    processing: true,
+                    ordering: false,
+                    serverSide: true,
+                    ajax: {
+                        url: url,
+                        dataSrc: function (json) {
+                            // Hide pagination if there are no records
+                            if (json.data.length === 0) {
+                                $('.paging_full_numbers').css('display', 'none');
+                            }
+                            return json.data;
+                        }
+                    },
+                    columns: [
+                        { data: 'id', name: 'id' },
+                        {
+                            data: 'total',
+                            name: 'total',
+                            render: function (data) {
+                                return data + ' DH';
+                            },
+                            className: "dt-right"
+                        },
+                        
+                        
+                        { 
+                            data: 'name', 
+                            name: 'name',
+                            className: 'text-center' // Center the content
+                        },
+                        { data: 'created_at', name: 'created_at' },
+                        {
+                            data: null,  // Custom column for input type date
+                            name: 'date_input',
+                            render: function (data, type, row) {
+                                return '<input type="date" class="form-control" name="date_input" value="">';
+                            },
+                            orderable: false,
+                            searchable: false
+                        }
+                    ],
+                    language: {
+                        "sInfo": "Affichage de l'élément _START_ à _END_ sur _TOTAL_ éléments",
+                        "sInfoEmpty": "Affichage de l'élément 0 à 0 sur 0 élément",
+                        "sInfoFiltered": "(filtré à partir de _MAX_ éléments au total)",
+                        "sLengthMenu": "Afficher _MENU_ éléments",
+                        "sLoadingRecords": "Chargement...",
+                        "sProcessing": "Traitement...",
+                        "sSearch": "Rechercher :",
+                        "sZeroRecords": "Aucun élément correspondant trouvé",
+                        "oPaginate": {
+                            "sFirst": "Premier",
+                            "sLast": "Dernier",
+                            "sNext": "Suivant",
+                            "sPrevious": "Précédent"
+                        },
+                        "select": {
+                            "rows": {
+                                "_": "%d lignes sélectionnées",
+                                "0": "Aucune ligne sélectionnée",
+                                "1": "1 ligne sélectionnée"
+                            }
+                        }
+                    }
+                });
+            }
+            function initializeDataTablePaiementOrder(selector, url)
+            {
+                if ($.fn.DataTable.isDataTable(selector)) {
+                    // Destroy the table if it already exists to avoid duplication
+                    $(selector).DataTable().destroy();
+                }
+                var tableReglementByOrder = $(selector).DataTable({
+                    processing: true,
+                    ordering: false,
+                    serverSide: true,
+                    ajax: {
+                        url: url,
+                        dataSrc: function (json) {
+                            // Hide pagination if there are no records
+                            if (json.data.length === 0) {
+                                $('.paging_full_numbers').css('display', 'none');
+                            }
+                            return json.data;
+                        }
+                    },
+                    columns: [
+                        { data: 'id', name: 'id' },
+                        {
+                            data: 'total',
+                            name: 'total',
+                            render: function (data) {
+                                return data + ' DH';
+                            },
+                            className: "dt-right"
+                        },
+                        
+                        
+                        { 
+                            data: 'name', 
+                            name: 'name',
+                            className: 'text-center' // Center the content
+                        },
+                        { data: 'created_at', name: 'created_at' },
+                        {
+                            data: null,  // Custom column for input type date
+                            name: 'date_input',
+                            render: function (data, type, row) {
+                                return '<input type="date" class="form-control" name="date_input" value="">';
+                            },
+                            orderable: false,
+                            searchable: false
+                        }
+                    ],
+                    language: {
+                        "sInfo": "Affichage de l'élément _START_ à _END_ sur _TOTAL_ éléments",
+                        "sInfoEmpty": "Affichage de l'élément 0 à 0 sur 0 élément",
+                        "sInfoFiltered": "(filtré à partir de _MAX_ éléments au total)",
+                        "sLengthMenu": "Afficher _MENU_ éléments",
+                        "sLoadingRecords": "Chargement...",
+                        "sProcessing": "Traitement...",
+                        "sSearch": "Rechercher :",
+                        "sZeroRecords": "Aucun élément correspondant trouvé",
+                        "oPaginate": {
+                            "sFirst": "Premier",
+                            "sLast": "Dernier",
+                            "sNext": "Suivant",
+                            "sPrevious": "Précédent"
+                        },
+                        "select": {
+                            "rows": {
+                                "_": "%d lignes sélectionnées",
+                                "0": "Aucune ligne sélectionnée",
+                                "1": "1 ligne sélectionnée"
+                            }
+                        }
+                    }
+                });
+            }
 
             
-
-
         }
     });
+    $('#BtnSaveChangeLaDateVente').on('click',function(e)
+    {
+        e.preventDefault();
+        var idorder         = $(this).attr('data-value');
+        var tableRows       = $('.TableVenteChnageDate tbody tr');
+        var tableReglement  = $('.TableReglementChnageDate tbody tr');
+        var DateNewOrder    = null;
+        var DateNewReglemnt = null;
+        var errorOccurred   = false; // Flag to track if an error occurred
+        var tablePaiement   = $('.TablePaiementChnageDate tbody tr');
+
+        // Function to manually parse date in DD-MM-YYYY or similar format
+        function parseDate(dateString) {
+            var parts = dateString.split('-'); // Split date string by '-'
+            return new Date(parts[0], parts[1] - 1, parts[2]); // new Date(year, month, day)
+        }
+
+        // Loop through each row in tableRows
+        tableRows.each(function() {
+            if (errorOccurred) return false; // Stop processing if an error occurred
+
+            var rowData = [];
+
+            // Find all 'td' elements (cells) within the current row and extract their data
+            $(this).find('td').each(function(index) {
+                if (index === 6) {
+                    // If rowData[6] contains an input of type date, get its value
+                    rowData.push($(this).find('input[type="date"]').val());
+                } else {
+                    rowData.push($(this).text().trim()); // Push cell data (text) to rowData array and trim whitespace
+                }
+            });
+
+            // Parse dates from rowData[5] (assumed text) and rowData[6] (input value)
+            var date1 = parseDate(rowData[5]); // Assuming date in DD-MM-YYYY or similar format
+            var date2 = rowData[6] ? new Date(rowData[6]) : null; // Get date from input, or null if empty
+
+            // Check if date2 is empty
+            if (!date2) {
+                toastr.error('Erreur', 'La date vente est vide');
+                errorOccurred = true; // Set error flag
+                return false; // Stop further execution
+            } else {
+                // Check if date1 is greater than date2
+                if (date1.getTime() > date2.getTime()) {
+                    toastr.error('Erreur: la date creation de vente est supérieure à la date change');
+                    errorOccurred = true; // Set error flag
+                    return false; // Stop further execution
+                } else {
+                    DateNewOrder = date2; // Set DateNewOrder if no error
+                }
+            }
+        });
+
+        // Stop further execution if an error occurred in the first table
+        if (errorOccurred) return;
+
+        var firstRowDateReglement = null; // To store the date from the first row of tableReglement
+        var reglementData = [];
+        tableReglement.each(function(index) {
+            if (errorOccurred) return false; // Stop processing if an error occurred
+
+            var rowDataRelement = [];
+            $(this).find('td').each(function(index) {
+                if (index === 4) {
+                    rowDataRelement.push($(this).find('input[type="date"]').val());
+                } else {
+                    rowDataRelement.push($(this).text().trim());
+                }
+            });
+            var modepaiement = rowDataRelement[2];
+            if (modepaiement === 'espèce') {
+                
+               
+                // Assuming rowDataRelement[0] is the idreglement and rowDataRelement[4] is the date change
+                reglementData.push({
+                    idreglement: rowDataRelement[0], // Assuming first column is idreglement
+                    dateChange: rowDataRelement[4],  // Assuming date input is in index 4
+                    modepaiement: modepaiement       // Include modepaiement in the object for reference
+                });
+            }
+            var date1 = parseDate(rowDataRelement[3]);
+            var date2 = rowDataRelement[4] ? new Date(rowDataRelement[4]) : null;
+
+            // Check if date2 is empty
+            if (!date2) {
+                toastr.error('Erreur', 'La date reglement est vide');
+                errorOccurred = true; // Set error flag
+                return false; // Stop further execution
+            }
+
+            // Store the date from the first row of tableReglement
+            if (index === 0) {
+                firstRowDateReglement = date2;
+                // Compare the first row date with DateNewOrder
+                if (firstRowDateReglement.getTime() != DateNewOrder.getTime()) {
+                    toastr.error('Erreur', 'La date de vente n’est pas égale à la date de reglement dans la première ligne.');
+                    errorOccurred = true;
+                    return false;
+                }
+            } else {
+                // For subsequent rows, compare with firstRowDateReglement
+                if (date2.getTime() != firstRowDateReglement.getTime()) {
+                    toastr.error('Erreur', 'La date de reglement dans cette ligne n’est pas égale à la date de la première ligne.');
+                    errorOccurred = true;
+                    return false;
+                }
+            }
+
+            // Check if the creation date (date1) is greater than the change date (date2)
+            if (date1.getTime() > date2.getTime()) {
+                toastr.error('Erreur: la date creation de reglement est supérieure à la date change');
+                errorOccurred = true; // Set error flag
+                return false; // Stop further execution
+            } else {
+                DateNewReglemnt = date2; // Set DateNewReglemnt if no error
+            }
+        });
+        
+        if (errorOccurred) return;
+        var paiementData = [];
+        tablePaiement.each(function()
+        {
+            if (errorOccurred) return false;
+            var rowDataPaiement = [];
+            $(this).find('td').each(function(index)
+            {
+                if(index === 4)
+                {
+                  rowDataPaiement.push($(this).find('input[type="date"]').val());  
+                } 
+                else
+                {
+                    rowDataPaiement.push($(this).text().trim());
+                }
+            });
+            paiementData.push({
+                idreglement: rowDataPaiement[0], // Assuming first column is idreglement
+                dateChange: rowDataPaiement[4]   // Assuming date input is in index 4
+            });
+            reglementData.forEach(function(reglement) {
+                // Find the corresponding paiement in paiementData based on idreglement
+                var matchingPaiement = paiementData.find(function(paiement) {
+                    return paiement.idreglement === reglement.idreglement;
+                });
+            
+                if (matchingPaiement) {
+                    // Compare the dates if the matching paiement is found
+                    if (reglement.dateChange !== matchingPaiement.dateChange) {
+                        toastr.error('Erreur', `Les dates ne correspondent pas pour idreglement: ${reglement.idreglement}`);
+                        errorOccurred = true; // Set error flag
+                        return false; // Stop further execution
+                    }
+                } else {
+                    // No matching idreglement found in paiementData
+                    toastr.error('Erreur', `Aucun paiement trouvé pour idreglement: ${reglement.idreglement}`);
+                    errorOccurred = true; // Set error flag
+                    return false; // Stop further execution
+                }
+            });
+           
+        });
+       
+        if(!errorOccurred)
+        {
+            $.ajax({
+                type      : "get",
+                url       : ChangeLaDateVente,
+                data      : 
+                {
+                    idorder : idorder,
+                    dateNew : DateNewOrder,
+                },
+                dataType: "json",
+                success: function (response) 
+                {
+                    if(response.status == 404)
+                    {
+                        toastr.error(response.message, 'Error');
+                        return false;
+                    }    
+                    if(response.status == 200)
+                    {
+                        toastr.success(response.message, 'Succès');
+                        $('.TableVente').DataTable().ajax.reload();
+                        $('#ModalChnageLaDateVente').modal("hide");
+                        return false;
+                    }
+                }
+            });
+        }
+    });
+    
+
+    
     /////////////////////
     function initializeTableTmpLineOrder(idclient, idcompany,typeVente) {
         return $('.TableTmpVente').DataTable({

@@ -206,13 +206,13 @@ class PersonnelController extends Controller
                 $today = Carbon::today();
                 $createdOrder = Carbon::parse($row->created_With_Time_Zone);
                 $btn = '<div class="action-btn d-flex">';
-                /* if ($createdOrder->isSameDay($today)) 
-                { */
+                if ($createdOrder->isSameDay($today)) 
+                {
                     $btn .= '<a href="#" class="text-light ms-2 Trash" value="' . $row->idreglementpersonnel . '">
                                 <i class="ti ti-shopping-cart-off fs-5 border rounded-2 bg-danger p-1" title="Annuler regelement"></i>
                             </a>';
                             
-               /*  }  */
+                } 
                 $btn .= '</div>';
                 return $btn;
             })->rawColumns(['action'])->make(true);

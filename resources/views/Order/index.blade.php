@@ -1,6 +1,7 @@
 @extends('Dashboard.app')
 @section('content')
 <script src="{{asset('js/Script_Order/script.js')}}"></script>
+
 <script>
     var csrf_token                      = "{{csrf_token()}}";
     var DisplayProductStock             = "{{url('DisplayProductStock')}}";
@@ -27,6 +28,10 @@
     var ChangeQteByPress                = "{{url('ChangeQteByPress')}}";
     var TrashOrder                      = "{{url('TrashOrder')}}";
     var verifiPaiement                  = "{{url('verifiPaiement')}}";
+    var ChangeLaDateVente               = "{{url('ChangeLaDateVente')}}";
+    var GetOrderAndPaiement             = "{{ url('GetOrderAndPaiement') }}";
+    var TableReglementByOrder           = "{{ url('TableReglementByOrder') }}";
+    var TablePaiementByOrder           = "{{ url('TablePaiementByOrder') }}";
 </script>
 <style>
     @keyframes slideDown
@@ -179,6 +184,8 @@
         white-space: nowrap;
         font-size: 12px;
     }
+    
+    
 </style>
 
 <div class="container-fluid">
@@ -258,7 +265,7 @@
   --main-background-color: #edc1c2;
   /* Menu Variables */
   --menu-radius: calc(var(--button-radius) - 2px);
-  --menu-height: 173px;
+  --menu-height: 201px;
   --menu-width: 270px;
   --menu-border-radius: 10px;
   --menu-bg-color: #e0deff;
@@ -951,12 +958,131 @@ https://www.instagram.com/p/ByuNUGkAVHk/
                                 
                                 </table>
                             </div>
-                            
-                            
                         </div>
                     </div>
                 </div>
                 
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade " id="ModalChnageLaDateVente" tabindex="-1" role="dialog" aria-labelledby="addContactModalTitle" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-xl" role="document">
+            <div class="modal-content ">
+                <div class="modal-header d-flex align-items-center">
+                    <h5 class="modal-title card-title border p-2 bg-white rounded-2 w-100 text-center">- Change la date de vente</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="add-contact-box">
+                        <div class="add-contact-content">
+                            <div class="row">
+                                <div class="card bg-primary-subtle">
+                                    <h5 class="card-title border p-2 bg-light rounded-2 text-center text-uppercase fst-italic mt-2">Tableau Vente</h5>
+                                    <div class="table-responsive">
+                                        <table class="table table-bordered table-striped TableVenteChnageDate w-100">
+                                            <thead>
+                                                <tr>
+                                                    <th>Client</th>
+                                                    <th>Montant Vente</th>
+                                                    <th>Montant Payé</th>
+                                                    <th>Montant Rest</th>
+                                                    <th>Compagnie</th>
+                                                    <th>Créer le</th>
+                                                    <th>Date Change</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                                <hr>
+                                <div class="card bg-primary-subtle">
+                                    <h5 class="card-title border p-2 bg-light rounded-2 text-center text-uppercase fst-italic mt-2">Tableau Reglement</h5>
+                                    <div class="table-responsive">
+                                        <table class="table table-bordered table-striped TableReglementChnageDate">
+                                            <thead>
+                                                <tr>
+                                                    <th>Id Reglement</th>
+                                                    <th>Montant </th>
+                                                    <th>Mode paiement</th>
+                                                    <th>Créer le</th>
+                                                    <th>Date Change</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                                <hr>
+                                <div class="card bg-primary-subtle">
+                                    <h5 class="card-title border p-2 bg-light rounded-2 text-center text-uppercase fst-italic mt-2">Tableau Paiement</h5>
+                                    <div class="table-responsive">
+                                        <table class="table table-bordered table-striped TablePaiementChnageDate">
+                                            <thead>
+                                                <tr>
+                                                    <th>Id Reglement</th>
+                                                    <th>Montant </th>
+                                                    <th>Mode paiement</th>
+                                                    <th>Créer le</th>
+                                                    <th>Date Change</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+
+                               
+                                
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <div class="d-flex gap-6 m-0">
+                        <button  class="btn btn-success" id="BtnSaveChangeLaDateVente">Sauvegarder</button>
+                        <button class="btn bg-danger-subtle text-danger" data-bs-dismiss="modal"> fermer</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade " id="ModalChangeModePaiement" tabindex="-1" role="dialog" aria-labelledby="addContactModalTitle" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-xl" role="document">
+            <div class="modal-content ">
+                <div class="modal-header d-flex align-items-center">
+                    <h5 class="modal-title card-title border p-2 bg-white rounded-2 w-100 text-center">- Change la date de vente</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="add-contact-box">
+                        <div class="add-contact-content">
+                            <div class="row ">
+                                <table class="table table-striped table-bordered TableChangePaiement">
+                                    <thead>
+                                        <tr>
+                                            <th>Mode Paiement</th>
+                                            <th>Montant Payé</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <div class="d-flex gap-6 m-0">
+                        <button  class="btn btn-success" id="BtnSaveChangeLaDateVente">Sauvegarder</button>
+                        <button class="btn bg-danger-subtle text-danger" data-bs-dismiss="modal"> fermer</button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
