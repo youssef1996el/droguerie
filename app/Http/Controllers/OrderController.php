@@ -1047,11 +1047,11 @@ class OrderController extends Controller
                 $today = Carbon::today();
                 $createdOrder = Carbon::parse($row->created_With_Time_Zone);
                 // Display "Annuler vente" button if order was created less than 12 hours ago
-                if ($createdOrder->isSameDay($today)) {
+                /* if ($createdOrder->isSameDay($today)) { */
                     $btn .= '<a href="#" class="text-light ms-2 Trash" value="' . $row->id . '">
                                 <i class="ti ti-shopping-cart-off fs-5 border rounded-2 bg-danger p-1" title="Annuler vente"></i>
                             </a>';
-                } 
+                /* }  */
                 // Print button with permission check
                 if (auth()->user()->can('vente-imprimer')) {
                     $btn .= '<a href="' . url('invoices/' . $row->id) . '" class="text-light ms-2" target="_blank" value="' . $row->id . '">
