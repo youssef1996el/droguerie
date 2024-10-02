@@ -240,10 +240,10 @@ class RecouverementController extends Controller
                                         ->where('idmode' ,$IdCredit->id)
                                         ->select('id','total','idclient','idcompany')
                                         ->first();
-                                        $Reglements = Reglements::selectRaw('reglements.*, SUM(total) as total')
+                                        /* $Reglements = Reglements::selectRaw('reglements.*, SUM(total) as total')
                                         ->where('idorder', $item['idorder'])
                                         ->where('idmode', $IdCredit->id)
-                                        ->first();
+                                        ->first(); */
 
 
                 if ($Reglements && floatval($Reglements->total) == $item['prix'])
