@@ -222,7 +222,7 @@ class RecouverementController extends Controller
                 }
             }
             
-           
+            
     
             foreach ($request['ModePaiement'] as $item)
             {
@@ -240,11 +240,15 @@ class RecouverementController extends Controller
                                         ->where('idmode' ,$IdCredit->id)
                                         ->select('id','total','idclient','idcompany')
                                         ->first();
+                                        $Reglements = Reglements::selectRaw('reglements.*, SUM(total) as total')
+                                        ->where('idorder', $item['idorder'])
+                                        ->where('idmode', $IdCredit->id)
+                                        ->first();
 
 
                 if ($Reglements && floatval($Reglements->total) == $item['prix'])
                 {
-
+                    
                     // Update reglement with mode paiement
                     $updateReglementModePaiement = Reglements::where('id', $Reglements->id)->update([
                         'datepaiement' => Carbon::now()->format('Y-m-d'),
@@ -262,7 +266,7 @@ class RecouverementController extends Controller
                 }
                 else if(intval($Reglements->total > $item['prix']))
                 {
-
+                   
                     $updateReglementModePaiement = Reglements::where('id',$Reglements->id)->update([
                         'total'           => $item['prix'],
                         'datepaiement'    => Carbon::now()->format('Y-m-d'),

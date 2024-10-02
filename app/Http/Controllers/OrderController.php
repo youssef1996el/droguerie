@@ -946,29 +946,7 @@ class OrderController extends Controller
     {
         if($request->ajax())
         {
-           /*  $orders = Order::select(
-                'orders.id',
-                DB::raw('orders.total  AS totalvente'),
-                DB::raw('SUM(reglements.total) AS totalpaye'),
-                DB::raw('(orders.total - SUM(reglements.total)) AS reste'),
-                DB::raw('CONCAT(clients.nom, " ", clients.prenom) AS client'),
-                'company.title AS company',
-                'users.name AS user',
-                'orders.idfacture',
-                DB::raw('DATE_FORMAT(orders.created_at, "%Y-%m-%d") as created_at_formatted')
-            )
-            ->join('reglements', 'reglements.idorder', '=', 'orders.id')
-            ->join('paiements', 'paiements.idreglement', '=', 'reglements.id')
-            ->join('modepaiement', 'modepaiement.id', '=', 'paiements.idmode')
-            ->join('clients', 'clients.id', '=', 'orders.idclient')
-            ->join('company', 'company.id', '=', 'orders.idcompany')
-            ->join('users', 'users.id', '=', 'orders.iduser')
-            ->leftJoin('factures', 'factures.id', '=', 'orders.idfacture')
-            ->where('company.status','=','Active')
-            ->where('reglements.status','=',null)
-            ->groupBy('orders.id')
-            ->orderBy('orders.id', 'desc')
-            ->get(); */
+           
 
             $subQuery1 = DB::table('orders as o')
             ->select([
@@ -989,25 +967,25 @@ class OrderController extends Controller
             ->groupBy('o.id');
 
             $subQuery2 = DB::table('orders as o')
-    ->select([
-        'o.id',
-        DB::raw('0 as totalvente'),
-        DB::raw('sum(p.total) as totalpaye'),
-        DB::raw('concat(c.nom, " ", c.prenom) as client'),
-        'u.name as user', // alias user
-        'co.title as company',
-        'o.idfacture',
-        DB::raw('DATE_FORMAT(o.created_at, "%Y-%m-%d") as created_at_formatted'),'o.created_at as created_With_Time_Zone'
+            ->select([
+                'o.id',
+                DB::raw('0 as totalvente'),
+                DB::raw('sum(p.total) as totalpaye'),
+                DB::raw('concat(c.nom, " ", c.prenom) as client'),
+                'u.name as user', // alias user
+                'co.title as company',
+                'o.idfacture',
+                DB::raw('DATE_FORMAT(o.created_at, "%Y-%m-%d") as created_at_formatted'),'o.created_at as created_With_Time_Zone'
 
-    ])
-    ->join('clients as c', 'o.idclient', '=', 'c.id')
-    ->join('users as u', 'o.iduser', '=', 'u.id')
-    ->join('company as co', 'o.idcompany', '=', 'co.id')
-    ->join('reglements as r', 'o.id', '=', 'r.idorder')
-    ->join('paiements as p', 'r.id', '=', 'p.idreglement')
-    ->where('co.status', 'Active')
-    ->where('o.total', '>', 0)
-    ->groupBy('r.idorder');
+            ])
+            ->join('clients as c', 'o.idclient', '=', 'c.id')
+            ->join('users as u', 'o.iduser', '=', 'u.id')
+            ->join('company as co', 'o.idcompany', '=', 'co.id')
+            ->join('reglements as r', 'o.id', '=', 'r.idorder')
+            ->join('paiements as p', 'r.id', '=', 'p.idreglement')
+            ->where('co.status', 'Active')
+            ->where('o.total', '>', 0)
+            ->groupBy('r.idorder');
 
             $orders = DB::table(DB::raw("({$subQuery1->toSql()} UNION ALL {$subQuery2->toSql()}) as t"))
             ->mergeBindings($subQuery1)
@@ -1063,13 +1041,17 @@ class OrderController extends Controller
                                 <ul class="menu-list w-100">
                                     <li class="menu-item  border border-white rounded-2 bg-white">
                                         <a href="#" class="item-text fs-2 py-2 text-dark text-center verifiPiement" value="'.$row->id.'">- Vérifiez la méthode de paiement</a>
-                                    </li>
+                                    </li>';
 
-                                    <li class="menu-item  border border-white rounded-2 bg-white mt-2">
-                                        <a href="#" class="item-text fs-2 py-2 text-dark text-center ChangePaiementOrder" value="'.$row->id.'">- Change mode de paiement</a>
-                                    </li>
+                                    // Conditionally add "Change mode de paiement" if the order was created today
+                                    if ($createdOrder->isSameDay($today)) {
+                                        $btn .= '<li class="menu-item border border-white rounded-2 bg-white mt-2">
+                                                    <a href="#" class="item-text fs-2 py-2 text-dark text-center ChangePaiementOrder" value="'.$row->id.'">- Change mode de paiement</a>
+                                                </li>';
+                                    }
                                     
-                                    <li class="menu-item   border border-white rounded-2 bg-white mt-2">
+                                    
+                                   $btn .= '<li class="menu-item   border border-white rounded-2 bg-white mt-2">
                                         <a href="#" class="item-text fs-2 py-2 text-dark text-center ChangeLaDateVente" value="'.$row->id.'">- Change la date vente</a>
                                     </li>
                                 </ul>
@@ -1818,9 +1800,15 @@ class OrderController extends Controller
         ->where('o.id', $request->idorder)
         ->select('r.total', 'm.name')
         ->get();
+        $ListModePaiement = DB::table('modepaiement as m')
+        ->join('company as c','c.id','=','m.idcompany')
+        ->where('c.status','Active')
+        ->select('m.id','m.name')
+        ->get();
         return response()->json([
             'status'   => 200,
-            'data'     => $InfoModePaiementORder
+            'data'     => $InfoModePaiementORder,
+            'ListModePaiement' => $ListModePaiement
         ]);
     }
 }

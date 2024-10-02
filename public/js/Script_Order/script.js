@@ -339,18 +339,57 @@ $(document).ready(function ()
                         {
                             $('#ModalChangeModePaiement').modal("show"); 
                             $('.TableChangePaiement tbody').empty(); // Clear the tbody before appending
+                            
 
-                            $.each(response.data, function (index, value) { 
-                                $('.TableChangePaiement tbody').append('<tr>\
+                            $.each(response.data, function (index, value) {
+                                // Start creating the row
+                                var row = '<tr>\
                                     <td>' + value.name + '</td>\
+                                    <td>';
+                            
+                                // Conditionally add the select tag with or without the 'disabled' attribute
+                                if (value.name === "crédit") {
+                                    row += '<select class="form-select bg-white" disabled>';
+                                } else {
+                                    row += '<select class="form-select bg-white DropDownChangeModePaiement">';
+                                }
+                            
+                                // Loop through the response.ListModePaiement to create the select options
+                                $.each(response.ListModePaiement, function (i, option) {
+                                    row += '<option value="' + option.id + '">' + option.name + '</option>';
+                                });
+                            
+                                // Close the select and add the last column
+                                row += '</select>\
+                                    </td>\
                                     <td>' + value.total + '</td>\
-                                </tr>');
+                                </tr>';
+                            
+                                // Append the row to the table body
+                                $('.TableChangePaiement tbody').append(row);
                             });
+                            
                             
                         }   
                     }
                 });
                 
+            });
+            $(document).on('change','.DropDownChangeModePaiement',function(e)
+            {
+                e.preventDefault();
+                var selectedText = $(this).find('option:selected').text();
+                
+                if(selectedText === "chèque")
+                {
+                    $('#ModalChangeModePaiement').modal("hide"); 
+                    $('#ModalInformationCheque').modal("show");
+                } 
+            });
+            $('.BtnDeleteModalChequeModePaiement, .BtnSaveModalChequeModePaiement').on('click', function(e) {
+                e.preventDefault();
+                $('#ModalChangeModePaiement').modal("show"); 
+                $('#ModalInformationCheque').modal("hide");
             });
             
             function initializeDataTableOrder(selector, url) {
