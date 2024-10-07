@@ -1037,23 +1037,26 @@ class OrderController extends Controller
                             </a>';
                 }
                 $btn .= '<div class="sticky-menu-container">
-                            <div class="inner-menu closed ">
+                            <div class="inner-menu closed">
                                 <ul class="menu-list w-100">
-                                    <li class="menu-item  border border-white rounded-2 bg-white">
-                                        <a href="#" class="item-text fs-2 py-2 text-dark text-center verifiPiement" value="'.$row->id.'">- Vérifiez la méthode de paiement</a>
+                                    <li class="menu-item border border-white rounded-2 bg-white">
+                                        <a href="#" class="item-text fs-2 py-2 text-dark text-center verifiPiement" value="' . $row->id . '">- Vérifiez la méthode de paiement</a>
                                     </li>';
-
+                
                                     // Conditionally add "Change mode de paiement" if the order was created today
                                     if ($createdOrder->isSameDay($today)) {
                                         $btn .= '<li class="menu-item border border-white rounded-2 bg-white mt-2">
-                                                    <a href="#" class="item-text fs-2 py-2 text-dark text-center ChangePaiementOrder" value="'.$row->id.'">- Change mode de paiement</a>
+                                                    <a href="#" class="item-text fs-2 py-2 text-dark text-center ChangePaiementOrder" value="' . $row->id . '">- Change mode de paiement</a>
                                                 </li>';
                                     }
-                                    
-                                    
-                                   $btn .= '<li class="menu-item   border border-white rounded-2 bg-white mt-2">
-                                        <a href="#" class="item-text fs-2 py-2 text-dark text-center ChangeLaDateVente" value="'.$row->id.'">- Change la date vente</a>
-                                    </li>
+                
+                                    $btn .= '<li class="menu-item border border-white rounded-2 bg-white mt-2">
+                                                <a href="' . url('ConvertToFacture', $row->id) . '" class="item-text fs-2 py-2 text-dark text-center ExtractFacture" value="' . $row->id . '">- Facture</a>
+                                            </li>';
+                
+                                    $btn .= '<li class="menu-item border border-white rounded-2 bg-white mt-2">
+                                                <a href="#" class="item-text fs-2 py-2 text-dark text-center ChangeLaDateVente" value="' . $row->id . '">- Change la date vente</a>
+                                            </li>
                                 </ul>
                             </div>
                             <div class="outer-button">
@@ -1071,9 +1074,134 @@ class OrderController extends Controller
                         </div>';
                 $btn .= '</div>';
                 return $btn;
+    
             })->rawColumns(['action'])->make(true);
 
         }
+    }
+    public function ConvertToFacture($id)
+    {
+        $invoice = Order::findOrFail($id);
+        // extract client from order
+        $IdClient = Order::where('id',$id)->select('idclient')->first();
+        $Client   = Client::where('id',$IdClient->idclient)->first();
+
+        // extract id mode credit by company and extract credit this order
+        $IdCredit = DB::table('modepaiement as m')
+        ->join('company as c','c.id','=','m.idcompany')
+        ->where('c.status','=','Active')
+        ->where('m.name','=','crédit')
+        ->value('m.id');
+        // now extract credit
+        $Credit = DB::table('reglements as r')
+        ->where('idorder','=',$id)
+        ->where('idmode','=',$IdCredit)
+        ->value('total');
+
+        // extract line order from id order
+
+
+        $DataLine = LineOrder::select([
+            'p.name',
+            DB::raw('CASE
+                WHEN s.convert IS NOT NULL THEN CONCAT(ROUND(l.qte / s.convert), \' \', s.type)
+                ELSE l.qte
+            END AS qte'),
+            'l.price',
+            'l.total',
+            DB::raw('CASE 
+                WHEN s.convert IS NOT NULL THEN ROUND(l.qte / s.convert) 
+                ELSE l.qte 
+            END AS qtedevision'),
+            'l.accessoire',
+            's.type',
+            DB::raw('l.qte * CASE 
+                WHEN s.convert IS NOT NULL THEN ROUND(l.qte / s.convert) 
+                ELSE l.qte 
+            END AS qteKG'),
+            DB::raw('l.price / NULLIF(l.qte, 0) AS priceKG'), // Prevent division by zero
+            DB::raw('IF(l.idsetting IS NOT NULL, ROUND(l.qte / s.convert), l.qte) AS QteConvertWithOutConcat'),
+            DB::raw('ROUND(l.accessoire / IF(l.idsetting IS NOT NULL, ROUND(l.qte / s.convert), l.qte)) AS remise'),
+            DB::raw('IF(
+                ROUND(l.accessoire / IF(l.idsetting IS NOT NULL, ROUND(l.qte / s.convert), l.qte)) < 0,
+                l.price - (-1 * ROUND(l.accessoire / IF(l.idsetting IS NOT NULL, ROUND(l.qte / s.convert), l.qte))),
+                l.price + ROUND(l.accessoire / IF(l.idsetting IS NOT NULL, ROUND(l.qte / s.convert), l.qte))
+            ) AS price_new'),
+            DB::raw('IF(
+                ROUND(l.accessoire / IF(l.idsetting IS NOT NULL, ROUND(l.qte / s.convert), l.qte)) < 0,
+                l.price - (-1 * ROUND(l.accessoire / IF(l.idsetting IS NOT NULL, ROUND(l.qte / s.convert), l.qte))),
+                l.price + ROUND(l.accessoire / IF(l.idsetting IS NOT NULL, ROUND(l.qte / s.convert), l.qte))
+            ) * IF(l.idsetting IS NOT NULL, ROUND(l.qte / s.convert), l.qte) AS totalnew'),
+            'st.price AS PriceStock',
+            'st.id AS idstock',
+            's.convert'
+        ])
+        ->from('lineorder AS l')
+        ->join('products AS p', 'l.idproduct', '=', 'p.id')
+        ->join('orders AS o', 'l.idorder', '=', 'o.id')
+        ->join('stock AS st', 'l.idstock', '=', 'st.id')
+        ->leftJoin('setting AS s', 'l.idsetting', '=', 's.id')
+        ->where('o.id', $id)
+        ->get();
+
+        // extract order
+        $order    = Order::findOrFail($id);
+        // check is facture or bon
+        $typeOrder = false;
+        $id = null;
+        if(!is_null($order->idfacture))
+        {
+            $typeOrder = true;
+            $id = $order->idfacture;
+        }
+        $id = $order->id;
+        $formattedId = str_pad($id, 4, '0', STR_PAD_LEFT);
+        $Tva                  = DB::table('tva as t')
+        ->join('company as c','c.id','=','t.idcompany')
+        ->where('c.status','=','Active')
+        ->select('t.name')
+        ->first();
+        $imagePath = public_path('images/R.png');
+        $imageData = base64_encode(file_get_contents($imagePath));
+        $Info = DB::table('infos as f')->join('company as c', 'c.id', '=', 'f.idcompany')->where('c.status', '=', 'Active')->select('f.*')->first();
+        $pdf = app('dompdf.wrapper');
+        $context = stream_context_create([
+            'ssl'  => [
+                'verify_peer'  => FALSE,
+                'verify_peer_name' => FALSE,
+                'allow_self_signed' => TRUE,
+            ]
+        ]);
+        $Info = DB::table('infos as f')->join('company as c', 'c.id', '=', 'f.idcompany')->where('c.status', '=', 'Active')->select('f.*')->first();
+    
+        // توليد HTML باستخدام القالب وتمرر البيانات
+        $html = view('Order.Facture', [
+            'Client'        => $Client,
+            'DataLine'      => $DataLine,
+            'order'         => $order,
+            'typeOrder'     => $typeOrder,
+            'Tva'           => $Tva,
+            'formattedId'   => $formattedId,
+            'Credit'        => $Credit,
+            'Info'          => $Info,
+            'imageData'     => $imageData,
+        ])->toArabicHTML();
+    
+        // تحميل HTML إلى PDF
+        $pdf = Pdf::loadHTML($html)->output();
+    
+        // تحديد رؤوس الاستجابة
+        $headers = [
+            "Content-type" => "application/pdf",
+        ];
+        
+        return response()->streamDownload(
+            fn() => print($pdf),
+            "Facture.pdf",
+            $headers
+        );
+        // إرجاع PDF كملف لتحميله
+        
     }
     public function GetOrderAndPaiement($id)
     {

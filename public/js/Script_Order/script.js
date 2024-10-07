@@ -321,6 +321,7 @@ $(document).ready(function ()
 
                 initializeDataTablePaiementOrder('.TablePaiementChnageDate', urlWithIdPaiement);
             });
+            
             $(selector + ' tbody').on('click','.sticky-menu-container .ChangePaiementOrder',function(e)
             {
                 e.preventDefault();

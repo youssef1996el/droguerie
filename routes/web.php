@@ -113,6 +113,7 @@ Route::group(['middleware' => ['web','auth']], function ()
     Route::get('GetOrderAndPaiement/{id}' ,[OrderController::class,'GetOrderAndPaiement'        ]);
     Route::get('TableReglementByOrder/{id}',[OrderController::class,'TableReglementByOrder'     ]);
     Route::get('TablePaiementByOrder/{id}',[OrderController::class,'TablePaiementByOrder'       ]);
+    Route::get('ConvertToFacture/{id}'    ,[OrderController::class,'ConvertToFacture'           ]);
     /******************************** End Order ************************************************/
 
 

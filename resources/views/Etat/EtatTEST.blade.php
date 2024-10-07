@@ -458,12 +458,12 @@
                     @endphp
                     @foreach ($Tableau_enccaissement_Credit as $item)
                         @php
-                            $TotalEncaissement_Credit += $item->total;
+                            $TotalEncaissement_Credit += $item->total2;
                         @endphp
                         <tr>
                             <th style="border: 1px solid #ccc; padding: 8px; text-align: right;">{{ $item->name}} </th>
                             <th style="border: 1px solid #ccc; padding: 8px;">{{ $item->client }}</th>
-                            <th style="border: 1px solid #ccc; padding: 8px; text-align: right;">{{ number_format($item->total, 2, ".", "") }} DH</th>
+                            <th style="border: 1px solid #ccc; padding: 8px; text-align: right;">{{ number_format($item->total2, 2, ".", "") }} DH</th>
                             
                         </tr>
                     @endforeach

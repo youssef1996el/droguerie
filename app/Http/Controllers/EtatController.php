@@ -452,8 +452,33 @@ class EtatController extends Controller
         ->where(DB::raw('DATE(r.datepaiement)'), '!=', DB::raw('DATE(r.created_at)'))
         ->where('co.status', 'Active')
         ->whereBetween(DB::raw('DATE(r.datepaiement)'), [$DateStart, $DateEnd])
-        ->groupBy(DB::raw('concat(c.nom, " ", c.prenom)'))
+        ->groupBy(DB::raw('concat(c.nom, " ", c.prenom)'), 'm.name')
         ->get();
+        $Tableau_enccaissement_Credit = DB::table('clients as c')
+        ->select(
+            DB::raw("CONCAT(c.nom, ' ', c.prenom) AS client"),
+            DB::raw("(SELECT SUM(r2.total) 
+                      FROM reglements r2
+                      JOIN clients c2 ON c2.id = r2.idclient
+                      WHERE r2.datepaiement = '$DateStart'
+                        AND r2.idclient = r.idclient
+                        AND r2.idmode = r.idmode
+                      GROUP BY CONCAT(c2.nom, ' ', c2.prenom), r2.idmode) AS total2"),
+            DB::raw("SUM(r.total) AS total"),
+            'r.idmode',
+            'm.name'
+        )
+        ->join('reglements as r', 'c.id', '=', 'r.idclient')
+        ->join('modepaiement as m', 'r.idmode', '=', 'm.id')
+        ->join('company as co', 'co.id', '=', 'r.idcompany')
+        ->whereNotNull('r.datepaiement')
+        ->whereRaw('DATE(r.datepaiement) != DATE(r.created_at)')
+        ->where('co.status', '=', 'Active')
+        ->whereBetween(DB::raw('DATE(r.datepaiement)'), [$DateStart, $DateEnd])
+        ->groupBy(DB::raw("CONCAT(c.nom, ' ', c.prenom), r.idmode, m.name"))
+        ->get();
+
+        
 
 
         /*******************************************************  End Tableau Encaissement Credit  ******************************************/
@@ -492,7 +517,7 @@ class EtatController extends Controller
         ->get();
 
 
-
+      
 
 
         $reste =  ( $TotalByModePaiement->sum('totalpaye') + $TotalReglementPaye +  $SoldeCaisse ) - ($Charge->sum('total') + $Versement->sum('total') + $Paiement_Employee->sum('total'));
