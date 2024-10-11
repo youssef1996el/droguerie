@@ -131,7 +131,14 @@ $(document).ready(function () {
                         swal("Votre charge est sécurisée !");
                     }
                   });
+            });
 
+            $(selector + ' tbody').on('click', '.ChangeDate', function(e)
+            {
+                e.preventDefault();
+                var idcharge = $(this).attr('value');
+                $('#idCharge').val(idcharge);
+                $('#ModelChargeEditDate').modal('show');
             });
 
         }

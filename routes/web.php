@@ -155,6 +155,7 @@ Route::group(['middleware' => ['web','auth']], function ()
     Route::post('StoreCharge'       ,[ChargeController::class,'StoreCharge'                    ]);
     Route::post('updateCharge'      ,[ChargeController::class,'updateCharge'                   ]);
     Route::post('TrashCharge'       ,[ChargeController::class,'TrashCharge'                   ]);
+    Route::post('ChangeDateCharge'       ,[ChargeController::class,'ChangeDateCharge'                   ]);
     /********************************  End Charge **********************************************/
 
 

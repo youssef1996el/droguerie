@@ -143,5 +143,41 @@
             </div>
         </div>
     </div>
+
+    <div class="modal fade " id="ModelChargeEditDate" tabindex="-1" role="dialog" aria-labelledby="addContactModalTitle" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header d-flex align-items-center">
+                    <h5 class="modal-title">Fiche change date charge</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form action="{{"ChangeDateCharge"}}" method="post">
+                    @csrf
+                    <div class="modal-body">
+                        <div class="add-contact-box">
+                            <div class="add-contact-content">                            
+                                <div class="row">
+                                    <div class="col-12">
+                                        <div class="mb-3 contact-name">
+                                            <input type="date" id="date" name="date" class="form-control"  required>
+                                            <input type="text" name="id" id="idCharge" hidden>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <div class="d-flex gap-6 m-0">
+                            <button  class="btn btn-success" id="BtnEditCharge" type="submit">Sauvegarder</button>
+                            <button class="btn bg-danger-subtle text-danger" data-bs-dismiss="modal"> fermer</button>
+                        </div>
+                    </div>
+                </form>
+                
+            </div>
+        </div>
+    </div>
+
 </div>
 @endsection

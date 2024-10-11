@@ -49,6 +49,9 @@ class ChargeController extends Controller
                                 <i class="ti ti-trash fs-5 border rounded-2 bg-danger p-1" title="Supprimer charge"></i>
                             </a>';
                 }
+                $btn .='<a href="#" class="text-light ChangeDate" value="' . $row->id . '">
+                                <i class="ti ti-calendar-due fs-5 border rounded-2 bg-info p-1" title="Supprimer charge"></i>
+                            </a>';
 
                 $btn .= '</div>';
                 return $btn;
@@ -169,5 +172,17 @@ class ChargeController extends Controller
                 'message'  => 'Charge supprimé avec succès',
             ]);
         }
+    }
+    
+    public function ChangeDateCharge(Request $request)
+    {
+       
+
+        Charge::where('id', $request->id)->update([
+            'created_at' => Carbon::parse($request->date)->setTimeFromTimeString(Carbon::now()->toTimeString()), // Current time
+            'updated_at' => Carbon::parse($request->date)->setTimeFromTimeString(Carbon::now()->toTimeString()), // Current time
+        ]);
+
+        return redirect()->to('Charge');
     }
 }
