@@ -173,7 +173,7 @@ Route::group(['middleware' => ['web','auth']], function ()
     Route::get('SearchEtatTable'        ,[EtatController::class,'SearchEtatTable'                   ]);
     Route::get('EtatProduction'         ,[EtatController::class,'EtatProduction'                    ]);
     Route::get('TotalUniteByDate'       ,[EtatController::class,'TotalUniteByDate'                  ]);
-    Route::get('EtatByClient'           ,[EtatController::class,'EtatByClient'                      ]);
+    Route::get('EtatByClient'           ,[EtatController::class,'EtatByClient2'                      ]);
     /******************************** End Etat *******************************************************/
 
     /********************************  Bordereau ********************************************************/

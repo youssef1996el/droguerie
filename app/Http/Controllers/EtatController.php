@@ -605,10 +605,267 @@ class EtatController extends Controller
     // Stream PDF to browser (inline view), 'D' to force download
     return $pdf->stream('Report.pdf', ['Attachment' => 1]); */
 
+    }
+
+    public function EtatByClient2(Request $request)
+    {
+        $today = Carbon::today();
+        $IdsCredit  = DB::table('modepaiement as m')
+        ->join('company as c','c.id','m.idcompany')
+        ->where('m.name','crédit')
+        ->where('c.status','Active')
+        ->value('m.id');
+
+        $DataByClient = DB::select('SELECT CONCAT(c.nom, " ", c.prenom) AS client, p.name, l.qte, l.price,l.accessoire, l.total, l.idsetting,
+        s.convert,IF(l.idsetting IS NOT NULL, CONCAT(ROUND(l.qte / s.convert), " ", s.type), l.qte) AS QteConvert,
+        IF(l.idsetting IS NOT NULL, ROUND(l.qte / s.convert), l.qte) AS QteConvertWithOutConcat,
+            ROUND(l.accessoire / IF(l.idsetting IS NOT NULL, ROUND(l.qte / s.convert), l.qte)) AS remise,
+        IF(
+            ROUND(l.accessoire / IF(l.idsetting IS NOT NULL, ROUND(l.qte / s.convert), l.qte)) < 0,
+            l.price - (-1 * ROUND(l.accessoire / IF(l.idsetting IS NOT NULL, ROUND(l.qte / s.convert), l.qte))),
+            l.price + ROUND(l.accessoire / IF(l.idsetting IS NOT NULL, ROUND(l.qte / s.convert), l.qte))
+        ) AS price_new,
+        IF(
+            ROUND(l.accessoire / IF(l.idsetting IS NOT NULL, ROUND(l.qte / s.convert), l.qte)) < 0,
+            l.price - (-1 * ROUND(l.accessoire / IF(l.idsetting IS NOT NULL, ROUND(l.qte / s.convert), l.qte))),
+            l.price + ROUND(l.accessoire / IF(l.idsetting IS NOT NULL, ROUND(l.qte / s.convert), l.qte))
+        ) * IF(l.idsetting IS NOT NULL, ROUND(l.qte / s.convert), l.qte) AS totalnew
+        FROM clients c JOIN orders o ON c.id = o.idclient
+        JOIN lineorder l ON o.id = l.idorder
+        JOIN products p ON l.idproduct = p.id
+        JOIN company co ON c.idcompany = co.id
+        LEFT JOIN setting s ON l.idsetting = s.id
+        WHERE DATE(o.created_at) BETWEEN ? AND ? and co.status = "Active"',[$request->startDate,$request->endDate]);
+
+        $DataByClient = collect($DataByClient)->groupBy('client')->toArray();
+
+        // Calculate total and last row
+        $TotalByClient = [];
+        $LastRowByClient = [];
+        foreach ($DataByClient as $client => $values) 
+        {
+            $TotalByClient[$client] = array_sum(array_column($values, 'totalnew'));
+            $LastRowByClient[$client] = end($values); // Get the last item
+        }
+        // Fetch credit data
+        $DataByClientCredit = DB::select('SELECT r.total AS credit_total, CONCAT(c.nom, " ", c.prenom) AS client
+                    FROM reglements r
+                    JOIN clients c ON c.id = r.idclient
+                    JOIN company co ON co.id = c.idcompany
+                    WHERE DATE(r.created_at) BETWEEN ? AND ? AND r.idmode = ? and co.status = "Active"',[$request->startDate,$request->endDate,$IdsCredit]);
+
+        $DataByClientPaye  = DB::select('select p.total as totalpaye,CONCAT(c.nom, " ", c.prenom) AS client from reglements r,paiements p,clients c,company as co
+                                    where r.id = p.idreglement and c.id = r.idclient and c.idcompany = co.id  and date(p.created_at) BETWEEN ? AND ? and r.datepaiement is null  and co.status = "Active"
+                                     union all
+
+                                     select p.total as totalpaye,concat(c.nom," ",c.prenom) as client from company co ,clients c,reglements r,paiements p where co.id = c.idcompany and c.id = r.idclient and r.id = p.idreglement and co.status = "Active" 
+
+                                     and r.datepaiement between ? and ? and r.datepaiement = date(r.created_at)',[$request->startDate,$request->endDate,$request->startDate,$request->endDate]);
+
+        $DataByClientCredit = collect($DataByClientCredit)->groupBy('client')->toArray();
+
+        $DataByClientPaye   = collect($DataByClientPaye)->groupBy('client')->toArray();
+        // Calculate total credit
+        $TotalCreditByClient = [];
+        // Calculate total paye
+        $TotalPayeByClient = [];
+        foreach($DataByClientPaye as $client => $values)
+        {
+            $TotalPayeByClient[$client] = array_sum(array_column($values,'totalpaye'));
+        }
+        foreach ($DataByClientCredit as $client => $values)
+        {
+            $TotalCreditByClient[$client] = array_sum(array_column($values, 'credit_total'));
+        }
+        $GrandTotal = array_sum($TotalByClient);
+
+        // Calculate the sum of all TotalCreditByClient values
+        $GrandTotalCredit = array_sum($TotalCreditByClient);
+
+        $CompanyIsActive       = Company::where('status','Active')->select('title','id')->first();
+        $pdf = new Dompdf();
+
+        $DateStart = $request->startDate;
+        $DateEnd   = $request->endDate;
+
+        // Charge
+
+        $Charge = DB::table('charge as ch')
+        ->join('company as c', 'ch.idcompany', '=', 'c.id')
+        ->select('ch.name', 'ch.total')
+        ->where('c.status', 'Active')
+        ->whereBetween(DB::raw('DATE(ch.created_at)'), [$DateStart, $DateEnd])
+        ->get();
+        // Versement
+        $Versement = DB::table('versement as v')
+        ->join('company as c','c.id','=','v.idcompany')
+        ->where('c.status','=','Active')
+        ->whereBetween(DB::raw('DATE(v.created_at)'), [$DateStart, $DateEnd])
+        ->groupBy('v.comptable')
+        ->select('v.comptable','v.total')
+        ->get();
+
+        $IdEspece    = DB::table('modepaiement as m')
+            ->join('company as c','c.id','=','m.idcompany')
+            ->where('c.status','Active')
+            ->where('m.name','=','espèce')
+            ->value('m.id');
+            $VenteSample = DB::table('paiements as p')
+            ->join('modepaiement as m', 'p.idmode', '=', 'm.id')
+            ->join('reglements as r', 'r.id', '=', 'p.idreglement')
+            ->join('company as c', 'p.idcompany', '=', 'c.id')
+            ->select(DB::raw('UPPER(m.name) as name'), DB::raw('SUM(p.total) as totalpaye'))
+            ->where('c.status', 'Active')
+            ->whereNull('r.datepaiement')
+            /* ->where('r.idmode',$IdEspece) */
+            ->whereBetween(DB::raw('DATE(p.created_at)'), [$DateStart, $DateEnd])
+            ->groupBy('p.idmode');
+
+        // Second subquery
+        $Credit_Paye_The_same_day = DB::table('reglements as r')
+            ->join('modepaiement as m', 'r.idmode', '=', 'm.id')
+            ->join('company as c', 'r.idcompany', '=', 'c.id')
+            ->select(DB::raw('UPPER(m.name) as name'), DB::raw('SUM(r.total) as totalpaye'))
+            ->where('c.status', 'Active')
+            ->whereRaw('r.datepaiement = DATE(r.created_at)')
+            /* ->where('r.idmode',$IdEspece) */
+            ->whereBetween(DB::raw('DATE(r.created_at)'), [$DateStart, $DateEnd])
+            ->groupBy('r.idmode');
+             // Union the subqueries
+        $unionQuery = $VenteSample->unionAll($Credit_Paye_The_same_day);
+
+        $TotalByModePaiement = DB::table(DB::raw("({$unionQuery->toSql()}) as t"))
+                    ->mergeBindings($unionQuery)
+                    ->select('name', DB::raw('SUM(totalpaye) as totalpaye'))
+                    ->groupBy('name')
+                    ->havingRaw('SUM(totalpaye) IS NOT NULL')
+                    ->get();
+        /*******************************************************  End Tableau Encaissement = vente sample + vente credit paye the same day *******/
+
+        /******************************************************* Tableau Encaissement Credit  ******************************************/
+
+        $Tableau_enccaissement_Credit = DB::table('clients as c')
+        ->join('reglements as r', 'c.id', '=', 'r.idclient')
+        ->join('modepaiement as m', 'r.idmode', '=', 'm.id')
+        ->join('company as co', 'co.id', '=', 'r.idcompany')
+        ->select(DB::raw('concat(c.nom, " ", c.prenom) as client'), DB::raw('SUM(r.total) as total'), 'm.name')
+        ->whereNotNull('r.datepaiement')
+        ->where(DB::raw('DATE(r.datepaiement)'), '!=', DB::raw('DATE(r.created_at)'))
+        ->where('co.status', 'Active')
+        ->whereBetween(DB::raw('DATE(r.datepaiement)'), [$DateStart, $DateEnd])
+        ->groupBy(DB::raw('concat(c.nom, " ", c.prenom)'), 'm.name')
+        ->get();
+        $Tableau_enccaissement_Credit = DB::table('clients as c')
+        ->select(
+            DB::raw("CONCAT(c.nom, ' ', c.prenom) AS client"),
+            DB::raw("(SELECT SUM(r2.total) 
+                      FROM reglements r2
+                      JOIN clients c2 ON c2.id = r2.idclient
+                      WHERE r2.datepaiement = '$DateStart'
+                        AND r2.idclient = r.idclient
+                        AND r2.idmode = r.idmode
+                      GROUP BY CONCAT(c2.nom, ' ', c2.prenom), r2.idmode) AS total2"),
+            DB::raw("SUM(r.total) AS total"),
+            'r.idmode',
+            'm.name'
+        )
+        ->join('reglements as r', 'c.id', '=', 'r.idclient')
+        ->join('modepaiement as m', 'r.idmode', '=', 'm.id')
+        ->join('company as co', 'co.id', '=', 'r.idcompany')
+        ->whereNotNull('r.datepaiement')
+        ->whereRaw('DATE(r.datepaiement) != DATE(r.created_at)')
+        ->where('co.status', '=', 'Active')
+        ->whereBetween(DB::raw('DATE(r.datepaiement)'), [$DateStart, $DateEnd])
+        ->groupBy(DB::raw("CONCAT(c.nom, ' ', c.prenom), r.idmode, m.name"))
+        ->get();
+
+        
 
 
+        /*******************************************************  End Tableau Encaissement Credit  ******************************************/
+
+        $TotalReglementPaye = DB::table('clients as c')
+        ->join('reglements as r', 'c.id', '=', 'r.idclient')
+        ->join('company as co', 'co.id', '=', 'r.idcompany')
+        ->select(DB::raw('concat(c.nom, " ", c.prenom) as client'), DB::raw('SUM(r.total) as total'))
+        ->whereNotNull('r.datepaiement')
+        ->where(DB::raw('Date(r.datepaiement)'), '!=', DB::raw('Date(r.created_at)'))
+        ->where('co.status', 'Active')
+        ->whereBetween(DB::raw('DATE(r.datepaiement)'), [$DateStart, $DateEnd])
+        ->sum('r.total');
 
 
+        $SoldeCaisse  = DB::table('soldecaisse as s')
+        ->join('company as c','c.id','=','s.idcompany')
+        ->where('c.status','Active')
+        ->whereBetween(DB::raw('DATE(s.created_at)'),[$DateStart,$DateEnd])
+        ->sum('s.total');
 
+        $Paiement_Employee = DB::table('personnels as p')
+        ->join('reglementspersonnels as r', 'p.id', '=', 'r.idpersonnel')
+        ->join('company as c', 'p.idcompany', '=', 'c.id')
+        ->select(DB::raw('concat(p.nom, " ", p.prenom) as employe'), 'r.total')
+        ->where('c.status', 'Active')
+        ->whereBetween(DB::raw('DATE(r.created_at)'),[$DateStart,$DateEnd])
+        ->get();
+
+        $Renevus = DB::table('getmoney as g')
+        ->join('company as c','c.id','=','g.idcompany')
+        ->where('c.status','=','Active')
+        ->whereBetween(DB::raw('DATE(g.created_at)'), [$DateStart, $DateEnd])
+        ->groupBy('g.friend')
+        ->select('g.friend','g.total')
+        ->get();
+
+
+      
+
+
+        $reste =  ( $TotalByModePaiement->sum('totalpaye') + $TotalReglementPaye +  $SoldeCaisse ) - ($Charge->sum('total') + $Versement->sum('total') + $Paiement_Employee->sum('total'));
+
+        $TotalPaiement = DB::select("select sum(p.total) as total from paiements p ,company c where c.id = p.idcompany and c.status = 'Active' and date(p.created_at) between  ? and ? and p.idmode = ? ;",
+        [$DateStart,$DateEnd,$IdEspece]);
+        $SoldeDepart   = DB::select('select sum(s.total) as solde from soldecaisse s ,company c where s.idcompany = c.id and c.status = "Active" and date(s.created_at) between ? and ?',[$DateStart,$DateEnd]);
+        $ChargeReste   = DB::select('select sum(c.total)as charge from charge c, company co where c.idcompany = co.id and co.status = "Active"  and date(c.created_at) between ? and ? ',[$DateStart,$DateEnd]);
+        $VersementReste = DB::select('select sum(v.total) as versement from versement v , company c where v.idcompany = c.id and c.status = "Active" and date(v.created_at) between ? and ? ',[$DateStart,$DateEnd]);
+        $Reglement_Personnel = DB::select("select sum(r.total) as reglement_personnel from reglementspersonnels r , personnels p , company c where r.idpersonnel=p.id and p.idcompany = c.id and c.status = 'Active' and date(r.created_at) between ? and ?",[$DateStart,$DateEnd]);
+        $getMoney            = DB::select("select sum(g.total) as getmoney from getmoney g, company c , users u where g.idcompany =c.id and g.iduser = u.id and c.status = 'Active'and date(g.created_at) between ? and ?",[$DateStart,$DateEnd]);
+        $Reste  =($TotalPaiement[0]->total + $SoldeDepart[0]->solde + $getMoney[0]->getmoney)  - ($ChargeReste[0]->charge + $VersementReste[0]->versement + $Reglement_Personnel[0]->reglement_personnel);
+        
+        $html = view('Etat.Etat', [
+            'CompanyIsActive'     => $CompanyIsActive,
+            'DataByClient'        => $DataByClient,
+            'TotalByClient'       => $TotalByClient,
+            'LastRowByClient'     => $LastRowByClient,
+            'TotalCreditByClient' => $TotalCreditByClient,
+            'GrandTotal'          => $GrandTotal,
+            'GrandTotalCredit'    => $GrandTotalCredit,
+            'DateStart'           => $DateStart,
+            'DateEnd'             => $DateEnd,
+            'Charge'              => $Charge,
+            'Versement'           => $Versement,
+            'TotalByModePaiement' => $TotalByModePaiement,
+            'TotalPayeByClient'   => $TotalPayeByClient,
+            'TotalReglementPaye'  => $TotalReglementPaye,
+            'SoldeCaisse'         => $SoldeCaisse,
+            'reste'               => $reste,
+            'Tableau_enccaissement_Credit' => $Tableau_enccaissement_Credit,
+            'Paiement_Employee'   => $Paiement_Employee,
+            'Reste'               => $Reste,
+            'Renevus'             => $Renevus
+        ])->toArabicHTML();
+        /* dd($Tableau_enccaissement_Credit); */
+        set_time_limit(300);
+        $pdf = Pdf::loadHTML($html)->output();
+        
+        // تحديد رؤوس الاستجابة
+        $headers = [
+            "Content-type" => "application/pdf",
+        ];
+        return response()->streamDownload(
+            fn() => print($pdf),
+            "Report.pdf",
+            $headers
+        );
     }
 }
