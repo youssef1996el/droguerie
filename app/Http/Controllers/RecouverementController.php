@@ -14,6 +14,9 @@ use App\Models\Cheques;
 use Carbon\Carbon;
 use App\Models\Paiements;
 use Auth;
+use PDF;
+use Dompdf\Dompdf;
+use Dompdf\Options;
 class RecouverementController extends Controller
 {
     public function index()
@@ -353,5 +356,52 @@ class RecouverementController extends Controller
 
         return view('Recouverement.suivi')
         ->with('CompanyIsActive'         ,$CompanyIsActive);
+    }
+
+    public function Listcredit()
+    {
+        $ListCredit = DB::table('clients as c')
+        ->join('company as co', 'c.idcompany', '=', 'co.id')
+        ->join('orders as o', 'c.id', '=', 'o.idclient')
+        ->join('reglements as r', 'o.id', '=', 'r.idorder')
+        ->join('modepaiement as m', 'r.idmode', '=', 'm.id')
+        ->select(DB::raw('CONCAT(c.nom, " ", c.prenom) as client'), DB::raw('SUM(r.total) as total'), 'o.created_at', 'm.name')
+        ->where('m.name', 'crédit')
+        ->where('co.status', 'Active')
+        ->groupBy('client', 'o.created_at', 'm.name')
+        ->orderBy('client')
+        ->get();
+
+        // Calculate grand total
+        $grandTotal = $ListCredit->sum('total');
+        $imagePath = public_path('images/R.png');
+        $imageData = base64_encode(file_get_contents($imagePath));
+        $pdf = app('dompdf.wrapper');
+        $context = stream_context_create([
+            'ssl'  => [
+                'verify_peer'  => FALSE,
+                'verify_peer_name' => FALSE,
+                'allow_self_signed' => TRUE,
+            ]
+        ]);
+        $html = view('Recouverement.Listcredit', [
+            'ListCredit'        => $ListCredit,
+            'imageData'     => $imageData,
+            'grandTotal' => $grandTotal,
+        ])->toArabicHTML();
+    
+        // تحميل HTML إلى PDF
+        $pdf = Pdf::loadHTML($html)->output();
+    
+        // تحديد رؤوس الاستجابة
+        $headers = [
+            "Content-type" => "application/pdf",
+        ];
+        
+        return response()->streamDownload(
+            fn() => print($pdf),
+            "List_de_crédit.pdf",
+            $headers
+        );
     }
 }

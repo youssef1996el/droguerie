@@ -164,6 +164,7 @@ Route::group(['middleware' => ['web','auth']], function ()
     Route::get('GetDataSelectedRecouvement' ,[RecouverementController::class,'GetDataSelectedRecouvement'   ]);
     Route::get('Suivirecouverement'         ,[RecouverementController::class,'Suivirecouverement'           ]);
     Route::post('StoreRecouvement'          ,[RecouverementController::class,'StoreRecouvement'             ]);
+    Route::get('Listcredit'                 ,[RecouverementController::class,'Listcredit'                   ]);
     /******************************** end Recouverement ***********************************************/
 
     /********************************  Etat **********************************************************/
