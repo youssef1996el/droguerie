@@ -1037,7 +1037,7 @@ class OrderController extends Controller
                             </a>';
                 }
                 $btn .= '<div class="sticky-menu-container">
-                            <div class="inner-menu closed">
+                            <div class="inner-menu closed" style="max-height: 200px; overflow-y: auto;">
                                 <ul class="menu-list w-100">
                                     <li class="menu-item border border-white rounded-2 bg-white">
                                         <a href="#" class="item-text fs-2 py-2 text-dark text-center verifiPiement" value="' . $row->id . '">- Vérifiez la méthode de paiement</a>
