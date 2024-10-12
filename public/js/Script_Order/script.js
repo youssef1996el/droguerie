@@ -671,14 +671,15 @@ $(document).ready(function ()
                 errorOccurred = true; // Set error flag
                 return false; // Stop further execution
             } else {
+                DateNewOrder = date2;
                 // Check if date1 is greater than date2
-                if (date1.getTime() > date2.getTime()) {
+                /* if (date1.getTime() > date2.getTime()) {
                     toastr.error('Erreur: la date creation de vente est supérieure à la date change');
                     errorOccurred = true; // Set error flag
                     return false; // Stop further execution
                 } else {
                     DateNewOrder = date2; // Set DateNewOrder if no error
-                }
+                } */
             }
         });
 
@@ -736,15 +737,15 @@ $(document).ready(function ()
                     return false;
                 }
             }
-
-            // Check if the creation date (date1) is greater than the change date (date2)
+            DateNewReglemnt = date2;
+           /*  // Check if the creation date (date1) is greater than the change date (date2)
             if (date1.getTime() > date2.getTime()) {
                 toastr.error('Erreur: la date creation de reglement est supérieure à la date change');
                 errorOccurred = true; // Set error flag
                 return false; // Stop further execution
             } else {
                 DateNewReglemnt = date2; // Set DateNewReglemnt if no error
-            }
+            } */
         });
         
         if (errorOccurred) return;
