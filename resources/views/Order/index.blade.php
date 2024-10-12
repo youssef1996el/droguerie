@@ -1153,6 +1153,48 @@ https://www.instagram.com/p/ByuNUGkAVHk/
     </div>
 
 
+    <div class="modal fade " id="ModalGeneratedFacture" tabindex="-1" role="dialog" aria-labelledby="addContactModalTitle" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-xl" role="document">
+            <div class="modal-content ">
+                <div class="modal-header d-flex align-items-center">
+                    <h5 class="modal-title card-title border p-2 bg-white rounded-2 w-100 text-center">- Entre information dans cfacture</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form action="{{url('GeneratedFactureRandom')}}" method="get">
+                    <div class="modal-body">
+                        <div class="add-contact-box">
+                            <div class="add-contact-content">
+                                <div class="row ">
+                                    <div class="col-sm-12 col-md-12 col-xl-6">
+                                        <label for="">Date de facture :</label>
+                                        <input type="date" class="form-control" name="date" value="{{ date('Y-m-d') }}" required>
+    
+                                        <label for="">Montant de facture :</label>
+                                        <input type="number" class="form-control" name="montant" placeholder="Ex : 1000 " required>
+                                    </div>
+                                    <div class="col-sm-12 col-md-12 col-xl-6">
+                                        <label for="">Nom et Prénom du client :</label>
+                                        <input type="text" class="form-control" name="client"  placeholder="Jack Jhon" required>
+                                        <label for="">Numéro de facture :</label>
+                                        <input type="number" class="form-control" name="numero" placeholder="Ex : 000001" required>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <div class="d-flex gap-6 m-0">
+                            <button  class="btn btn-success " type="submit">Sauvegarder</button>
+                            <button class="btn bg-danger-subtle text-danger " data-bs-dismiss="modal"> fermer</button>
+                        </div>
+                    </div>
+                </form>
+                
+            </div>
+        </div>
+    </div>
+
+
 
 </div>
 @endsection

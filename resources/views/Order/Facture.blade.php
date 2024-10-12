@@ -54,6 +54,13 @@
             border: 1px solid rgb(150, 196, 255);
             border-radius: 10px;
         }
+        .titleRight
+        {
+            border: 1px solid rgb(150, 196, 255);
+            border-radius: 10px;
+            min-height: 100px;
+            min-width: 200px;
+        }
         .DivContentInformationClient {
             border: 1px solid rgb(150, 196, 255);
             border-radius: 10px;
@@ -124,9 +131,16 @@
                         </div>
                     </th>
                     <th>
-                        <div class="right titleRight">
+                        {{-- <div class="right titleRight">
                             <img src="data:image/png;base64,{{ $imageData }}" alt="" style="width: 150px; height: 150px;">
+                        </div> --}}
+
+                        <div class="right ">
+                            <p>Facture:<br> N°  {{ $NumeroFacture }}</p>
+                            <div class="titleRight"></div>
                         </div>
+
+
     
                     </th>
                 </tr>
@@ -134,18 +148,16 @@
         </div>
         <div>
             <div class="container DivContentInformationClient">
-                <div class="" style="margin-left: 15px;">
-                    <p style="padding-right: 5px;">{{ $typeOrder ? 'Facture :' : 'Bon :' }} N° {{ $formattedId }}</p>
-
-                </div>
+               
                 <table style="width: 100%">
                     <tr>
-                        <th class="right" style="float: right; text-align: left;">
-                            {{ \Carbon\Carbon::parse($order->created_at)->format('d/m/Y') }} التاريخ :
+                        <th class="left" style="white-space: nowrap; text-transform: uppercase; text-align:left;">
+                            CLIENT :{{ $Client}} 
                         </th>
-                        <th class="left" style="white-space: nowrap; text-transform: uppercase; text-align:right;">
-                            الزبون :{{ $Client->nom }} {{ $Client->prenom }} 
+                        <th class="right" style="float: right; text-align: right;">
+                            DATE : {{ $Date }} 
                         </th>
+                        
                     </tr>
                 </table>
             </div>
@@ -153,6 +165,7 @@
         <table id="tableDetail">
             <thead>
                 <tr>
+                    <td style="text-align: center"><strong>Référence</strong></td>
                     <td style="text-align: center"><strong>Description</strong></td>
                     <td style="text-align: center"><strong>Quantité</strong></td>
                     <td style="text-align: center"><strong>P.U HT</strong></td>
@@ -161,40 +174,82 @@
             </thead>
             <tbody>
                 @php
-                    $SumTotalHT = 0;
-                    $SumTotalAccessoire = 0;
+                    
+                    $TVA     = $MonatantTTC / 6;
+                    $MontantHT = $MonatantTTC - $TVA;
+                    $Quantitie = $MontantHT / 8;
+                @endphp
                 @endphp
 
-                @foreach ($DataLine as $item)
-                    @php
-                        // Sum up the total and accessoire
-                        $SumTotalHT += $item->total + $item->accessoire;
-                        $SumTotalAccessoire += $item->accessoire;
-
-                        // Calculate the difference between qteKG * priceKG and totalnew
-                        $difference = $item->QteConvertWithOutConcat * $item->convert;
-                        $difference *=$item->PriceStock;
-                        
-                        // If the calculated difference doesn't match totalnew, add accessoire to difference
-                       /*  if ($difference != $item->totalnew) {
-                            $difference = $item->accessoire / $item->qteKG;
-                            $difference += $item->PriceStock;
-                            $item->PriceStock = $difference;
-                        } */
-                    @endphp
+                
+                    
 
                     <tr>
-                        <td style="text-align: center">{{ $item->name }}</td>
-                        <td style="text-align: center">{{ $item->QteConvertWithOutConcat * $item->convert }}</td>
-                        <td style="text-align: right">{{ number_format($item->PriceStock, 2, ",", " ") }}</td>
-                        <td style="text-align: right">{{ number_format($item->totalnew, 2, ",", " ") }}</td>
+                        <td style="text-align: center">FER (10)</td>
+                        <td style="text-align: center">FER (10)</td>
+                        <td style="text-align: center">
+                            @php
+                                // تحويل القيمة إلى سلسلة نصية للتحقق من وجود فاصلة
+                                $QuantitieStr = strval($Quantitie);
+                
+                                // التحقق مما إذا كانت القيمة تحتوي على فاصلة
+                                if (strpos($QuantitieStr, ',') !== false || strpos($QuantitieStr, '.') !== false) {
+                                    // إذا كانت تحتوي على فاصلة، نقوم بإنقاص 1
+                                    $Quantitie = floor($Quantitie); // تحويلها إلى أقرب عدد صحيح
+                                    $Quantitie = $Quantitie - 1;
+                                } else {
+                                    // إذا لم تحتوي على فاصلة، تبقى القيمة كما هي
+                                    $Quantitie = $Quantitie; // لا تغيير
+                                }
+                            @endphp
+                
+                            {{ number_format($Quantitie, 2, ',', ' ') }}
+                        </td>
+                        <td style="text-align: center">8</td>
+                        <td style="text-align: center"> {{$Quantitie * 8 }}</td>
                     </tr>
-                @endforeach
+                    @if($MontantHT - ($Quantitie * 8) !=0)
+                        @php
+                            $TotalHTSecoundRow = $MontantHT - ($Quantitie * 8);
+                        @endphp
+                        <tr>
+                            <td style="text-align: center">FER (8)</td>
+                            <td style="text-align: center">FER (8)</td>
+                            <td style="text-align: center">1</td>
+                            <td style="text-align: center">{{number_format($TotalHTSecoundRow,2,","," ")}}</td>
+                            <td style="text-align: center"> {{number_format($TotalHTSecoundRow,2,","," ")}}</td>
+                        </tr>
+                    @endif
+                
 
             </tbody>
         </table>
         <div class="table-responsive">
             <table class="custom-table" id="tableDetail" style="width: 50%; float: right;">
+                @php
+                    $taxRate = floatval(rtrim($Tva->name, '%')) / 100;
+                    $TVA     = $MonatantTTC / 6;
+                    $MontantHT = $MonatantTTC - $TVA;
+                @endphp
+                <tr>
+                    <td class="text-end"><strong>Total HT:</strong></td>
+                    <td style="text-align: right">{{ number_format($MontantHT, 2, ",", " ") }} DH</td>
+                </tr>
+                
+                
+                    
+                    <tr>
+                        <td class="text-end"><strong>TVA {{ $Tva->name }}:</strong></td>
+                        <td style="text-align: right">{{ number_format( $TVA , 2, ",", " ") }} DH</td>
+                    </tr>
+                    <tr>
+                        <td class="text-end"><strong>Total TTC:</strong></td>
+                        <td style="text-align: right">{{ number_format($MonatantTTC, 2, ",", " ") }} DH</td>
+                    </tr>
+                
+            </table>
+            
+            {{-- <table class="custom-table" id="tableDetail" style="width: 50%; float: right;">
                 <tr>
                     <td class="text-end"><strong>Total HT:</strong></td>
                     <td style="text-align: right">{{ number_format($SumTotalHT, 2, ",", " ") }} DH</td>
@@ -215,7 +270,7 @@
                         <td style="text-align: right">{{ number_format($totalIncludingTax, 2, ",", " ") }} DH</td>
                     </tr>
                 
-            </table>
+            </table> --}}
 
             
             

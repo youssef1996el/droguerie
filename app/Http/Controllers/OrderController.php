@@ -1050,9 +1050,12 @@ class OrderController extends Controller
                                                 </li>';
                                     }
                 
-                                    $btn .= '<li class="menu-item border border-white rounded-2 bg-white mt-2">
+                                    /* $btn .= '<li class="menu-item border border-white rounded-2 bg-white mt-2">
                                                 <a href="' . url('ConvertToFacture', $row->id) . '" class="item-text fs-2 py-2 text-dark text-center ExtractFacture" value="' . $row->id . '">- Facture</a>
-                                            </li>';
+                                            </li>'; */
+                                    $btn .= '<li class="menu-item border border-white rounded-2 bg-white mt-2">
+                                        <a href="#" class="item-text fs-2 py-2 text-dark text-center ExtractFacture" value="' . $row->id . '">- Facture</a>
+                                    </li>';
                 
                                     $btn .= '<li class="menu-item border border-white rounded-2 bg-white mt-2">
                                                 <a href="#" class="item-text fs-2 py-2 text-dark text-center ChangeLaDateVente" value="' . $row->id . '">- Change la date vente</a>
@@ -1078,6 +1081,50 @@ class OrderController extends Controller
             })->rawColumns(['action'])->make(true);
 
         }
+    }
+    public function GeneratedFactureRandom(Request $request)
+    {
+        $Tva                  = DB::table('tva as t')
+        ->join('company as c','c.id','=','t.idcompany')
+        ->where('c.status','=','Active')
+        ->select('t.name')
+        ->first();
+        $imagePath = public_path('images/R.png');
+        $imageData = base64_encode(file_get_contents($imagePath));
+        $Info = DB::table('infos as f')->join('company as c', 'c.id', '=', 'f.idcompany')->where('c.status', '=', 'Active')->select('f.*')->first();
+        $pdf = app('dompdf.wrapper');
+        $context = stream_context_create([
+            'ssl'  => [
+                'verify_peer'  => FALSE,
+                'verify_peer_name' => FALSE,
+                'allow_self_signed' => TRUE,
+            ]
+        ]);
+        $Info = DB::table('infos as f')->join('company as c', 'c.id', '=', 'f.idcompany')->where('c.status', '=', 'Active')->select('f.*')->first();
+    
+        $html = view('Order.Facture', [
+            'Client'        => $request->client,
+            'Date'          => $request->date,
+            'Tva'           => $Tva,
+            'Info'          => $Info,
+            'NumeroFacture' => $request->numero,
+            'imageData'     => $imageData,
+            'MonatantTTC'   => $request->montant, 
+        ])->toArabicHTML();
+    
+        // تحميل HTML إلى PDF
+        $pdf = Pdf::loadHTML($html)->output();
+    
+        // تحديد رؤوس الاستجابة
+        $headers = [
+            "Content-type" => "application/pdf",
+        ];
+        
+        return response()->streamDownload(
+            fn() => print($pdf),
+            "Facture.pdf",
+            $headers
+        );
     }
     public function ConvertToFacture($id)
     {

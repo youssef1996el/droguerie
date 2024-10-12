@@ -376,6 +376,11 @@ $(document).ready(function ()
                 });
                 
             });
+            $(selector + ' tbody',).on('click','.sticky-menu-container .ExtractFacture',function(e)
+            {
+                e.preventDefault();
+                $('#ModalGeneratedFacture').modal("show"); 
+            });
             $(document).on('change','.DropDownChangeModePaiement',function(e)
             {
                 e.preventDefault();
