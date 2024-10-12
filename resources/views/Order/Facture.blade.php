@@ -137,7 +137,7 @@
 
                         <div class="right ">
                             <p>Facture:<br> N°  {{ $NumeroFacture }}</p>
-                            <div class="titleRight"></div>
+                            <div class="titleRight">{{$ice}}</div>
                         </div>
 
 

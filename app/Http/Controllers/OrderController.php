@@ -1110,6 +1110,7 @@ class OrderController extends Controller
             'NumeroFacture' => $request->numero,
             'imageData'     => $imageData,
             'MonatantTTC'   => $request->montant, 
+            'ice'           => $request->ice,
         ])->toArabicHTML();
     
         // تحميل HTML إلى PDF

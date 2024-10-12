@@ -1171,10 +1171,13 @@ https://www.instagram.com/p/ByuNUGkAVHk/
     
                                         <label for="">Montant de facture :</label>
                                         <input type="number" class="form-control" name="montant" placeholder="Ex : 1000 " required>
+                                        <label for="">ICE du client :</label>
+                                        <input type="text" class="form-control" name="ice" placeholder="EX : 12345678900" required>
                                     </div>
                                     <div class="col-sm-12 col-md-12 col-xl-6">
                                         <label for="">Nom et Prénom du client :</label>
                                         <input type="text" class="form-control" name="client"  placeholder="Jack Jhon" required>
+
                                         <label for="">Numéro de facture :</label>
                                         <input type="number" class="form-control" name="numero" placeholder="Ex : 000001" required>
                                     </div>
