@@ -1107,11 +1107,27 @@ class OrderController extends Controller
             'Date'          => $request->date,
             'Tva'           => $Tva,
             'Info'          => $Info,
-            'NumeroFacture' => $request->numero,
+            'NumeroFacture' => $request->numero != '' ? $request->numero : DB::table('factures')->max('id') + 1,
             'imageData'     => $imageData,
             'MonatantTTC'   => $request->montant, 
             'ice'           => $request->ice,
         ])->toArabicHTML();
+
+        // insert Facture
+        $IdCompanyIsActive       = Company::where('status','Active')->value('id');
+        $idClient                = DB::select('select id from clients where concat(nom," ",prenom) = ?',[$request->client]);
+        if(count($idClient) == 0)
+        {
+            $idclient = 2;
+        }
+        
+        $Facture = Facture::create([
+            'id'         => $request->numero != '' ? $request->numero : DB::table('factures')->max('id') + 1,
+            'total'      => $request->montant,
+            'idcompany'  => $IdCompanyIsActive,
+            'idclient'   => $idclient,
+            'iduser'     => Auth::user()->id,
+        ]);
     
         // تحميل HTML إلى PDF
         $pdf = Pdf::loadHTML($html)->output();
@@ -1126,6 +1142,22 @@ class OrderController extends Controller
             "Facture.pdf",
             $headers
         );
+    }
+
+    public function checkIsHAsFacture()
+    {
+        // check if has facutre or not
+        $IdCompanyIsActive       = Company::where('status','Active')->value('id');
+        $Facture= Facture::where('idcompany',$IdCompanyIsActive)->count();
+        $hasFacture = false;
+        if($Facture > 1)
+        {
+            $hasFacture = true;
+        }
+        return response()->json([
+            'status'    => 200,
+            'hasFacture' => $hasFacture,
+        ]);
     }
     public function ConvertToFacture($id)
     {

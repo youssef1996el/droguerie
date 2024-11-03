@@ -17,6 +17,8 @@ use Auth;
 use PDF;
 use Dompdf\Dompdf;
 use Dompdf\Options;
+use Illuminate\Support\Facades\Crypt;
+
 class RecouverementController extends Controller
 {
     public function index()
@@ -69,29 +71,7 @@ class RecouverementController extends Controller
             ->where('c.id',$CompanyIsActive->id)
             ->where('m.name','=','crédit')
             ->value('m.id');
-            /* $Recouvement = Order::select(
-                'orders.id',
-                'orders.total AS totalvente',
-                DB::raw('SUM(reglements.total) AS totalpaye'),
-                DB::raw('(orders.total - SUM(reglements.total)) AS reste'),
-                DB::raw('CONCAT(clients.nom, " ", clients.prenom) AS client'),
-                'company.title AS company',
-                'users.name AS user',
-                'orders.idfacture',
-                DB::raw('DATE_FORMAT(orders.created_at, "%Y-%m-%d") as created_at_formatted')
-            )
-            ->join('reglements', 'reglements.idorder', '=', 'orders.id')
-            ->join('paiements', 'paiements.idreglement', '=', 'reglements.id')
-            ->join('modepaiement', 'modepaiement.id', '=', 'paiements.idmode')
-            ->join('clients', 'clients.id', '=', 'orders.idclient')
-            ->join('company', 'company.id', '=', 'orders.idcompany')
-            ->join('users', 'users.id', '=', 'orders.iduser')
-            ->leftJoin('factures', 'factures.id', '=', 'orders.idfacture')
-            ->where('clients.id','=',$request->idclient)
-            ->where('company.status','=','Active')
-            ->havingRaw('reste > 0')
-            ->groupBy('orders.id')
-            ->get(); */
+            
             $Recouvement = DB::table('reglements as r')
             ->join('orders as o', 'r.idorder', '=', 'o.id')
             ->join('clients as c', 'o.idclient', '=', 'c.id')
@@ -136,28 +116,7 @@ class RecouverementController extends Controller
         if($request->ajax())
         {
             $ids = $request->id;
-            /* $Recouvement = Order::select(
-                'orders.id',
-                'orders.total AS totalvente',
-                DB::raw('SUM(reglements.total) AS totalpaye'),
-                DB::raw('(orders.total - SUM(reglements.total)) AS reste'),
-                DB::raw('CONCAT(clients.nom, " ", clients.prenom) AS client'),
-                'company.title AS company',
-                'users.name AS user',
-                'orders.idfacture',
-                DB::raw('DATE_FORMAT(orders.created_at, "%Y-%m-%d") as created_at_formatted')
-            )
-            ->join('reglements', 'reglements.idorder', '=', 'orders.id')
-            ->join('paiements', 'paiements.idreglement', '=', 'reglements.id')
-            ->join('modepaiement', 'modepaiement.id', '=', 'paiements.idmode')
-            ->join('clients', 'clients.id', '=', 'orders.idclient')
-            ->join('company', 'company.id', '=', 'orders.idcompany')
-            ->join('users', 'users.id', '=', 'orders.iduser')
-            ->leftJoin('factures', 'factures.id', '=', 'orders.idfacture')
-            ->whereIn('orders.id', $ids)
-            ->havingRaw('reste > 0')
-            ->groupBy('orders.id')
-            ->get(); */
+            
 
             $IdCredit = DB::table('modepaiement as m')
             ->join('company as c','c.id','=','m.idcompany')
@@ -345,13 +304,32 @@ class RecouverementController extends Controller
             ->join('paiements as p', 'r.id', '=', 'p.idreglement')
             ->join('company as co', 'p.idcompany', '=', 'co.id')
             ->select('r.id',DB::raw('concat(c.nom, " ", c.prenom) as client'),DB::raw('sum(p.total) as total'),
-                    DB::raw('date(p.created_at) as date_paye'),DB::raw('date(r.created_at) as date_credit'),'co.title')
+                    DB::raw('date(p.created_at) as date_paye'),DB::raw('date(r.created_at) as date_credit'),'co.title','p.id as idpaiement')
             ->where('co.status', 'Active')
             ->whereRaw('r.datepaiement != date(r.created_at)')
             ->groupBy('p.id')
             ->get();
 
-            return DataTables::of($Recouvement)->addIndexColumn()->make(true);
+            /* return DataTables::of($Recouvement)->addIndexColumn()->make(true); */
+
+            return DataTables::of($Recouvement)->addIndexColumn()->addColumn('action', function ($row)
+            {
+                $encryptedId = Crypt::encrypt($row->idpaiement);
+
+                $btn = '<div class="action-btn d-flex">';
+
+                
+                /* if (auth()->user()->can('clients-supprimer')) { */
+                    $btn .= '<a href="#" class="text-light trashP_Paiement ms-2" value="' . $row->idpaiement . '">
+                                <i class="ti ti-trash fs-5 border rounded-2 bg-danger p-1" title="Supprimer le paiement"></i>
+                            </a>';
+
+                /* } */
+                $btn .='</div>';
+
+
+                return $btn;
+            })->rawColumns(['action'])->make(true);
         }
 
         return view('Recouverement.suivi')
@@ -403,5 +381,131 @@ class RecouverementController extends Controller
             "List_de_crédit.pdf",
             $headers
         );
+    }
+
+    public function DeletePaiement(Request $request)
+    {
+        // extraxct id regelement
+        $IdRegelement = Paiements::where('id',$request->idPaiement)->value('idreglement');
+        
+        // check if idregelement is double
+        $check_Double = Paiements::where('idreglement',$IdRegelement)->count();
+        
+        
+        if($check_Double > 1)
+        {
+            // Delete Paiement
+            $Delete_Paiement = Paiements::where('id',$request->idPaiement)->delete();
+            return response()->json([
+                'status' => 200,
+                'message' => 'supprimé avec succès',
+            ]);
+        }
+        else
+        {
+            
+            // extract id mode credit by company and extract credit this order
+            $IdCredit = DB::table('modepaiement as m')
+            ->join('company as c','c.id','=','m.idcompany')
+            ->where('c.status','=','Active')
+            ->where('m.name','=','crédit')
+            ->value('m.id');
+            // extract idorder from reglement
+            $ExtractIdorderFromReglement = DB::table('reglements as r')
+            ->join('orders as o','o.id','=','r.idorder')
+            ->where('r.id',$IdRegelement)
+            ->select('r.idorder')
+            ->first();
+            // check if has regelement credit
+            $check_Regelement_credit = DB::table('reglements as r')
+            ->where('r.idorder','=',$ExtractIdorderFromReglement->idorder)
+            ->where('r.idmode','=',$IdCredit)
+            ->get();
+            
+            if($check_Regelement_credit->isEmpty())
+            {
+                // get information reglement
+                $getInformationReglement = Reglements::where('id',$IdRegelement)->first();
+                
+                
+                // update Reglement to credit
+                $UpdateReglement = Reglements::where('id',$IdRegelement)->update([
+                    'idmode'  => $IdCredit,
+                    'updated_at' =>Carbon::now(),
+                ]);
+                //delete Paiement
+                $Delete_Paiement = Paiements::where('id',$request->idPaiement)->delete();
+                return response()->json([
+                    'status' => 200,
+                    'message' => 'supprimé avec succès',
+                ]);
+            }
+            else
+            {
+                // extract total paiement 
+                $Total_Paiement = Paiements::where('id',$request->idPaiement)->value('total');
+                
+                $Total_Paiement = floatval($Total_Paiement);
+               
+                //delete paiement
+                $Delete_Paiement = Paiements::where('id',$request->idPaiement)->delete();
+                
+               // extract total reglement content for credit*
+               $Total_CreditFromReglement=DB::table('reglements as r')
+               ->where('r.idorder','=',$ExtractIdorderFromReglement->idorder)
+               ->where('r.idmode','=',$IdCredit)
+               ->first();
+               
+                // delete Reglement 
+                $Delete_Reglement = Reglements::where('id',$IdRegelement)->delete();
+
+
+                
+               
+                $UpdateReglement = Reglements::where('id',$Total_CreditFromReglement->id)->update([
+                    'total'  => $Total_Paiement + $Total_CreditFromReglement->total,
+
+                ]);
+                return response()->json([
+                    'status' => 200,
+                    'message' => 'supprimé avec succès',
+                ]);
+
+
+            }
+            
+        }
+    }
+
+    public function ListPaiement(Request $request)
+    {
+        if($request->ajax())
+        {
+            $results = DB::table('clients as c')
+            ->join('reglements as r', 'c.id', '=', 'r.idclient')
+            ->join('paiements as p', 'r.id', '=', 'p.idreglement')
+            ->join('modepaiement as m', 'p.idmode', '=', 'm.id')
+            ->join('company as co', 'p.idcompany', '=', 'co.id')
+            ->select(
+                DB::raw("CONCAT(c.nom, ' ', c.prenom) as clients"),
+                'p.total',
+                'p.created_at',
+                DB::raw("IF(r.datepaiement IS NULL, 'Vente sample', 'paiement crédit') as status"),
+                'p.id',
+                'm.name'
+            )
+            ->where('co.status', 'Active')
+            ->orderBy('p.id', 'desc')
+            ->get();
+            return DataTables::of($results)
+                ->addIndexColumn()
+                ->addColumn('action', function ($row) {
+                })
+                ->rawColumns(['action'])
+                ->make(true);
+        }
+        $CompanyIsActive       = Company::where('status','Active')->select('title')->first();
+        return view('Recouverement.ListPaiement')
+        ->with('CompanyIsActive'         ,$CompanyIsActive);
     }
 }

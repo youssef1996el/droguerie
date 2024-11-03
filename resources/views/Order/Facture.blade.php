@@ -136,7 +136,8 @@
                         </div> --}}
 
                         <div class="right ">
-                            <p>Facture:<br> N°  {{ $NumeroFacture }}</p>
+                            <p>Facture:<br> N°  {{ str_pad($NumeroFacture, 4, '0', STR_PAD_LEFT) }}</p>
+
                             <div class="titleRight">ICE : {{$ice}}</div>
                         </div>
 

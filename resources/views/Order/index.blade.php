@@ -31,7 +31,8 @@
     var ChangeLaDateVente               = "{{url('ChangeLaDateVente')}}";
     var GetOrderAndPaiement             = "{{ url('GetOrderAndPaiement') }}";
     var TableReglementByOrder           = "{{ url('TableReglementByOrder') }}";
-    var TablePaiementByOrder           = "{{ url('TablePaiementByOrder') }}";
+    var TablePaiementByOrder            = "{{ url('TablePaiementByOrder') }}";
+    var checkIsHAsFacture               = "{{ url('checkIsHAsFacture') }}";
 </script>
 <style>
     @keyframes slideDown
@@ -1179,7 +1180,7 @@ https://www.instagram.com/p/ByuNUGkAVHk/
                                         <input type="text" class="form-control" name="client"  placeholder="Jack Jhon" required>
 
                                         <label for="">Numéro de facture :</label>
-                                        <input type="number" class="form-control" name="numero" placeholder="Ex : 000001" required>
+                                        <input type="number" class="form-control" name="numero" placeholder="Ex : 000001" id="IDFacutre" >
                                     </div>
                                 </div>
                             </div>

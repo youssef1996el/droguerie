@@ -1,10 +1,11 @@
-$(document).ready(function () {
+$(document).ready(function () 
+{
     $(function ()
     { 
-        initializeDataTable('.TableSuiviRecouverement', Suivirecouverement);
+        initializeDataTable('.TableListPaiement', ListPaiement);
         function initializeDataTable(selector, url)
         {
-            var TableSuiviRecouverement = $(selector).DataTable({
+            var TableListPaiement = $(selector).DataTable({
                 processing: true,
                 serverSide: true,
                 ajax: {
@@ -19,7 +20,7 @@ $(document).ready(function () {
                 columns:
                 [
 
-                    {data: 'client'             , name: 'client'},
+                    {data: 'clients'             , name: 'clients'},
                     {
                         data: 'total',
                         name: 'total',
@@ -28,9 +29,9 @@ $(document).ready(function () {
                         },
                         className: "dt-right"
                     },
-                    {data: 'title'              , name: 'title'},
-                    {data: 'date_paye'          , name: 'date_paye'},
-                    {data: 'date_credit'        , name: 'date_credit'},
+                    {data: 'created_at'              , name: 'created_at'},
+                    {data: 'status'          , name: 'status'},
+                    {data: 'name'        , name: 'name'},
                     {data: 'action', name: 'action', orderable: false, searchable: false}
 
 
@@ -66,52 +67,7 @@ $(document).ready(function () {
                 }
 
             });
-            $(selector + " tbody").on('click', '.trashP_Paiement', function(e) {
-                e.preventDefault();
-                
-                var idPaiement = $(this).attr('value');
-                swal({
-                    title: "es-tu sûr de supprimer cette paiement",
-                    text: "Une fois supprimée, vous ne pourrez plus récupérer cette paiement !",
-                    icon: "warning",
-                    buttons: true,
-                    dangerMode: true,
-                })
-                .then((willDelete) =>
-                {
-                    if (willDelete)
-                    {
-                        var data =
-                        {
-                            'idPaiement'         : idPaiement,
-                            '_token'             : csrf_token,
-                        };
-                        $.ajax({
-                            type: "post",
-                            url: DeletePaiement,
-                            data: data,
-
-                            dataType: "json",
-                            success: function (response)
-                            {
-                                if(response.status == 200)
-                                {
-                                    swal("Votre detail paiement a été supprimée !", {
-                                        icon: "success",
-                                    });
-                                    $('.TableSuiviRecouverement').DataTable().ajax.reload();
-                                }
-                                
-                            }
-                        });
-
-                    }
-                    else
-                    {
-                        swal("Votre detail catégorie est sécurisée !");
-                    }
-                });
-            });
+            
 
 
         }

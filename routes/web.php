@@ -115,6 +115,7 @@ Route::group(['middleware' => ['web','auth']], function ()
     Route::get('TablePaiementByOrder/{id}',[OrderController::class,'TablePaiementByOrder'       ]);
     Route::get('ConvertToFacture/{id}'    ,[OrderController::class,'ConvertToFacture'           ]);
     Route::get('GeneratedFactureRandom'  ,[OrderController::class,'GeneratedFactureRandom'      ]);
+    Route::get('checkIsHAsFacture'        ,[OrderController::class,'checkIsHAsFacture'          ]);
     /******************************** End Order ************************************************/
 
 
@@ -167,6 +168,8 @@ Route::group(['middleware' => ['web','auth']], function ()
     Route::get('Suivirecouverement'         ,[RecouverementController::class,'Suivirecouverement'           ]);
     Route::post('StoreRecouvement'          ,[RecouverementController::class,'StoreRecouvement'             ]);
     Route::get('Listcredit'                 ,[RecouverementController::class,'Listcredit'                   ]);
+    Route::post('DeletePaiement'            ,[RecouverementController::class,'DeletePaiement'               ]);
+    Route::get('ListPaiement'               ,[RecouverementController::class,'ListPaiement'                 ]);
     /******************************** end Recouverement ***********************************************/
 
     /********************************  Etat **********************************************************/

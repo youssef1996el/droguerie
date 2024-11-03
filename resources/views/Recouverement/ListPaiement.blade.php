@@ -1,11 +1,10 @@
 @extends('Dashboard.app')
 @section('content')
 <script>
-    var Suivirecouverement = "{{url('Suivirecouverement')}}";
-    var csrf_token         = "{{csrf_token()}}";
-    var DeletePaiement     = "{{url('DeletePaiement')}}";
+   
+    var ListPaiement = "{{url('ListPaiement')}}";
 </script>
-<script src="{{asset('js/Script_SuiviRecouvrement/script.js')}}"></script>
+<script src="{{asset('js/Script_ListPaiement/script.js')}}"></script>
 <div class="container-fluid">
     <div class="card card-body py-3">
         <div class="row align-items-center">
@@ -21,7 +20,7 @@
                             </li>
                             <li class="breadcrumb-item" aria-current="page">
                                 <span class="badge fw-medium fs-2 bg-primary-subtle text-primary">
-                                    Recouverement
+                                    List de paiements
                                 </span>
                             </li>
                         </ol>
@@ -30,19 +29,18 @@
             </div>
         </div>
     </div>
-
-
     <div class="card card-body">
-        <h5 class="card-title border p-2 bg-light rounded-2">Fiche suivi Recouvrement</h5>
+        <h5 class="card-title border p-2 bg-light rounded-2">Fiche List de paiements</h5>
         <div class="table-responsive">
-            <table class="table table-bordered table-striped TableSuiviRecouverement">
+            <table class="table table-bordered table-striped TableListPaiement">
                 <thead>
                     <tr>
                         <th>Client</th>
                         <th>Montant Payé</th>
-                        <th>Compagnie</th>
+                        
                         <th>Date Payé</th>
-                        <th>Date Crédit</th>
+                        <th>Status</th>
+                        <th>Mode paiement</th>
                         <th>Action</th>
                     </tr>
                 </thead>
@@ -51,7 +49,5 @@
             </table>
         </div>
     </div>
-
-
 </div>
 @endsection

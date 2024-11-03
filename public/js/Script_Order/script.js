@@ -379,7 +379,23 @@ $(document).ready(function ()
             $(selector + ' tbody',).on('click','.sticky-menu-container .ExtractFacture',function(e)
             {
                 e.preventDefault();
-                $('#ModalGeneratedFacture').modal("show"); 
+                $.ajax({
+                    type: "get",
+                    url: checkIsHAsFacture,
+                    dataType: "json",
+                    success: function (response) 
+                    {
+                        if(response.status == 200)
+                        {
+                            $('#ModalGeneratedFacture').modal("show"); 
+                            if(response.hasFacture == true)
+                            {
+                                $('#IDFacutre').css('display','none');
+                            }
+                        }    
+                    }
+                });
+                
             });
             $(document).on('change','.DropDownChangeModePaiement',function(e)
             {
