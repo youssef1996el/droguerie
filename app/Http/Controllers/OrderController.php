@@ -1107,7 +1107,7 @@ class OrderController extends Controller
             'Date'          => $request->date,
             'Tva'           => $Tva,
             'Info'          => $Info,
-            'NumeroFacture' => $request->numero != '' ? $request->numero : DB::table('factures')->max('id') + 1,
+            'NumeroFacture' => $request->numero != '' ? $request->numero : DB::table('factures')->max('invoice_number') + 1,
             'imageData'     => $imageData,
             'MonatantTTC'   => $request->montant, 
             'ice'           => $request->ice,
@@ -1122,7 +1122,7 @@ class OrderController extends Controller
         }
         
         $Facture = Facture::create([
-            'id'         => $request->numero != '' ? $request->numero : DB::table('factures')->max('id') + 1,
+            'invoice_number'         => $request->numero != '' ? $request->numero : DB::table('factures')->max('invoice_number') + 1,
             'total'      => $request->montant,
             'idcompany'  => $IdCompanyIsActive,
             'idclient'   => $idclient,
@@ -1150,7 +1150,7 @@ class OrderController extends Controller
         $IdCompanyIsActive       = Company::where('status','Active')->value('id');
         $Facture= Facture::where('idcompany',$IdCompanyIsActive)->count();
         $hasFacture = false;
-        if($Facture > 1)
+        if($Facture >= 1)
         {
             $hasFacture = true;
         }

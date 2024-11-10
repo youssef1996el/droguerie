@@ -172,8 +172,8 @@
                     <tr>
                         <td style="text-align: center">{{ $item->name }}</td>
                         <td style="text-align: center">{{ $item->qte }}</td>
-                        <td style="text-align: right">{{number_format($item->price_new,2,","," ")}}</td>
-                        <td style="text-align: right">{{number_format($item->totalnew,2,","," ")}}</td>
+                        <td style="text-align: right">{{number_format($item->price,2,","," ")}}</td>
+                        <td style="text-align: right">{{number_format($item->total,2,","," ")}}</td>
 
                         
                     </tr>

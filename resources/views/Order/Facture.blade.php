@@ -131,15 +131,15 @@
                         </div>
                     </th>
                     <th>
-                        {{-- <div class="right titleRight">
+                        <div class="right titleRight">
                             <img src="data:image/png;base64,{{ $imageData }}" alt="" style="width: 150px; height: 150px;">
-                        </div> --}}
+                        </div>
 
-                        <div class="right ">
+                        {{-- <div class="right ">
                             <p>Facture:<br> N°  {{ str_pad($NumeroFacture, 4, '0', STR_PAD_LEFT) }}</p>
 
                             <div class="titleRight">ICE : {{$ice}}</div>
-                        </div>   
+                        </div>    --}}
 
 
     
@@ -155,10 +155,20 @@
                         <th class="left" style="white-space: nowrap; text-transform: uppercase; text-align:left;">
                             CLIENT :{{ $Client}} 
                         </th>
+                        
                         <th class="right" style="float: right; text-align: right;">
                             DATE : {{ $Date }} 
                         </th>
+                       
                         
+                    </tr>
+                    <tr>
+                        <th class="left" style="white-space: nowrap; text-transform: uppercase; text-align:left;">
+                            Facture :{{ str_pad($NumeroFacture, 4, '0', STR_PAD_LEFT) }} 
+                        </th>
+                        <th class="right" style="float: right; text-align: right;">
+                            ICE : {{$ice}} 
+                        </th>
                     </tr>
                 </table>
             </div>
