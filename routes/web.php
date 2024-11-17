@@ -170,6 +170,7 @@ Route::group(['middleware' => ['web','auth']], function ()
     Route::get('Listcredit'                 ,[RecouverementController::class,'Listcredit'                   ]);
     Route::post('DeletePaiement'            ,[RecouverementController::class,'DeletePaiement'               ]);
     Route::get('ListPaiement'               ,[RecouverementController::class,'ListPaiement'                 ]);
+    Route::post('TrashCredit'               ,[RecouverementController::class,'TrashCredit'                  ]);
     /******************************** end Recouverement ***********************************************/
 
     /********************************  Etat **********************************************************/

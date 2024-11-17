@@ -8,10 +8,11 @@
     var ModePaiement                = @Json($ModePaiement);
     var csrf_token                  = "{{csrf_token()}}";
     var StoreRecouvement            = "{{url('StoreRecouvement')}}";
+    var TrashCredit                 = "{{url('TrashCredit')}}";
 </script> 
 <div class="container-fluid">
     <div class="card card-body py-3">
-        <div class="row align-items-center">
+        <div class="row align-items-center"> 
             <div class="col-12">
                 <div class="d-sm-flex align-items-center justify-space-between">
                     <h4 class="mb-4 mb-sm-0 card-title">ÉVALUATION DE LA SITUATION FINANCIÈRE</h4>
@@ -67,6 +68,7 @@
                         <th>Compagnie</th>
                         <th>Créer par</th>
                         <th>Créer Le</th>
+                        <th>Action</th>
                     </tr>
                 </thead>
                 <tbody>

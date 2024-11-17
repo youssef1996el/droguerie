@@ -17,7 +17,7 @@ $(document).ready(function () {
                 url: GetRecouvementClient,
                 data: function (d) {
                     d.idclient = idclient;
-                    d.idcompany = idcompany;
+                    d.idcompany = idcompany; 
                 },
             },
             columns: [
@@ -68,6 +68,7 @@ $(document).ready(function () {
                 {data: 'company'        , name: 'company'},
                 {data: 'user'           , name: 'user'},
                 {data: 'created_at_formatted'     , name: 'created_at_formatted'},
+                {data: 'action', name: 'action', orderable: false, searchable: false},
 
             ],
             language: {
@@ -100,11 +101,61 @@ $(document).ready(function () {
                 }
             }
         });
+        
 
 
 
 
     }
+    $('.TableRecouverement tbody').on('click','.Trash',function(e)
+    {
+        e.preventDefault();
+        var idcredit = $(this).attr('value');
+        var clients  = $(this).closest('tr').find('td:eq(1)').text();
+        var reste    = $(this).closest('tr').find('td:eq(4)').text();
+        
+        swal({
+            title: "es-tu sûr de supprimer cette crédit "+reste,
+            text: "Une fois supprimée, vous ne pourrez plus récupérer cette crédit !",
+            icon: "warning",
+            buttons: true,
+            dangerMode: true,
+          })
+          .then((willDelete) => {
+            if (willDelete)
+            {
+                var data =
+                {
+                    'id'         : idcredit,
+                    '_token'     : csrf_token,
+                };
+                $.ajax({
+                    type: "post",
+                    url: TrashCredit,
+                    data: data,
+
+                    dataType: "json",
+                    success: function (response)
+                    {
+                        if(response.status == 200)
+                        {
+                            swal("Votre crédit a été supprimée !", {
+                                icon: "success",
+                            });
+                            $('.TableRecouverement').DataTable().ajax.reload();
+                        }
+                        
+                    }
+                });
+
+            }
+            else
+            {
+                swal("Votre vente est sécurisée !");
+            }
+        });
+        
+    });
 
     // Function to destroy and reinitialize the DataTable
     function reloadTable(idclient, idcompany) {
@@ -216,7 +267,8 @@ $(document).ready(function () {
                         var html =  '<input type="number" class="form-control idorder" min="1" placeholder="Saisir montant" value="'+row.id+'" hidden>';
                         return html;
                     },
-                },
+                }, 
+                /* {data: 'action', name: 'action', orderable: false, searchable: false}, */
 
 
             ],

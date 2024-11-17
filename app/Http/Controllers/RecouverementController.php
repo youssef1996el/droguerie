@@ -52,13 +52,11 @@ class RecouverementController extends Controller
                                 ->where('ca.status','Active')
                                 ->groupBy('m.id')
                                 ->get();
-        return view('Recouverement.index')
 
+        return view('Recouverement.index')
         ->with('CompanyIsActive'         ,$CompanyIsActive)
         ->with('Clients'                 ,$Clients)
-        ->with('ModePaiement'            ,$ModePaiement)
-
-        ;
+        ->with('ModePaiement'            ,$ModePaiement);
     }
 
     public function GetRecouvementClient(Request $request)
@@ -99,6 +97,7 @@ class RecouverementController extends Controller
                 'o.idfacture',
                 'u.name as user',
                 'co.title as company',
+                'r.id as idcredit',
                 DB::raw("DATE_FORMAT(o.created_at, '%Y-%m-%d') as created_at_formatted")
             )
             ->where('co.status', 'Active')
@@ -107,8 +106,25 @@ class RecouverementController extends Controller
             ->groupBy('o.id', )
             ->having('reste', '>', 0)
             ->get();
-            return DataTables::of($Recouvement)->addIndexColumn()->make(true);
+           // return DataTables::of($Recouvement)->addIndexColumn()->make(true);
+            return DataTables::of($Recouvement)->addIndexColumn()->addColumn('action', function ($row)
+            {
+                $btn = '<div class="action-btn d-flex">';
+                $btn .= '<a href="#" class="text-light ms-2 Trash" value="' . $row->idcredit . '">
+                                <i class="ti ti-shopping-cart-off fs-5 border rounded-2 bg-danger p-1" title="Annuler crédit"></i>
+                            </a>';
+                $btn .= '</div>';
+                return $btn;
+            })->rawColumns(['action'])->make(true);
         }
+    }
+
+    public function TrashCredit(Request $request)
+    {
+        $Reglements = Reglements::where('id',$request->id)->delete();
+        return response()->json([
+            'status' => 200,
+        ]);
     }
 
     public function GetDataSelectedRecouvement(Request $request)
@@ -162,7 +178,8 @@ class RecouverementController extends Controller
 
 
 
-            return DataTables::of($Recouvement)->addIndexColumn()->make(true);
+           return DataTables::of($Recouvement)->addIndexColumn()->make(true); 
+            
         }
     }
 
