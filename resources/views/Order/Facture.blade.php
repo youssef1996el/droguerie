@@ -188,7 +188,7 @@
                     
                     $TVA     = $MonatantTTC / 6;
                     $MontantHT = $MonatantTTC - $TVA;
-                    $Quantitie = $MontantHT / 8;
+                    $Quantitie = $MontantHT / 8.5;
                 @endphp
                 @endphp
 
@@ -216,12 +216,12 @@
                 
                             {{ number_format($Quantitie, 2, ',', ' ') }}
                         </td>
-                        <td style="text-align: center">8</td>
+                        <td style="text-align: center">8.5</td>
                         <td style="text-align: center"> {{$Quantitie * 8 }}</td>
                     </tr>
-                    @if($MontantHT - ($Quantitie * 8) !=0)
+                    @if($MontantHT - ($Quantitie * 8.5) !=0)
                         @php
-                            $TotalHTSecoundRow = $MontantHT - ($Quantitie * 8);
+                            $TotalHTSecoundRow = $MontantHT - ($Quantitie * 8.5);
                         @endphp
                         <tr>
                             <td style="text-align: center">FER (8)</td>
