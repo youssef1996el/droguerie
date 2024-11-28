@@ -1084,6 +1084,21 @@ class OrderController extends Controller
     }
     public function GeneratedFactureRandom(Request $request)
     {
+        $data = $request->all();
+        $dataTableFacture = [];
+        $count = count($data['Reference']);
+        for ($i = 0; $i < $count; $i++) 
+        {
+            $dataTableFacture[] = [
+                'Reference' => $data['Reference'][$i],
+                'Libelle'   => $data['libelle'][$i],
+                'prix'      => $data['prix'][$i],
+                'qte'       => $data['qte'][$i],
+                'tva'       => $data['tva'][$i],
+                'totalTTC'  => $data['totalTTC'][$i],
+            ];
+        }
+       
         $Tva                  = DB::table('tva as t')
         ->join('company as c','c.id','=','t.idcompany')
         ->where('c.status','=','Active')
@@ -1111,6 +1126,10 @@ class OrderController extends Controller
             'imageData'     => $imageData,
             'MonatantTTC'   => $request->montant, 
             'ice'           => $request->ice,
+            'dataTableFacture' =>$dataTableFacture,
+            'modelivraison' => $request->modelivraison,
+            'modepaiement'  => $request->modepaiement,
+            'numerocheque'  => $request->numerocheque,
         ])->toArabicHTML();
 
         // insert Facture

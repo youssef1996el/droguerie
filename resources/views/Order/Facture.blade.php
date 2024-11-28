@@ -91,17 +91,20 @@
             font-size: 11px;
             white-space: nowrap;
         }
-        .invoice-footer {
-            text-transform: uppercase;
-            white-space: nowrap;
+       
+         .invoice-footer
+         {
+            display: flex;
+            justify-content: flex-start;
+            align-items: flex-start;
             margin-top: 5px;
             bottom: 12;
             position: absolute;
-        }
+         }
         .watermark {
             position: absolute;
             top: 50%;
-            left: 48%;
+            left: 37%;
             transform: translate(-50%, -50%) rotate(-45deg); 
             font-size: 200px;
             opacity: 0.1;
@@ -177,6 +180,30 @@
             <thead>
                 <tr>
                     <td style="text-align: center"><strong>Référence</strong></td>
+                    <td style="text-align: center"><strong>Libellé</strong></td>
+                    <td style="text-align: center"><strong>Prix unitaire</strong></td>
+                    <td style="text-align: center"><strong>Qté</strong></td>
+                    <td style="text-align: center"><strong>TVA (%)</strong></td>
+                    <td style="text-align: center"><strong>Total TTC (DH)</strong></td>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach($dataTableFacture as $item)
+                    <tr>
+                        <td style="text-align: center">{{ $item['Reference'] }}</td>
+                        <td style="text-align: center">{{ $item['Libelle'] }}</td>
+                        <td style="text-align: center">{{ $item['prix'] }}</td>
+                        <td style="text-align: center">{{ $item['qte'] }}</td>
+                        <td style="text-align: center">{{ $item['tva'] }}</td>
+                        <td style="text-align: center">{{ $item['totalTTC'] }}</td>
+                    </tr>
+                @endforeach
+            </tbody>
+        </table>
+        {{-- <table id="tableDetail">
+            <thead>
+                <tr>
+                    <td style="text-align: center"><strong>Référence</strong></td>
                     <td style="text-align: center"><strong>Description</strong></td>
                     <td style="text-align: center"><strong>Quantité</strong></td>
                     <td style="text-align: center"><strong>P.U HT</strong></td>
@@ -234,7 +261,24 @@
                 
 
             </tbody>
-        </table>
+        </table> --}}
+        <div class="table-responsive">
+            <table class="custom-table" id="tableDetail" style="width: 30%; float: left;">
+               
+                <tr>
+                    <td class="text-end"><strong>Mode de réglement:</strong></td>
+                    <td style="text-align: right">{{$modepaiement}}</td>
+                </tr>
+                <tr>
+                    <td class="text-end"><strong>N° de chèque :</strong></td>
+                    <td style="text-align: right">{{$numerocheque}}</td>
+                </tr>
+                <tr>
+                    <td class="text-end"><strong>Mode de livraison:</strong></td>
+                    <td style="text-align: right">{{$modelivraison}}</td>
+                </tr>
+                
+            </table>
         <div class="table-responsive">
             <table class="custom-table" id="tableDetail" style="width: 50%; float: right;">
                 @php
@@ -288,14 +332,14 @@
         </div>
         
        
-        <footer>
-            <div class="invoice-footer">
-                <span class="text-uppercase" style="padding: 8px;display: flex;justify-content: center;align-content: center">
-                    <p style="font-size: 12px;">ICE: {{ $Info->ice }} / CNSS: {{ $Info->cnss }} / RC: {{ $Info->rc }} / IF: {{ $Info->if }} / adresse: {{ $Info->address }}</p>
-                </span>
-            </div>
-        </footer>
+        
+       
         <div class="watermark">Facture</div>
+    </div>
+    <div class="invoice-footer">
+        <span class="text-uppercase" style="padding: 8px;">
+            <p style="font-size: 12px;">ICE: {{ $Info->ice }} / CNSS: {{ $Info->cnss }} / RC: {{ $Info->rc }} / IF: {{ $Info->if }} / adresse: {{ $Info->address }}</p>
+        </span>
     </div>
     
     

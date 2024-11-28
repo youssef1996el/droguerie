@@ -2206,6 +2206,62 @@ $('.TableTmpVente').on('input', 'input.input-box', function () {
         }
     },300));
 
+    $('.BtnAddNewline').on('click',function(e)
+    {
+        e.preventDefault(); 
+        $('#TableFactureGenerated').find('tbody').append('<tr>\
+            <td> <input type="text" class="form-control" name="Reference[]" placeholder="Veuillez saisir la référence" >     </td>\
+            <td> <input type="text" class="form-control" name="libelle[]"   placeholder="Veuillez saisir le libellé" >       </td>\
+            <td> <input type="number" class="form-control prixProduct" name="prix[]"    placeholder="Veuillez saisir le prix" step="0.01" > </td>\
+            <td> <input type="number" class="form-control QteProduct" name="qte[]"     placeholder="Veuillez saisir la quantité" step="0.01" > </td>\
+            <td> <input type="number" class="form-control" name="tva[]"     placeholder="Veuillez saisir la TVA" value="20" step="0.01">  </td>\
+            <td> <input type="number" class="form-control" name="totalTTC[]"placeholder="Veuillez saisir le Total TTC" step="0.01" >     </td>\
+        </tr>');
+        
+    });
+    $('.BtnRemoveLastLine').on('click',function(e)
+    {
+        e.preventDefault();
+        $('#TableFactureGenerated tbody tr:last').remove();
+    });
+
+    $('#TableFactureGenerated tbody').on('keyup', '.prixProduct', function(e) {
+        e.preventDefault();
+    
+        // Get the current row
+        var $row = $(this).closest('tr');
+    
+        // Get the price (prix) and quantity (qte) values
+        var quantity = parseFloat($row.find('td:eq(3) input').val()) || 0; // Price (in 4th column)
+        var price = parseFloat($(this).val()) || 0;                 // Quantity (current input value)
+    
+        // Calculate TotalTTC
+        var totalTTC = price * quantity;
+    
+        // Update TotalTTC in the corresponding column (6th column)
+        $row.find('td:eq(5) input').val(totalTTC.toFixed(2)); // Round to 2 decimal places
+    });
+
+
+    $('#TableFactureGenerated tbody').on('keyup', '.QteProduct', function(e) {
+        e.preventDefault();
+    
+        // Get the current row
+        var $row = $(this).closest('tr');
+    
+        // Get the price (prix) and quantity (qte) values
+        var quantity = parseFloat($(this).val()) || 0;                 // Quantity (current input value)
+        var price = parseFloat($row.find('td:eq(2) input').val()) || 0; // Price (in 4th column)
+        
+    
+        // Calculate TotalTTC
+        var totalTTC = price * quantity;
+    
+        // Update TotalTTC in the corresponding column (6th column)
+        $row.find('td:eq(5) input').val(totalTTC.toFixed(2)); // Round to 2 decimal places
+    });
+    
+    
 
 
 
