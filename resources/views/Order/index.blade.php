@@ -1197,7 +1197,7 @@ https://www.instagram.com/p/ByuNUGkAVHk/
                                         <input type="date" class="form-control" name="date" value="{{ date('Y-m-d') }}" required>
     
                                         <label for="">Montant de facture :</label>
-                                        <input type="number" class="form-control" name="montant" placeholder="Ex : 1000 " required>
+                                        <input type="number" class="form-control" name="montant" placeholder="Ex : 1000 " step="0.01" required>
 
                                         <label for="">ICE du client :</label>
                                         <input type="text" class="form-control" name="ice" placeholder="EX : 12345678900" required>
