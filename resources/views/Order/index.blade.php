@@ -1218,6 +1218,8 @@ https://www.instagram.com/p/ByuNUGkAVHk/
 
                                         <label for="" style="display: none">Numéro de facture :</label>
                                         <input type="number" class="form-control" name="numero" placeholder="Ex : 000001" id="IDFacutre" >
+
+                                        <input type="text" style="display:none" id="idOrderExtractWhenClickButtonFacture" name="IDORDER">
                                     </div>
                                 </div>
                             </div>

@@ -26,6 +26,8 @@ use App\Http\Controllers\AvoirController;
 use App\Http\Controllers\VersementController;
 use App\Http\Controllers\DevisController;
 use App\Http\Controllers\GetMoneyController;
+use App\Models\Order;
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -116,6 +118,8 @@ Route::group(['middleware' => ['web','auth']], function ()
     Route::get('ConvertToFacture/{id}'    ,[OrderController::class,'ConvertToFacture'           ]);
     Route::get('GeneratedFactureRandom'  ,[OrderController::class,'GeneratedFactureRandom'      ]);
     Route::get('checkIsHAsFacture'        ,[OrderController::class,'checkIsHAsFacture'          ]);
+    Route::get('invoicegenerated'         ,[OrderController::class,'invoicegenerated'           ]);
+    Route::get('getInfoFactureRandom'     ,[OrderController::class,'getInfoFactureRandom'       ]);
     /******************************** End Order ************************************************/
 
 

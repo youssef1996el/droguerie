@@ -11,6 +11,6 @@ class Facture extends Model
     protected $table = 'factures';
 
     protected $fillable = [
-        'total','idcompany','idclient','iduser','invoice_number'
+        'total','idcompany','idclient','iduser','invoice_number','idorder'
     ];
 }

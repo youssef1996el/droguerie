@@ -942,6 +942,8 @@ class OrderController extends Controller
 
     }
 
+   
+
     public function GetMyVente(Request $request)
     {
         if($request->ajax())
@@ -1146,7 +1148,10 @@ class OrderController extends Controller
             'idcompany'  => $IdCompanyIsActive,
             'idclient'   => $idclient,
             'iduser'     => Auth::user()->id,
+            'idorder'    => $request->IDORDER,
         ]);
+
+        
     
         // تحميل HTML إلى PDF
         $pdf = Pdf::loadHTML($html)->output();
@@ -1612,7 +1617,7 @@ class OrderController extends Controller
                 ) * IF(l.idsetting IS NOT NULL, ROUND(l.qte / s.convert), l.qte) AS totalnew')
             )
             ->get();
-
+            //dd($DataLine);
         // extract order
         $order    = Order::findOrFail($id);
         // check is facture or bon
@@ -1754,6 +1759,65 @@ class OrderController extends Controller
         }
         $CompanyIsActive       = Company::where('status','Active')->select('title','id')->first();
         return view('Facture.index') ->with('CompanyIsActive'         ,$CompanyIsActive);
+    }
+
+    public function invoicegenerated(Request $request)
+    {
+        if($request->ajax())
+        {
+            $data = DB::table('factures as f')
+            ->join('clients as c', 'f.idclient', '=', 'c.id')
+            ->join('company as co', 'f.idcompany', '=', 'co.id')
+            ->join('users as u', 'f.iduser', '=', 'u.id')
+            ->where('co.status', 'Active')
+            ->select(
+                'f.id',
+                'f.total as totalvente',
+                'f.total as totalpaye',
+                DB::raw('0.00 as reste'),
+                DB::raw('CONCAT(c.nom, " ", c.prenom) as client'),
+                'co.title as company',
+                'u.name as user',
+                'f.id as idfacture',
+                DB::raw('DATE_FORMAT(f.created_at, "%Y-%m-%d") as created_at_formatted')
+            )
+            ->get();
+            return DataTables::of($data)->addIndexColumn()->addColumn('action', function ($row)
+            {
+
+
+                $btn = '<div class="action-btn d-flex">';
+
+                // Print button with permission check
+                if (auth()->user()->can('facture-imprimer')) {
+                    $btn .= '<a href="' . url('invoices/' . $row->id) . '" class="text-light trash ms-2" target="_blank" value="' . $row->id . '">
+                                <i class="ti ti-file-invoice fs-5 border rounded-2 bg-success p-1" title="Imprimer bon ou facture"></i>
+                            </a>
+
+                            <a href="#" class="text-light edit ms-2"  value="' . $row->id . '">
+                                <i class="ti ti-edit fs-5 border rounded-2 bg-danger p-1" title="modifier facture"></i>
+                            </a>
+                            
+                            
+                            ';
+                }
+
+                $btn .= '</div>';
+                return $btn;
+
+            })->rawColumns(['action'])->make(true);
+
+        }
+        $CompanyIsActive       = Company::where('status','Active')->select('title','id')->first();
+        return view('facture.genratedinvoice') ->with('CompanyIsActive'         ,$CompanyIsActive);
+            
+        
+        
+    }
+
+    public function getInfoFactureRandom(Request $request)
+    {
+
     }
 
 

@@ -379,6 +379,8 @@ $(document).ready(function ()
             $(selector + ' tbody',).on('click','.sticky-menu-container .ExtractFacture',function(e)
             {
                 e.preventDefault();
+                let idOrder = $(this).attr('value');
+                $('#idOrderExtractWhenClickButtonFacture').val(idOrder);
                 $.ajax({
                     type: "get",
                     url: checkIsHAsFacture,
@@ -2218,6 +2220,23 @@ $('.TableTmpVente').on('input', 'input.input-box', function () {
             <td> <input type="number" class="form-control" name="totalTTC[]"placeholder="Veuillez saisir le Total TTC" step="0.01" >     </td>\
         </tr>');
         
+    });
+    $('#TableFactureGenerated').on('input', 'input[name="totalTTC[]"]', function () {
+       let row = $(this).closest('tr');
+
+        let totalTTC = parseFloat($(this).val()) || 0;
+        let prix = parseFloat(row.find('input[name="prix[]"]').val());
+
+        // إذا prix خاوي، ما ندير حتى حساب
+        if (isNaN(prix) || prix === 0) {
+            return;
+        }
+
+        // Total TTC / Prix
+        let qte = totalTTC / prix;
+
+        // وضع النتيجة في qte[]
+        row.find('input[name="qte[]"]').val(qte.toFixed(2));
     });
     $('.BtnRemoveLastLine').on('click',function(e)
     {
