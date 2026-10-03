@@ -106,7 +106,10 @@ $(document).ready(function ()
                     dataType: "json",
                     success: function (response) 
                     {
-                        
+                        if(response.status == 200)
+                        {
+                            
+                        }    
                     }
                 });
                 

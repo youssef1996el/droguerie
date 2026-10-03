@@ -866,6 +866,6 @@ class EtatController extends Controller
             fn() => print($pdf),
             "Report.pdf",
             $headers
-        );
+        ); 
     }
 }
