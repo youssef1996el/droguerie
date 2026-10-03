@@ -856,6 +856,7 @@ class EtatController extends Controller
         ])->toArabicHTML();
         /* dd($Tableau_enccaissement_Credit); */
         set_time_limit(300);
+        dd($Tableau_enccaissement_Credit);
         $pdf = Pdf::loadHTML($html)->output();
         
         // تحديد رؤوس الاستجابة
