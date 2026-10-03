@@ -14,6 +14,11 @@
             margin: 0;
             padding: 0;
         }
+        .arabic {
+        direction: rtl;
+        text-align: right;
+        font-family: "DejaVu Sans", sans-serif;
+    }
         .invoice-container table {
             direction: ltr;
             width: 100%;
@@ -452,15 +457,7 @@
                             @php $TotalEncaissement_Credit += $item->total2; @endphp
                             <tr>
                                 <th style="border: 1px solid #ccc; padding: 8px; text-align: right;">{{ $item->name }}</th>
-                               <th style="
-    border: 1px solid #ccc;
-    padding: 8px;
-    direction: rtl;
-    text-align: right;
-    font-family: 'DejaVu Sans';
-">
-    {{ $item->client }}
-</th>
+                               <th class="arabic" style="border: 1px solid #ccc; padding: 8px;">{{ $item->client }}</th>
                                 <th style="border: 1px solid #ccc; padding: 8px; text-align: right;">{{ number_format($item->total2, 2, ".", "") }} DH</th>
                             </tr>
                         @endforeach

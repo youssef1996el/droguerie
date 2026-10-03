@@ -832,7 +832,7 @@ class EtatController extends Controller
         $getMoney            = DB::select("select sum(g.total) as getmoney from getmoney g, company c , users u where g.idcompany =c.id and g.iduser = u.id and c.status = 'Active'and date(g.created_at) between ? and ?",[$DateStart,$DateEnd]);
         $Reste  =($TotalPaiement[0]->total + $SoldeDepart[0]->solde + $getMoney[0]->getmoney)  - ($ChargeReste[0]->charge + $VersementReste[0]->versement + $Reglement_Personnel[0]->reglement_personnel);
         
-        $html = view('Etat.Etat', [
+       /*  $html = view('Etat.Etat', [
             'CompanyIsActive'     => $CompanyIsActive,
             'DataByClient'        => $DataByClient,
             'TotalByClient'       => $TotalByClient,
@@ -853,10 +853,34 @@ class EtatController extends Controller
             'Paiement_Employee'   => $Paiement_Employee,
             'Reste'               => $Reste,
             'Renevus'             => $Renevus
-        ])->toArabicHTML();
-        /* dd($Tableau_enccaissement_Credit); */
+        ])->toArabicHTML(); */
+
+        $html = view('Etat.Etat', [
+    'CompanyIsActive'     => $CompanyIsActive,
+    'DataByClient'        => $DataByClient,
+    'TotalByClient'       => $TotalByClient,
+    'LastRowByClient'     => $LastRowByClient,
+    'TotalCreditByClient' => $TotalCreditByClient,
+    'GrandTotal'          => $GrandTotal,
+    'GrandTotalCredit'    => $GrandTotalCredit,
+    'DateStart'           => $DateStart,
+    'DateEnd'             => $DateEnd,
+    'Charge'              => $Charge,
+    'Versement'           => $Versement,
+    'TotalByModePaiement' => $TotalByModePaiement,
+    'TotalPayeByClient'   => $TotalPayeByClient,
+    'TotalReglementPaye'  => $TotalReglementPaye,
+    'SoldeCaisse'         => $SoldeCaisse,
+    'reste'               => $reste,
+    'Tableau_enccaissement_Credit' => $Tableau_enccaissement_Credit,
+    'Paiement_Employee'   => $Paiement_Employee,
+    'Reste'               => $Reste,
+    'Renevus'             => $Renevus
+])->render();
+
+        
         set_time_limit(300);
-        dd($Tableau_enccaissement_Credit);
+        
         $pdf = Pdf::loadHTML($html)->output();
         
         // تحديد رؤوس الاستجابة
