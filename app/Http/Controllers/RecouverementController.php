@@ -525,4 +525,65 @@ class RecouverementController extends Controller
         return view('Recouverement.ListPaiement')
         ->with('CompanyIsActive'         ,$CompanyIsActive);
     }
+
+    public function GetSoldeCredit(Request $request)
+    {
+        $CompanyIsActive       = Company::where('status','Active')->select('id')->first();
+        
+        $IdModeCredit          = ModePaiement::where('name','crédit')->where('idcompany',$CompanyIsActive->id)->select('id')->first();
+        $TotalSoldCredit = DB::table('reglements')
+        ->where('idmode',$IdModeCredit->id)
+        ->where('idclient',$request->idclient)
+        ->sum('total')
+        ;
+
+        return response()->json([
+            'status'         => 200,
+            'data'           => $TotalSoldCredit
+        ]);
+    }
+
+    public function PrintAllDataForCustomer(Request $request)
+    {
+       
+
+        $Data = DB::select("SELECT 
+    o.id,
+    p.name,
+    CONCAT(
+        ROUND(l.qte / COALESCE(s.convert, 1)),
+        ' ',
+        COALESCE(s.type, '')
+    ) AS qte,
+    ROUND(l.qte / COALESCE(s.convert, 1)) AS quantity,
+    s.type,
+    l.price,
+    l.accessoire,
+    l.total
+FROM orders o
+
+JOIN lineorder l 
+    ON o.id = l.idorder
+
+JOIN products p 
+    ON l.idproduct = p.id
+
+LEFT JOIN setting s 
+    ON l.idsetting = s.id
+
+WHERE o.idclient = ? and name !='Solde de départ'",[$request->idclient]);
+        $Data = collect($Data)->groupBy('id');
+
+        $FindPayeOrCredit = DB::select('select r.id,r.total , r.idorder,m.name from reglements r, modepaiement m  where r.idmode = m.id and idclient=?',[$request->idclient]);
+        
+
+        $Reglements = collect($FindPayeOrCredit)->groupBy('idorder');
+
+        return view('recouverement.printAllDataForCustomer')
+        ->with('Data',$Data)
+        ->with('Reglements',$Reglements)
+        ;
+
+
+    }
 }

@@ -347,7 +347,7 @@
                         </a>
                     </div>
                 @endcan
-                {{-- <div class="sidebar-item">
+                <div class="sidebar-item">
                     <a class="sidebar-link {{Request::is('invoicegenerated') ? 'active' : ''}} " href="{{url('invoicegenerated')}}" aria-expanded="false">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-file-invoice">
                             <path stroke="none" d="M0 0h24v24H0z" fill="none" />
@@ -359,7 +359,7 @@
                         </svg>
                         <span class="hide-menu">facture générée</span>
                     </a>
-                </div> --}}
+                </div>
                 @can('Change')
                     <div class="sidebar-item">
                         <a class="sidebar-link {{Request::is('Avoir') ? 'active' : ''}} " href="{{url('Avoir')}}" aria-expanded="false">

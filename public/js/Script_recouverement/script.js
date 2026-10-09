@@ -166,6 +166,61 @@ $(document).ready(function () {
         initializeTableRecouverement(idclient, idcompany);
     }
 
+    function GetSoldCredit(idclient)
+    {
+        $.ajax({
+            type: "get",
+            url: GetSoldeCredit,
+            data: 
+            {
+                idclient : idclient,
+            },
+            dataType: "json",
+            success: function (response) 
+            {
+                if(response.status == 200)
+                {
+                    $('.SoldCredit').text(response.data +' DH') ;
+                }    
+            }
+        });
+    }
+
+    $('#PrintAllDataForCustomer').on('click',function(e)
+    {
+        e.preventDefault();
+        var idclient = $('#IdClient').val();
+        /* if(idclient == 0)
+        {
+            toastr.error('veuillez sélectionner le client', 'Error');
+            return false;
+        }
+        else
+        {
+            $.ajax({
+                type: "get",
+                url: "url",
+                data: 
+                {
+                    idclient : idclient
+                },
+                xhrFields: {
+                    responseType: 'blob'
+                },
+                
+                success: function (response) 
+                {
+                    var blob = new Blob([response], {
+                        type: 'application/pdf'
+                    });    
+                    var url = window.URL.createObjectURL(blob);
+
+                    window.open(url, '_blank');
+                }
+            });
+        } */
+    });
+
     $('#IdClient').on('change',function(e)
     {
         e.preventDefault();
@@ -178,10 +233,12 @@ $(document).ready(function () {
         else
         {
             var newIdClient = $(this).val();
+            $('#IdclientPrint').val(newIdClient);
             var newIdCompany = IdCompanyActive.id; // Assuming company ID does not change
 
             // Destroy the existing DataTable
             reloadTable(newIdClient, newIdCompany);
+            GetSoldCredit(newIdClient);
 
         }
     });

@@ -175,6 +175,9 @@ Route::group(['middleware' => ['web','auth']], function ()
     Route::post('DeletePaiement'            ,[RecouverementController::class,'DeletePaiement'               ]);
     Route::get('ListPaiement'               ,[RecouverementController::class,'ListPaiement'                 ]);
     Route::post('TrashCredit'               ,[RecouverementController::class,'TrashCredit'                  ]);
+    Route::get('GetSoldeCredit'             ,[RecouverementController::class,'GetSoldeCredit'               ]);
+    Route::get('PrintAllDataForCustomer'    ,[RecouverementController::class,'PrintAllDataForCustomer'      ]);
+
     /******************************** end Recouverement ***********************************************/
 
     /********************************  Etat **********************************************************/

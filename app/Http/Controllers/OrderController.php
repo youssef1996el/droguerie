@@ -1087,6 +1087,7 @@ class OrderController extends Controller
     public function GeneratedFactureRandom(Request $request)
     {
         $data = $request->all();
+        //dd($data);
         $dataTableFacture = [];
         $count = count($data['Reference']);
         for ($i = 0; $i < $count; $i++) 
@@ -1141,12 +1142,17 @@ class OrderController extends Controller
         {
             $idclient = 2;
         }
+        $idorder_tmp = $data['IDORDER'];
+       
+        $idorder_extract_client = DB::select('select * from orders where id =?',[$idorder_tmp]);
+        $Idclient = DB::select('select * from clients where id = ?',[$idorder_extract_client[0]->idclient]);
+       
         
         $Facture = Facture::create([
             'invoice_number'         => $request->numero != '' ? $request->numero : DB::table('factures')->max('invoice_number') + 1,
             'total'      => $request->montant,
             'idcompany'  => $IdCompanyIsActive,
-            'idclient'   => $idclient,
+            'idclient'   => $Idclient[0]->id,
             'iduser'     => Auth::user()->id,
             'idorder'    => $request->IDORDER,
         ]);
@@ -1817,7 +1823,27 @@ class OrderController extends Controller
 
     public function getInfoFactureRandom(Request $request)
     {
+        $extract_id_order = DB::select('select * from factures where id = ?',[$request->idfacture]);
+                                    
+        
+        $orders = DB::table('orders as o')
+                    ->join('lineorder as l', 'o.id', '=', 'l.idorder')
+                    ->join('products as p', 'l.idproduct', '=', 'p.id')
+                    ->join('setting as s', 'l.idsetting', '=', 's.id')
+                    ->where('l.idorder', $extract_id_order[0]->idorder)
+                    ->select(
+                        'p.name',
+                        'l.price',
+                        'l.total',
+                        DB::raw("CONCAT(ROUND(l.qte / s.convert), ' ', s.type) AS qte")
+                    )
+                    ->get();
 
+
+        return response()->json([
+            'status'  => 200,
+            'data'    => $orders,
+        ]);
     }
 
 

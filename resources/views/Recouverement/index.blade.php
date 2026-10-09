@@ -9,6 +9,8 @@
     var csrf_token                  = "{{csrf_token()}}";
     var StoreRecouvement            = "{{url('StoreRecouvement')}}";
     var TrashCredit                 = "{{url('TrashCredit')}}";
+    var GetSoldeCredit              = "{{ url('GetSoldeCredit') }}";
+    var PrintAllDataForCustomer     = "{{ url('PrintAllDataForCustomer') }}"
 </script> 
 <div class="container-fluid">
     <div class="card card-body py-3">
@@ -47,6 +49,23 @@
                                 <option value="{{$item->id}}">{{ $item->client}} </option>
                             @endforeach
                         </select>
+                    </div>
+                </div>
+
+                <div class="col-md-4 col-xl-4">
+                    <div class="form-group d-flex align-items-center">
+                        <label for="" class="">Crédit :</label>
+                        <span class="fs-3  text-danger ml-3 SoldCredit rounded-2 border border-danger p-2">0.00 DH</span>
+                    </div>
+                </div>
+                <div class="col-md-4 col-xl-4">
+                    <div class="form-group d-flex align-items-center">
+                        <form action="{{ url('PrintAllDataForCustomer') }}" method="get">
+                            <button class="btn btn-success"  type="submit">Detail</button>
+                            <input type="text" id="IdclientPrint" name="idclient" hidden>
+
+                        </form>
+                        
                     </div>
                 </div>
             </div>

@@ -119,7 +119,23 @@
                                     <input type="text" name="numerocheque" class="form-control">
 
                                     <label for="" style="display: none">Numéro de facture :</label>
-                                    <input type="button" class="form-control" name="numero" placeholder="Ex : 000001" id="IDFacutre" >
+                                    
+                                </div>
+                            </div>
+
+                            <div class="row mt-3">
+                                <div class="col-sm-12 col-md-12 col-xl-12">
+                                    <table class="table table-bordered tablelineorderfacture">
+                                        <thead>
+                                            <tr>
+                                                <th>Produit</th>
+                                                <th>Prix</th>
+                                                <th>Qte</th>
+                                                <th>Total</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody></tbody>
+                                    </table>
                                 </div>
                             </div>
                         </div>

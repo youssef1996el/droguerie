@@ -106,10 +106,25 @@ $(document).ready(function ()
                     dataType: "json",
                     success: function (response) 
                     {
-                        if(response.status == 200)
-                        {
-                            
-                        }    
+                       if (response.status == 200) {
+
+                            $('.tablelineorderfacture tbody').empty();
+
+                            $.each(response.data, function(index, value) {
+
+                                console.log(value);
+
+                                $('.tablelineorderfacture tbody').append(
+                                    '<tr>' +
+                                        '<td>' + value.name + '</td>' +
+                                        '<td>' + value.price + '</td>' +
+                                        '<td>' + value.qte + '</td>' +
+                                        '<td>' + value.total + '</td>' +
+                                    '</tr>'
+                                );
+
+                            });
+                        }  
                     }
                 });
                 
